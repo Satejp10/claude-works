@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Labs — Headcount</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff; --ink:#1f1f1f; --lede:#3a3a3a; --muted:#737373; --faint:#a3a3a3;
+    --border:#e8e8e8; --grid:#f1f1f1; --hover:#fafafa; --axis:#d4d4d4;
+    --accent:#7F4BF3; --accent-soft:#f2ecff;
+    --display:'Space Grotesk', 'Inter', system-ui, sans-serif;
+    --sans:'Inter', system-ui, -apple-system, sans-serif;
+    --mono:ui-monospace, 'SF Mono', Menlo, monospace;
+    --r:16px; --r-sm:5px;
+    /* per-entity categorical palette */
+    --c-openai:#111111;
+    --c-google:#2e9e5b;
+    --c-anthropic:#cc785c;
+    --c-xai:#5b54e8;
+    --c-meta:#1877f2;
+    --c-zai:#0e9488;
+    --c-qwen:#ff6a00;
+    --c-minimax:#ec4899;
+    --c-kimi:#38bdf8;
+    --c-deepseek:#4d6bfe;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+    padding:0 22px 90px}
+  .wrap{max-width:980px;margin:0 auto}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* topbar */
+  .topbar{display:flex;justify-content:space-between;align-items:center;
+    padding:26px 0 34px}
+  .mark{font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.04em;
+    color:var(--ink);text-transform:uppercase}
+  .mark span{color:var(--accent)}
+  .stamp{font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+
+  /* hero */
+  h1{font-family:var(--display);font-weight:600;letter-spacing:-0.015em;
+    font-size:clamp(2.3rem,6.4vw,3.7rem);line-height:1.02;max-width:15ch;
+    margin-bottom:18px}
+  .lede{color:var(--lede);font-size:clamp(1rem,2.4vw,1.12rem);max-width:62ch;
+    line-height:1.55}
+  .lede b{font-weight:600;color:var(--ink)}
+
+  /* cards */
+  .card{margin-top:38px;padding:24px 24px 26px;border:1px solid var(--border);
+    border-radius:var(--r)}
+  .eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .sq{width:13px;height:13px;border-radius:4px;flex:none}
+  .eyebrow h2{font-family:var(--display);font-weight:600;font-size:1.18rem;
+    letter-spacing:-0.01em}
+  .sub{color:var(--muted);font-size:13.5px;margin-bottom:22px;margin-left:23px}
+  .pill-new{font-size:11px;color:var(--accent);background:var(--accent-soft);
+    padding:2px 8px;border-radius:20px;font-weight:600;letter-spacing:.02em}
+
+  /* bar chart */
+  .bars{display:flex;flex-direction:column;gap:13px}
+  .row{display:grid;grid-template-columns:168px 1fr auto;align-items:center;gap:14px}
+  .blabel{display:flex;align-items:baseline;gap:7px;min-width:0}
+  .bname{font-weight:500;font-size:13.5px;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis}
+  .tag{font-size:10px;font-weight:600;letter-spacing:.04em;color:var(--faint);
+    border:1px solid var(--border);border-radius:4px;padding:1px 4px;flex:none}
+  .track{height:18px;background:var(--grid);border-radius:var(--r-sm);
+    position:relative;overflow:hidden}
+  .fill{height:100%;border-radius:var(--r-sm);width:0;
+    transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+  .val{font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px;
+    text-align:right;min-width:54px}
+  .val small{font-weight:400;color:var(--faint);font-size:11px;margin-left:2px}
+
+  .axis{display:grid;grid-template-columns:168px 1fr auto;gap:14px;margin-top:14px}
+  .ticks{position:relative;height:16px;border-top:1px solid var(--axis)}
+  .tick{position:absolute;top:0;transform:translateX(-50%);font-size:11px;
+    color:var(--faint);font-variant-numeric:tabular-nums;padding-top:5px}
+  .tick::before{content:"";position:absolute;top:0;left:50%;width:1px;height:4px;
+    background:var(--axis)}
+  .axisnote{grid-column:2;color:var(--faint);font-size:11px;margin-top:2px}
+
+  /* method strip */
+  .method{margin-top:38px;border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);padding:18px 0}
+  .method .lbl{font-size:10.5px;letter-spacing:.13em;color:var(--accent);
+    font-weight:600;text-transform:uppercase;margin-bottom:9px}
+  .method p{color:var(--muted);font-size:13px;line-height:1.6;max-width:88ch}
+  .method p + p{margin-top:7px}
+  .method b{color:var(--ink);font-weight:600}
+
+  /* table */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .fpill{font-size:12.5px;font-weight:500;padding:5px 13px;border-radius:20px;
+    border:1px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;
+    transition:.15s}
+  .fpill:hover{border-color:var(--axis);color:var(--ink)}
+  .fpill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tbl-wrap{overflow-x:auto;margin:0 -2px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px}
+  thead th{text-align:left;font-weight:600;color:var(--muted);font-size:12px;
+    letter-spacing:.02em;padding:0 14px 11px;border-bottom:1px solid var(--border);
+    cursor:pointer;white-space:nowrap;user-select:none}
+  thead th.r{text-align:right}
+  thead th:hover{color:var(--ink)}
+  th .arr{color:var(--accent);font-size:10px;margin-left:3px;opacity:0}
+  th.sorted .arr{opacity:1}
+  tbody td{padding:12px 14px;border-bottom:1px solid var(--grid);vertical-align:top}
+  tbody tr:hover{background:var(--hover)}
+  td.co{font-weight:600;white-space:nowrap}
+  td.co .dot{display:inline-block;width:9px;height:9px;border-radius:3px;
+    margin-right:8px;vertical-align:middle}
+  td.r{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  td.note{color:var(--muted);font-size:12.5px;line-height:1.45;min-width:200px}
+  .reg{color:var(--faint);font-size:12.5px}
+
+  /* footer */
+  footer{margin-top:30px;padding-top:18px;border-top:1px solid var(--border);
+    color:var(--faint);font-size:12px;line-height:1.65}
+  footer b{color:var(--muted);font-weight:600}
+
+  @media (max-width:640px){
+    .row,.axis{grid-template-columns:118px 1fr auto;gap:9px}
+    .bname{font-size:12.5px}
+    .tag{display:none}
+    .val{min-width:46px;font-size:12.5px}
+  }
+  @media (prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="mark">AI Labs <span>/</span> Headcount</div>
+    <div class="stamp">Updated June 2026</div>
+  </div>
+
+  <h1>How big are the AI labs?</h1>
+  <p class="lede">Estimated employee counts across ten frontier model builders. The split is stark: the leading <b>US labs</b> run five-figure-adjacent teams, while China's open-weight champions — <b>DeepSeek, Moonshot, MiniMax</b> — ship rival models with a few hundred people. For <b>Google</b> and <b>Meta</b>, only the dedicated AI division is counted, not the parent company.</p>
+
+  <!-- BAR CHART -->
+  <div class="card">
+    <div class="eyebrow">
+      <span class="sq" style="background:var(--accent)"></span>
+      <h2>Employees by company</h2>
+      <span class="pill-new">est.</span>
+    </div>
+    <div class="sub">Sorted by headcount · longer bar = more people · drawn to a common linear scale</div>
+
+    <div class="bars" id="bars"></div>
+
+    <div class="axis">
+      <div></div>
+      <div class="ticks" id="ticks"></div>
+      <div></div>
+    </div>
+    <div class="axis"><div class="axisnote">Employees (full scale 0 – 8,000)</div></div>
+  </div>
+
+  <!-- METHOD -->
+  <div class="method">
+    <div class="lbl">Method &amp; caveats</div>
+    <p><b>None of these are official.</b> Every company here is private or reports headcount loosely, so figures are mid-2026 estimates triangulated from workforce-intelligence trackers (Revelio Labs, PitchBook, Tracxn), Wikipedia, and press reporting. Counts vary by source mainly over whether contractors and data-annotation staff are included.</p>
+    <p><b>Google &amp; Meta show AI divisions only.</b> Google = Google DeepMind (~2.5K core researchers inside a broader ~6K org); Meta = Superintelligence Labs (FAIR + TBD Lab + product-AI), not Meta's ~70K+ total staff.</p>
+    <p><b>xAI is not pure AI.</b> Its headcount folds in X (formerly Twitter) staff after the Feb 2026 SpaceX merger, so it overstates model-team size. <b>OpenAI</b> spans a wide range — FT pegged core staff near 4,500 against a ~7.8K broad count, with a stated target of 8,000 by end of 2026.</p>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card">
+    <div class="eyebrow">
+      <span class="sq" style="background:var(--accent)"></span>
+      <h2>The full table</h2>
+    </div>
+    <div class="sub">Click any column to sort · filter by region</div>
+
+    <div class="filters" id="filters">
+      <button class="fpill on" data-f="all">All</button>
+      <button class="fpill" data-f="US">US / UK</button>
+      <button class="fpill" data-f="China">China</button>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-k="name" data-t="s">Company <span class="arr">▾</span></th>
+            <th data-k="region" data-t="s">Region <span class="arr">▾</span></th>
+            <th data-k="emp" data-t="n" class="r sorted">AI staff (est.) <span class="arr">▾</span></th>
+            <th data-k="founded" data-t="n" class="r">Founded <span class="arr">▾</span></th>
+            <th data-k="note" data-t="s">Note <span class="arr">▾</span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <b>Sources:</b> Revelio Labs, PitchBook, Tracxn, Crunchbase, Dealroom, Wikipedia, Financial Times, CNBC, Reuters, Global Times (Jan–Jun 2026). &nbsp;·&nbsp;
+    <b>est.</b> = estimate; figures rounded. &nbsp;·&nbsp; Google/Meta = AI division only; xAI includes X staff. &nbsp;·&nbsp; As of June 2026.
+  </footer>
+
+</div>
+
+<script>
+const DATA=[
+  {name:"OpenAI",          key:"openai",   region:"US",    emp:7800, founded:2015, note:"Core ~4,500 per FT; ~7.8K broad count; targeting 8K by end-2026"},
+  {name:"Google DeepMind", key:"google",   region:"US",    emp:6000, founded:2010, note:"Google's AI lab; ~2.5K core researchers in a wider org"},
+  {name:"Anthropic",       key:"anthropic",region:"US",    emp:5000, founded:2021, note:"Famously lean for its scale — est. ~$9M revenue per employee"},
+  {name:"xAI",             key:"xai",      region:"US",    emp:5000, founded:2023, note:"Includes X (Twitter) staff after the SpaceX merger"},
+  {name:"Meta (Superint. Labs)", key:"meta", region:"US",  emp:3000, founded:2025, note:"FAIR + TBD Lab + product AI; cut ~600 roles in late 2025"},
+  {name:"Zhipu / z.ai",    key:"zai",      region:"China", emp:880,  founded:2019, note:"Formerly Zhipu AI; Hong Kong-listed; GLM model family"},
+  {name:"Qwen (Alibaba)",  key:"qwen",     region:"China", emp:400,  founded:2023, note:"Alibaba's Tongyi Lab — reported as 'hundreds of researchers'"},
+  {name:"MiniMax",         key:"minimax",  region:"China", emp:385,  founded:2021, note:"73% R&D, average age 29; HK IPO Jan 2026"},
+  {name:"Moonshot / Kimi", key:"kimi",     region:"China", emp:200,  founded:2023, note:"Talent-dense; sources range from ~80 to ~200"},
+  {name:"DeepSeek",        key:"deepseek", region:"China", emp:160,  founded:2023, note:"Backed by the High-Flyer hedge fund; tiny team, big impact"},
+];
+const MAX=8000, color=k=>`var(--c-${k})`;
+const fmt=n=>n.toLocaleString("en-US");
+const regLabel=r=>r==="US"?"US / UK":"China";
+
+/* bars */
+const bars=document.getElementById("bars");
+[...DATA].sort((a,b)=>b.emp-a.emp).forEach(d=>{
+  const row=document.createElement("div"); row.className="row";
+  row.innerHTML=`
+    <div class="blabel">
+      <span class="bname" title="${d.name}">${d.name}</span>
+      <span class="tag">${d.region==="US"?"US":"CN"}</span>
+    </div>
+    <div class="track"><div class="fill" data-w="${(d.emp/MAX*100).toFixed(2)}" style="background:${color(d.key)}"></div></div>
+    <div class="val">${fmt(d.emp)}<small>≈</small></div>`;
+  bars.appendChild(row);
+});
+/* ticks */
+const ticks=document.getElementById("ticks");
+[0,2000,4000,6000,8000].forEach(t=>{
+  const el=document.createElement("div"); el.className="tick";
+  el.style.left=(t/MAX*100)+"%"; el.textContent=t?fmt(t):"0";
+  ticks.appendChild(el);
+});
+/* animate */
+requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  document.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%");
+}));
+
+/* table */
+const tbody=document.getElementById("tbody");
+let filter="all", sortK="emp", sortDir=-1;
+function render(){
+  let rows=DATA.filter(d=>filter==="all"||d.region===filter);
+  rows.sort((a,b)=>{
+    let x=a[sortK],y=b[sortK];
+    if(typeof x==="string") return sortDir*x.localeCompare(y);
+    return sortDir*(x-y);
+  });
+  tbody.innerHTML=rows.map(d=>`
+    <tr>
+      <td class="co"><span class="dot" style="background:${color(d.key)}"></span>${d.name}</td>
+      <td class="reg">${regLabel(d.region)}</td>
+      <td class="r">${fmt(d.emp)}</td>
+      <td class="r">${d.founded}</td>
+      <td class="note">${d.note}</td>
+    </tr>`).join("");
+}
+document.querySelectorAll("thead th").forEach(th=>{
+  th.addEventListener("click",()=>{
+    const k=th.dataset.k;
+    if(sortK===k) sortDir*=-1;
+    else{sortK=k; sortDir=(th.dataset.t==="n")?-1:1;}
+    document.querySelectorAll("thead th").forEach(h=>h.classList.remove("sorted"));
+    th.classList.add("sorted");
+    th.querySelector(".arr").textContent=sortDir<0?"▾":"▴";
+    render();
+  });
+});
+document.querySelectorAll(".fpill").forEach(p=>{
+  p.addEventListener("click",()=>{
+    document.querySelectorAll(".fpill").forEach(x=>x.classList.remove("on"));
+    p.classList.add("on"); filter=p.dataset.f; render();
+  });
+});
+render();
+</script>
+</body>
+</html>
