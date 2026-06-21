@@ -142,6 +142,17 @@
     .fill{transition:none;}
   }
   :focus-visible{outline:2px solid var(--violet);outline-offset:2px;border-radius:4px;}
+
+  /* --- runtime data loading + roadmap rows --- */
+  .srcline{font-size:12.5px;color:var(--muted);margin:-20px 0 34px;}
+  .srcline b{color:#3a3a3a;font-weight:600;}
+  .loadbtn{font:inherit;font-size:12.5px;color:var(--violet);background:none;border:none;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+  .loadbtn:hover{color:#5a30c0;}
+  tr.ph td{background:#fbfbfb;color:#9a9a9a;}
+  tr.ph td:first-child{background:#fbfbfb;}
+  tr.ph:hover td{background:#f3f3f3;}
+  tr.ph td.chip{color:#6f6f6f;}
+  .soon{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--violet);border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -159,6 +170,9 @@
     <div class="ey"><span class="sq"></span>METHOD</div>
     <p>Compute is normalized to <b style="color:#444">dense FP8</b>, peak theoretical. Real delivered throughput (model FLOPs utilization) typically runs 30–50% of peak. <span>Where a chip can't be compared cleanly — no native FP8, undisclosed power, SRAM instead of HBM — the bar is hatched or omitted and explained, never faked.</span></p>
   </div>
+
+  <div class="srcline" id="srcline"></div>
+  <input type="file" id="jsonfile" accept="application/json,.json" style="display:none">
 
   <!-- charts injected here -->
   <div id="charts"></div>
@@ -208,210 +222,119 @@
 </div>
 
 <script>
-const CHIPS = [
-  {id:'h100', name:'H100 SXM', vendor:'NVIDIA', color:'#aacb6a', fp8:1979, fp8n:true, mem:80,  bw:3.35, tdp:700,  price:2.50, node:'TSMC 4N',  role:'Train + Inference', access:'Buyable',        launch:'2022'},
-  {id:'h200', name:'H200',      vendor:'NVIDIA', color:'#8cc63f', fp8:1979, fp8n:true, mem:141, bw:4.8,  tdp:700,  price:3.50, node:'TSMC 4N',  role:'Train + Inference', access:'Buyable',        launch:'2024'},
-  {id:'b200', name:'B200',      vendor:'NVIDIA', color:'#6aa80f', fp8:4500, fp8n:true, mem:192, bw:8.0,  tdp:1000, price:5.00, node:'TSMC 4NP', role:'Train + Inference', access:'Buyable',        launch:'2025'},
-  {id:'b300', name:'B300 Ultra',vendor:'NVIDIA', color:'#4d8000', fp8:7000, fp8n:true, mem:288, bw:8.0,  tdp:1400, price:6.80, node:'TSMC 4NP', role:'Train + Inference', access:'Buyable',        launch:'Jan 2026'},
-  {id:'iron', name:'Ironwood TPU v7', vendor:'Google', color:'#4285f4', fp8:4614, fp8n:true, mem:192, bw:7.37, tdp:600, tdpEst:true, price:null, priceNote:'GCP rental', node:'TSMC 3nm', role:'Train + Inference', access:'Rent · GCP', launch:'Nov 2025'},
-  {id:'trn3', name:'Trainium3',  vendor:'AWS',    color:'#ff9900', fp8:2520, fp8n:true, mem:144, bw:4.9,  tdp:null, tdpEst:true, price:1.80, node:'TSMC N3P', role:'Training',          access:'Rent · AWS',     launch:'Dec 2025'},
-  {id:'910c', name:'Ascend 910C',vendor:'Huawei', color:'#cf0a2c', fp8:null, fp8n:false, fp16:780, mem:128, memEst:true, bw:3.2, bwEst:true, tdp:700, tdpEst:true, price:null, priceNote:'China-only', node:'SMIC 7nm', role:'Train + Inference', access:'China-only', launch:'2025'},
-  {id:'mi355',name:'MI355X',     vendor:'AMD',    color:'#1f1f1f', fp8:5000, fp8n:true, mem:288, bw:8.0,  tdp:1400, price:5.45, node:'TSMC 3nm', role:'Train + Inference', access:'Buyable',        launch:'Jun 2025'},
-  {id:'groq', name:'Groq LPU',   vendor:'Groq',   color:'#0d9488', fp8:null, fp8n:false, fp16:188, mem:0.23, memSram:true, bw:80, bwSram:true, tdp:375, tdpEst:true, price:null, priceNote:'per-token', node:'GF 14nm', role:'Inference', access:'Rent · GroqCloud', launch:'2024'},
+const DATA_URL='ai-accelerators.json';
+const EMBEDDED=[{"id": "h100", "name": "H100 SXM", "vendor": "NVIDIA", "color": "#aacb6a", "fp8": 1979, "fp8n": true, "fp16": 990, "fp4": null, "mem": 80, "mem_type": "HBM3", "bw": 3.35, "tdp": 700, "price": 2.5, "price_chip": 30000, "priceNote": null, "interconnect": "NVLink 900 GB/s", "node": "TSMC 4N", "role": "Train + Inference", "access": "Buyable", "launch": "2022", "status": "Shipping", "source": "NVIDIA H100 datasheet", "last_updated": "2026-06-20", "notes": "Sparse FP8 ~3,958 TFLOPS (2x dense). The 2022 baseline."}, {"id": "h200", "name": "H200", "vendor": "NVIDIA", "color": "#8cc63f", "fp8": 1979, "fp8n": true, "fp16": 990, "fp4": null, "mem": 141, "mem_type": "HBM3e", "bw": 4.8, "tdp": 700, "price": 3.5, "price_chip": 35000, "priceNote": null, "interconnect": "NVLink 900 GB/s", "node": "TSMC 4N", "role": "Train + Inference", "access": "Buyable", "launch": "2024", "status": "Shipping", "source": "NVIDIA H200 datasheet", "last_updated": "2026-06-20", "notes": "Same compute as H100, more/faster memory. China sales conditionally allowed Jan 2026."}, {"id": "b200", "name": "B200", "vendor": "NVIDIA", "color": "#6aa80f", "fp8": 4500, "fp8n": true, "fp16": 2250, "fp4": 9000, "mem": 192, "mem_type": "HBM3e", "bw": 8.0, "tdp": 1000, "price": 5.0, "price_chip": 37500, "priceNote": null, "interconnect": "NVLink 1.8 TB/s", "node": "TSMC 4NP", "role": "Train + Inference", "access": "Buyable", "launch": "2025", "status": "Shipping", "source": "NVIDIA Blackwell", "last_updated": "2026-06-20", "notes": "FP4 ~9 PFLOPS dense. Epoch BoM est ~$6.5k vs ~$35k street."}, {"id": "b300", "name": "B300 Ultra", "vendor": "NVIDIA", "color": "#4d8000", "fp8": 5000, "fp8n": true, "fp16": 2500, "fp4": 15000, "mem": 288, "mem_type": "HBM3e", "bw": 8.0, "tdp": 1400, "price": 6.8, "price_chip": 40000, "priceNote": null, "interconnect": "NVLink 1.8 TB/s", "node": "TSMC 4NP", "role": "Train + Inference", "access": "Buyable", "launch": "Jan 2026", "status": "Shipping", "source": "NVIDIA Blackwell Ultra blog / GB300 NVL72 spec", "last_updated": "2026-06-21", "notes": "Blackwell Ultra (GB300) peak: dense FP8 5 PFLOPS (+11% vs B200, from clock headroom), dense FP4 15 PFLOPS (1.5x B200, the real Ultra gain), dense FP16 2.5 PFLOPS. HGX/DGX-B300 SXM runs ~10% lower (FP8 ~4,500, FP4 ~13,500). FP64 gutted to ~1.25 TFLOPS. Sold mainly in GB300 NVL72 racks. CORRECTED 2026-06-21: prior FP8 of 7,000 was unsourced and wrong."}, {"id": "iron", "name": "Ironwood TPU v7", "vendor": "Google", "color": "#4285f4", "fp8": 4614, "fp8n": true, "fp16": 2300, "fp4": null, "mem": 192, "mem_type": "HBM3e", "bw": 7.37, "tdp": 600, "price": null, "price_chip": null, "priceNote": "GCP rental (not itemized per chip)", "interconnect": "ICI 1.2 TB/s", "node": "TSMC 3nm", "role": "Train + Inference", "access": "Rent · GCP", "launch": "Nov 2025", "status": "Shipping", "source": "Google Cloud Ironwood", "last_updated": "2026-06-20", "notes": "Pod = 9,216 chips -> 42.5 FP8 ExaFLOPS. TDP not published; ~600W inferred from Google \"2.8x vs H100\" claim.", "tdpEst": true}, {"id": "trn3", "name": "Trainium3", "vendor": "AWS", "color": "#ff9900", "fp8": 2520, "fp8n": true, "fp16": 1260, "fp4": null, "mem": 144, "mem_type": "HBM3e", "bw": 4.9, "tdp": null, "price": 1.8, "price_chip": null, "priceNote": null, "interconnect": "NeuronLink", "node": "TSMC N3P", "role": "Training", "access": "Rent · AWS", "launch": "Dec 2025", "status": "Shipping", "source": "AWS Trainium", "last_updated": "2026-06-20", "notes": "UltraServer = 144 chips -> 362 FP8 PFLOPS. +40% efficiency vs Trn2. TDP not published. MXFP8/MXFP4 + sparsity.", "tdpEst": true}, {"id": "910c", "name": "Ascend 910C", "vendor": "Huawei", "color": "#cf0a2c", "fp8": null, "fp8n": false, "fp16": 780, "fp4": null, "mem": 128, "mem_type": "HBM2e", "bw": 3.2, "tdp": 700, "price": null, "price_chip": null, "priceNote": "China-only (no Western cloud rate)", "interconnect": "HCCS / UnifiedBus (950+)", "node": "SMIC 7nm", "role": "Train + Inference", "access": "China-only", "launch": "2025", "status": "Shipping", "source": "Industry est / Toms Hardware", "last_updated": "2026-06-20", "notes": "Dual-die (2x 910B). No production FP8 -> FP16/BF16 only. Specs unofficial; capacity reports 96-128GB. CloudMatrix 384. Ascend 950 (2026) adds FP8/FP4.", "memEst": true, "bwEst": true, "tdpEst": true}, {"id": "mi355", "name": "MI355X", "vendor": "AMD", "color": "#1f1f1f", "fp8": 5033, "fp8n": true, "fp16": 2516, "fp4": 10066, "mem": 288, "mem_type": "HBM3e", "bw": 8.0, "tdp": 1400, "price": 5.45, "price_chip": null, "priceNote": null, "interconnect": "Infinity Fabric", "node": "TSMC 3nm", "role": "Train + Inference", "access": "Buyable", "launch": "Jun 2025", "status": "Shipping", "source": "AMD MI355X datasheet (Performance Labs, May 2025)", "last_updated": "2026-06-21", "notes": "CDNA4. AMD datasheet dense peaks: FP8 5,033, FP16/BF16 2,516, FP4/FP6 10,066 (2x each with sparsity); FP64 78.6 TFLOPS, FP32 157.3 TFLOPS. 288 GB HBM3e, 8 TB/s. ROCm. 1.4kW liquid. 185B transistors. OEM-sold (no fixed list price). Tightened 2026-06-21 to exact datasheet values."}, {"id": "groq", "name": "Groq LPU", "vendor": "Groq", "color": "#0d9488", "fp8": null, "fp8n": false, "fp16": 188, "fp4": null, "mem": 0.23, "mem_type": "SRAM (on-chip)", "bw": 80, "tdp": 375, "price": null, "price_chip": null, "priceNote": "per-token (GroqCloud)", "interconnect": "RealScale", "node": "GF 14nm", "role": "Inference", "access": "Rent · GroqCloud", "launch": "2024", "status": "Shipping", "source": "Groq", "last_updated": "2026-06-20", "notes": "Deterministic inference. 230MB on-chip SRAM, no HBM -> needs many chips (often 100s) per model. ~80 TB/s is on-chip SRAM, not HBM. ~750 TOPS INT8.", "tdpEst": true, "memSram": true, "bwSram": true}, {"id": "rubin", "name": "Rubin (VR200)", "vendor": "NVIDIA", "color": "#3f6b00", "fp8": null, "fp8n": false, "fp16": null, "fp4": 50000, "mem": 288, "mem_type": "HBM4", "bw": 22.0, "tdp": null, "price": null, "price_chip": null, "priceNote": "announced", "interconnect": "NVLink 6 (3.6 TB/s)", "node": "TSMC N3", "role": "Train + Inference", "access": "Announced", "launch": "H2 2026 (exp)", "status": "Announced", "source": "NVIDIA CES/GTC 2026", "last_updated": "2026-06-20", "notes": "CES/GTC 2026. 336B transistors, dual-die. NVFP4 50 PF inference / 35 PF training. ~1.8-2.3 kW (liquid-only). First rack live at Azure. Per-chip FP8 not published.", "placeholder": true}, {"id": "trn4", "name": "Trainium4", "vendor": "AWS", "color": "#cc7a00", "fp8": null, "fp8n": false, "fp16": null, "fp4": null, "mem": null, "mem_type": null, "bw": null, "tdp": null, "price": null, "price_chip": null, "priceNote": "announced", "interconnect": "NeuronLink + NVLink Fusion", "node": "TBD", "role": "Train + Inference", "access": "Announced", "launch": "Late 2026 / 2027 (exp)", "status": "Announced", "source": "AWS re:Invent 2025", "last_updated": "2026-06-20", "notes": "AWS claims vs Trn3: ~6x FP4, ~3x FP8, ~4x memory bandwidth. Integrates NVLink 6 + NVIDIA MGX (NVLink Fusion). Per-chip specs not published.", "placeholder": true}, {"id": "mi400", "name": "MI400 (MI455X)", "vendor": "AMD", "color": "#0a0a0a", "fp8": 20000, "fp8n": true, "fp16": null, "fp4": 40000, "mem": 432, "mem_type": "HBM4", "bw": 19.6, "tdp": null, "price": null, "price_chip": null, "priceNote": "announced", "interconnect": "UALink / Infinity Fabric", "node": "TSMC 2nm", "role": "Train + Inference", "access": "Announced", "launch": "Q3 2026 (exp)", "status": "Announced", "source": "AMD roadmap / GTC 2026", "last_updated": "2026-06-20", "notes": "CDNA5, TSMC 2nm. 432 GB HBM4, 19.6 TB/s, 40 PFLOPS FP4 / 20 PFLOPS FP8. UALink scale-up. Leads Rubin on capacity, trails on bandwidth (19.6 vs 22 TB/s).", "placeholder": true}, {"id": "tpu8t", "name": "TPU 8t (Sunfish)", "vendor": "Google", "color": "#2a5bb0", "fp8": null, "fp8n": false, "fp16": null, "fp4": null, "mem": null, "mem_type": "HBM3e", "bw": null, "tdp": null, "price": null, "price_chip": null, "priceNote": "preview", "interconnect": "3D torus (9,600/pod)", "node": "TSMC 2nm", "role": "Training", "access": "Preview", "launch": "Late 2027 (exp)", "status": "Preview", "source": "Google Cloud Next 2026", "last_updated": "2026-06-20", "notes": "Broadcom-designed training chip. 2 compute dies + I/O, 8x 12-Hi HBM3e (~288 GB). Superpod 9,600 chips -> 121 FP4 ExaFLOPS, 2 PB HBM. ~2.7x training price/perf, ~2x perf/W vs Ironwood. Per-chip specs not published.", "placeholder": true}, {"id": "tpu8i", "name": "TPU 8i (Zebrafish)", "vendor": "Google", "color": "#5a8fd6", "fp8": null, "fp8n": false, "fp16": null, "fp4": null, "mem": 216, "mem_type": "HBM3e", "bw": 6.5, "tdp": null, "price": null, "price_chip": null, "priceNote": "preview", "interconnect": "Boardfly", "node": "TSMC 2nm", "role": "Inference", "access": "Preview", "launch": "Late 2027 (exp)", "status": "Preview", "source": "Google Cloud Next 2026", "last_updated": "2026-06-20", "notes": "MediaTek-designed inference chip. Single compute die, 6x 12-Hi HBM3e = 216 GB @ 6.5 TB/s, 128 MB SRAM. ~80% better inference price/perf, ~1.8x perf/W vs Ironwood. Built around on-silicon KV cache.", "placeholder": true}];
+let CHIPS=[];
+const fmt=n=>n>=1000?n.toLocaleString('en-US'):(n%1===0?String(n):n.toFixed(n<10?2:1));
+const live=()=>CHIPS.filter(c=>!c.placeholder);
+function computePerfW(a){a.forEach(c=>{c.perfW=(c.fp8&&c.tdp)?+(c.fp8/c.tdp).toFixed(2):null;});}
+
+const CHARTS=[
+ {key:'fp8',title:'FP8 compute',unit:'TFLOPS',sqv:'--m-compute',better:'higher',
+  note:'Ascend 910C (FP16-only) and Groq LPU (INT8/FP16) have no production FP8 path — hatched here, full figures in the table.'},
+ {key:'mem',title:'Memory capacity',unit:'GB',sqv:'--m-cap',better:'higher',
+  note:'Bigger capacity holds larger models without sharding. Groq carries 0.23&nbsp;GB of on-chip SRAM by design — a deliberate trade, not a shortfall.'},
+ {key:'bw',title:'Memory bandwidth',unit:'TB/s',sqv:'--m-bw',better:'higher',
+  note:'Often the real inference bottleneck, not capacity. Groq is excluded: its ~80&nbsp;TB/s is on-chip SRAM, not HBM, and would break the scale.',exclude:['groq']},
+ {key:'tdp',title:'Power draw',unit:'W',sqv:'--m-power',better:null,
+  note:'Per-chip TDP. NVIDIA and AMD publish it; Google, AWS and Huawei do not — estimates marked "est", Trainium3 hatched as undisclosed.'},
+ {key:'perfW',title:'Compute efficiency',unit:'TFLOPS/W',sqv:'--m-eff',better:'higher',
+  note:'FP8 ÷ TDP — "performance per watt". Needs both a published FP8 rate and a power figure, so only six chips qualify; Ironwood rests on an estimated TDP.'},
+ {key:'price',title:'Cloud cost',unit:'$/GPU-hr',sqv:'--m-price',better:'lower',
+  note:'On-demand midpoints, ~June 2026; spot and reserved differ sharply. TPU/Trainium pricing is not itemized per chip, Ascend has no Western rate, Groq bills per token.'},
 ];
-// derived perf/W (only when FP8 + TDP exist)
-CHIPS.forEach(c=>{ c.perfW = (c.fp8 && c.tdp) ? +(c.fp8/c.tdp).toFixed(2) : null; });
-
-const fmt = n => n>=1000 ? n.toLocaleString('en-US') : (n%1===0? String(n): n.toFixed(n<10?2:1));
-
-/* ---------------- bar charts ---------------- */
-const CHARTS = [
-  {key:'fp8',  title:'FP8 compute',     unit:'TFLOPS', sqv:'--m-compute', better:'higher',
-   note:'Ascend 910C (FP16-only) and Groq LPU (INT8/FP16) have no production FP8 path — hatched here, full figures in the table.'},
-  {key:'mem',  title:'Memory capacity', unit:'GB',     sqv:'--m-cap',     better:'higher',
-   note:'Bigger capacity holds larger models without sharding. Groq carries 0.23&nbsp;GB of on-chip SRAM by design — a deliberate architectural trade, not a shortfall.'},
-  {key:'bw',   title:'Memory bandwidth',unit:'TB/s',   sqv:'--m-bw',      better:'higher',
-   note:'Often the real inference bottleneck, not capacity. Groq is excluded: its ~80&nbsp;TB/s is on-chip SRAM, not HBM, and would break the scale.', exclude:['groq']},
-  {key:'tdp',  title:'Power draw',      unit:'W',      sqv:'--m-power',   better:null,
-   note:'Per-chip TDP. NVIDIA and AMD publish it; Google, AWS and Huawei do not — estimates marked "est", Trainium3 hatched as undisclosed.'},
-  {key:'perfW',title:'Compute efficiency',unit:'TFLOPS/W',sqv:'--m-eff',  better:'higher',
-   note:'FP8 ÷ TDP — "performance per watt". Needs both a published FP8 rate and a power figure, so only six chips qualify; Ironwood rests on an estimated TDP.'},
-  {key:'price',title:'Cloud cost',      unit:'$/GPU-hr',sqv:'--m-price',  better:'lower',
-   note:'On-demand midpoints, ~June 2026; spot and reserved differ sharply. TPU/Trainium pricing isn\'t itemized per chip, Ascend has no Western cloud rate, Groq bills per token.'},
-];
-
-function barRow(c, ch){
-  const excluded = (ch.exclude||[]).includes(c.id);
-  if(excluded) return null;
-  let v = c[ch.key];
-  const usable = v!=null && !(ch.key==='fp8' && !c.fp8n);
-  return {c, v, usable, est:c[ch.key+'Est']===true || (ch.key==='perfW' && c.tdpEst)};
+function barRow(c,ch){
+  if((ch.exclude||[]).includes(c.id)) return null;
+  let v=c[ch.key];
+  const usable=v!=null && !(ch.key==='fp8' && !c.fp8n);
+  return {c,v,usable,est:c[ch.key+'Est']===true || (ch.key==='perfW' && c.tdpEst)};
 }
-
 function renderChart(ch){
-  let items = CHIPS.map(c=>barRow(c,ch)).filter(Boolean);
-  // sort: usable first by value (dir), hatched last
-  const dir = ch.better==='lower' ? 1 : -1;
-  items.sort((a,b)=>{
-    if(a.usable!==b.usable) return a.usable?-1:1;
-    if(!a.usable) return 0;
-    return (a.v-b.v)*dir;
-  });
-  const maxV = Math.max(...items.filter(i=>i.usable).map(i=>i.v));
-  const betterTxt = ch.better==='higher' ? 'Higher is better'
-                  : ch.better==='lower'  ? 'Lower is better' : 'Context metric';
-
-  const rows = items.map(it=>{
-    const {c,v,usable,est} = it;
-    let pct, fillCls='', valHtml, tag='';
-    if(usable){
-      pct = Math.max(2, (v/maxV)*100);
-      // for "lower is better", invert visual length so shorter bar = worse price reads intuitively? keep length∝value but that's fine; value labelled.
-      valHtml = `${fmt(v)}<span class="u"> ${ch.unit}</span>`;
-      if(c.memSram) tag = '<span class="tag">SRAM</span>';
-      if(est) tag = '<span class="tag">est</span>';
-    } else {
-      pct = 13; fillCls=' hatch';
-      let why = !c.fp8n && ch.key==='fp8' ? 'no FP8'
-              : c.priceNote ? c.priceNote
-              : 'undisclosed';
-      valHtml = `<span class="na">${why}</span>`;
-    }
-    return `<div class="row">
-      <div class="nm"><span class="dot" style="background:${c.color}"></span><span class="t">${c.name}</span></div>
-      <div class="track"><div class="fill${fillCls}" style="width:${pct}%;background:${usable?c.color:''}"></div></div>
-      <div class="val">${valHtml}${tag}</div>
-    </div>`;
+  let items=live().map(c=>barRow(c,ch)).filter(Boolean);
+  const dir=ch.better==='lower'?1:-1;
+  items.sort((a,b)=>{ if(a.usable!==b.usable) return a.usable?-1:1; if(!a.usable) return 0; return (a.v-b.v)*dir; });
+  const maxV=Math.max(...items.filter(i=>i.usable).map(i=>i.v));
+  const bt=ch.better==='higher'?'Higher is better':ch.better==='lower'?'Lower is better':'Context metric';
+  const rows=items.map(it=>{
+    const {c,v,usable,est}=it; let pct,fc='',vh,tag='';
+    if(usable){ pct=Math.max(2,(v/maxV)*100); vh=`${fmt(v)}<span class="u"> ${ch.unit}</span>`;
+      if(c.memSram) tag='<span class="tag">SRAM</span>'; if(est) tag='<span class="tag">est</span>'; }
+    else { pct=13; fc=' hatch'; let why=!c.fp8n&&ch.key==='fp8'?'no FP8':c.priceNote?c.priceNote:'undisclosed'; vh=`<span class="na">${why}</span>`; }
+    return `<div class="row"><div class="nm"><span class="dot" style="background:${c.color}"></span><span class="t">${c.name}</span></div>`+
+      `<div class="track"><div class="fill${fc}" style="width:${pct}%;background:${usable?c.color:''}"></div></div>`+
+      `<div class="val">${vh}${tag}</div></div>`;
   }).join('');
-
-  return `<div class="card">
-    <div class="card-h">
-      <div class="eyebrow"><span class="sq" style="background:var(${ch.sqv})"></span><h2>${ch.title}</h2></div>
-      <p class="sub"><span class="better">${betterTxt}</span> · dense FP8 basis · per chip</p>
-    </div>
-    <div class="bars">${rows}</div>
-    <p class="chart-note">${ch.note}</p>
-  </div>`;
+  return `<div class="card"><div class="card-h"><div class="eyebrow"><span class="sq" style="background:var(${ch.sqv})"></span><h2>${ch.title}</h2></div>`+
+    `<p class="sub"><span class="better">${bt}</span> · dense FP8 basis · per chip</p></div>`+
+    `<div class="bars">${rows}</div><p class="chart-note">${ch.note}</p></div>`;
 }
-document.getElementById('charts').innerHTML = CHARTS.map(renderChart).join('');
+function renderCharts(){ document.getElementById('charts').innerHTML=CHARTS.map(renderChart).join(''); }
 
-/* ---------------- scatter ---------------- */
-(function(){
-  const pts = CHIPS.filter(c=>c.perfW!=null && c.bw!=null && !c.bwSram);
-  const W=720,H=430, ml=58, mr=24, mt=22, mb=52;
-  const xMin=2, xMax=8, yMin=3, yMax=8.5;
-  const px = v => ml + (v-xMin)/(xMax-xMin)*(W-ml-mr);
-  const py = v => H-mb - (v-yMin)/(yMax-yMin)*(H-mt-mb);
-  const rOf = m => 9 + Math.sqrt(m)/Math.sqrt(288)*26;
-
-  const xticks=[2,3,4,5,6,7,8], yticks=[3,4,5,6,7,8];
+function renderScatter(){
+  const pts=live().filter(c=>c.perfW!=null&&c.bw!=null&&!c.bwSram);
+  const W=720,H=430,ml=58,mr=24,mt=22,mb=52, xMin=2,xMax=8,yMin=3,yMax=8.5;
+  const px=v=>ml+(v-xMin)/(xMax-xMin)*(W-ml-mr), py=v=>H-mb-(v-yMin)/(yMax-yMin)*(H-mt-mb);
+  const rOf=m=>9+Math.sqrt(m)/Math.sqrt(288)*26;
   let g='';
-  // grid + axes
-  yticks.forEach(t=>{ g+=`<line class="ax-line" x1="${ml}" y1="${py(t)}" x2="${W-mr}" y2="${py(t)}"/>
-    <text class="ax-tick" x="${ml-10}" y="${py(t)+4}" text-anchor="end">${t}</text>`; });
-  xticks.forEach(t=>{ g+=`<text class="ax-tick" x="${px(t)}" y="${H-mb+20}" text-anchor="middle">${t}</text>`; });
-  g+=`<line class="ax-base" x1="${ml}" y1="${H-mb}" x2="${W-mr}" y2="${H-mb}"/>
-      <line class="ax-base" x1="${ml}" y1="${mt}" x2="${ml}" y2="${H-mb}"/>`;
+  [3,4,5,6,7,8].forEach(t=>{ g+=`<line class="ax-line" x1="${ml}" y1="${py(t)}" x2="${W-mr}" y2="${py(t)}"/><text class="ax-tick" x="${ml-10}" y="${py(t)+4}" text-anchor="end">${t}</text>`; });
+  [2,3,4,5,6,7,8].forEach(t=>{ g+=`<text class="ax-tick" x="${px(t)}" y="${H-mb+20}" text-anchor="middle">${t}</text>`; });
+  g+=`<line class="ax-base" x1="${ml}" y1="${H-mb}" x2="${W-mr}" y2="${H-mb}"/><line class="ax-base" x1="${ml}" y1="${mt}" x2="${ml}" y2="${H-mb}"/>`;
   g+=`<text class="ax-title" x="${(ml+W-mr)/2}" y="${H-8}" text-anchor="middle">FP8 compute efficiency (TFLOPS / watt) →</text>`;
   g+=`<text class="ax-title" transform="translate(15 ${(mt+H-mb)/2}) rotate(-90)" text-anchor="middle">Memory bandwidth (TB/s) →</text>`;
-
-  // label offsets per chip to reduce collisions
   const off={h100:[12,-12],h200:[12,4],b200:[-6,-16],b300:[10,-14],mi355:[-50,18],iron:[-12,-18]};
-  pts.forEach(c=>{
-    const x=px(c.perfW), y=py(c.bw), r=rOf(c.mem);
-    const dash = c.tdpEst ? 'stroke-dasharray="4 3"' : '';
-    g+=`<circle class="pt" cx="${x}" cy="${y}" r="${r}" fill="${c.color}" stroke="${c.color}" ${dash}>
-        <title>${c.name} — ${c.perfW} TFLOPS/W · ${c.bw} TB/s · ${c.mem} GB${c.tdpEst?' (est. power)':''}</title></circle>`;
-    const o=off[c.id]||[r+4,4];
-    g+=`<text class="pt-lbl" x="${x+o[0]}" y="${y+o[1]}">${c.name.replace(' TPU v7','')}</text>`;
-  });
-
-  document.getElementById('scatter').innerHTML =
-    `<svg class="scatter" viewBox="0 0 ${W} ${H}" role="img" aria-label="Scatter of compute efficiency versus memory bandwidth">${g}</svg>`;
-
+  pts.forEach(c=>{ const x=px(c.perfW),y=py(c.bw),r=rOf(c.mem); const dash=c.tdpEst?'stroke-dasharray="4 3"':'';
+    g+=`<circle class="pt" cx="${x}" cy="${y}" r="${r}" fill="${c.color}" stroke="${c.color}" ${dash}><title>${c.name} — ${c.perfW} TFLOPS/W · ${c.bw} TB/s · ${c.mem} GB${c.tdpEst?' (est. power)':''}</title></circle>`;
+    const o=off[c.id]||[r+4,4]; g+=`<text class="pt-lbl" x="${x+o[0]}" y="${y+o[1]}">${c.name.replace(' TPU v7','')}</text>`; });
+  document.getElementById('scatter').innerHTML=`<svg class="scatter" viewBox="0 0 ${W} ${H}" role="img" aria-label="Compute efficiency versus memory bandwidth">${g}</svg>`;
   const vendors=[...new Map(pts.map(c=>[c.vendor,c.color])).entries()];
-  document.getElementById('scatter-legend').innerHTML =
-    vendors.map(([v,col])=>`<span class="it"><span class="d" style="background:${col}"></span>${v}</span>`).join('')
-    + `<span class="it meta">○ bubble size = memory capacity</span>`
-    + `<span class="it meta">– – dashed = estimated power</span>`;
-})();
+  document.getElementById('scatter-legend').innerHTML=vendors.map(([v,col])=>`<span class="it"><span class="d" style="background:${col}"></span>${v}</span>`).join('')
+    +`<span class="it meta">○ bubble size = memory capacity</span><span class="it meta">– – dashed = estimated power</span>`;
+}
 
-/* ---------------- table ---------------- */
-(function(){
-  const COLS = [
-    {k:'name', l:'Chip',        t:'s'},
-    {k:'fp8',  l:'FP8 TFLOPS',  t:'n'},
-    {k:'mem',  l:'Mem GB',      t:'n'},
-    {k:'bw',   l:'BW TB/s',     t:'n'},
-    {k:'tdp',  l:'TDP W',       t:'n'},
-    {k:'perfW',l:'Perf/W',      t:'n'},
-    {k:'price',l:'$/GPU-hr',    t:'n'},
-    {k:'node', l:'Process',     t:'s'},
-    {k:'role', l:'Role',        t:'s'},
-    {k:'access',l:'Access',     t:'s'},
-  ];
-  const thead=document.querySelector('#tbl thead');
-  const tbody=document.querySelector('#tbl tbody');
-  let sort={k:'fp8', dir:-1}, filter='all';
+const COLS=[{k:'name',l:'Chip',t:'s'},{k:'fp8',l:'FP8 TFLOPS',t:'n'},{k:'mem',l:'Mem GB',t:'n'},{k:'bw',l:'BW TB/s',t:'n'},
+ {k:'tdp',l:'TDP W',t:'n'},{k:'perfW',l:'Perf/W',t:'n'},{k:'price',l:'$/GPU-hr',t:'n'},{k:'node',l:'Process',t:'s'},{k:'role',l:'Role',t:'s'},{k:'access',l:'Access',t:'s'}];
+let sort={k:'fp8',dir:-1}, filter='all';
+function passes(c){ if(filter==='buy') return c.access==='Buyable'; if(filter==='train') return /Train/.test(c.role); if(filter==='inf') return /Inference/.test(c.role); if(filter==='ship') return !c.placeholder; return true; }
+function cell(c,col){
+  const k=col.k;
+  if(k==='name'){ const tag=c.placeholder?`<span class="soon">${c.status||'Roadmap'}</span>`:''; const sub=c.placeholder?` · ${c.vendor} · ${c.launch}`:` · ${c.vendor}`;
+    return `<td class="chip"><span class="dot" style="background:${c.color}"></span>${c.name}${tag}<span class="vd">${sub}</span></td>`; }
+  if(col.t==='s') return `<td>${c[k]}</td>`;
+  let v=c[k];
+  if(v==null){ if(k==='mem'&&c.memSram) return `<td class="num">0.23<span class="vd"> SRAM</span></td>`;
+    let note=k==='fp8'?'FP16: '+(c.fp16||'—'):k==='tdp'?'undisclosed':(c.priceNote||'—'); return `<td class="dash num" title="${note}">—</td>`; }
+  let s=fmt(v); if((k==='mem'&&c.memEst)||(k==='bw'&&c.bwEst)||(k==='tdp'&&c.tdpEst)) s+='<span class="vd"> est</span>';
+  return `<td class="num">${s}</td>`;
+}
+function renderTable(){
+  const thead=document.querySelector('#tbl thead'), tbody=document.querySelector('#tbl tbody');
+  thead.innerHTML='<tr>'+COLS.map(col=>{ const a=sort.k===col.k?`<span class="arr">${sort.dir<0?'▼':'▲'}</span>`:''; return `<th data-k="${col.k}" data-t="${col.t}">${col.l}${a}</th>`; }).join('')+'</tr>';
+  let rows=CHIPS.filter(passes).slice().sort((a,b)=>{ let x=a[sort.k],y=b[sort.k]; if(x==null&&y==null)return 0; if(x==null)return 1; if(y==null)return -1; if(sort.k==='name'){x=a.name;y=b.name;} if(typeof x==='string') return x.localeCompare(y)*sort.dir; return (x-y)*sort.dir; });
+  tbody.innerHTML=rows.map(c=>`<tr class="${c.placeholder?'ph':''}">`+COLS.map(col=>cell(c,col)).join('')+'</tr>').join('');
+  thead.querySelectorAll('th').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(sort.k===k) sort.dir*=-1; else sort={k,dir:th.dataset.t==='s'?1:-1}; renderTable(); });
+}
+function setupPills(){
+  const F=[{id:'all',l:'All chips'},{id:'ship',l:'Shipping now'},{id:'buy',l:'Buyable'},{id:'train',l:'Training'},{id:'inf',l:'Inference'}];
+  document.getElementById('pills').innerHTML=F.map(f=>`<button class="pill" data-f="${f.id}" aria-pressed="${f.id==='all'}">${f.l}</button>`).join('');
+  document.querySelectorAll('#pills .pill').forEach(p=>p.onclick=()=>{ filter=p.dataset.f; document.querySelectorAll('#pills .pill').forEach(x=>x.setAttribute('aria-pressed', x===p)); renderTable(); });
+  document.getElementById('tbl-note').innerHTML='Grey rows are announced or preview silicon — shown for planning, excluded from the charts above until they ship. Also outside this grid: Cerebras WSE-3 (wafer-scale, 44&nbsp;GB SRAM), Intel Gaudi 3, and captive hyperscaler silicon (Microsoft Maia, Meta MTIA). "est" marks figures not officially published.';
+}
+function setStatus(kind,name){
+  const asof=(CHIPS.find(c=>c.last_updated)||{}).last_updated||''; const n=CHIPS.length, ship=live().length;
+  const label=kind==='live'?`live · ${DATA_URL}`:kind==='file'?`file · ${name}`:'built-in snapshot';
+  document.getElementById('srcline').innerHTML=`Data source: <b>${label}</b> · ${n} chips (${ship} shipping, ${n-ship} on roadmap)${asof?` · as of ${asof}`:''} · <button class="loadbtn" id="loadbtn">Load edited JSON…</button>`;
+  document.getElementById('loadbtn').onclick=()=>document.getElementById('jsonfile').click();
+}
+function renderAll(){ computePerfW(CHIPS); renderCharts(); renderScatter(); renderTable(); }
+async function load(){
+  try{ const r=await fetch(DATA_URL,{cache:'no-store'}); if(!r.ok) throw 0; const j=await r.json(); if(!Array.isArray(j)||!j.length) throw 0; CHIPS=j; renderAll(); setStatus('live'); }
+  catch(e){ CHIPS=EMBEDDED; renderAll(); setStatus('embedded'); }
+}
+document.getElementById('jsonfile').addEventListener('change',ev=>{ const f=ev.target.files[0]; if(!f) return; const fr=new FileReader();
+  fr.onload=()=>{ try{ const j=JSON.parse(fr.result); if(Array.isArray(j)&&j.length){ CHIPS=j; renderAll(); setStatus('file',f.name); } else alert('JSON must be a non-empty array of chips.'); }catch(err){ alert("Couldn't parse that JSON: "+err.message); } };
+  fr.readAsText(f); });
+setupPills(); load();
 
-  const FILTERS=[
-    {id:'all',l:'All chips'},
-    {id:'buy',l:'Buyable now'},
-    {id:'train',l:'Training'},
-    {id:'inf',l:'Inference'},
-  ];
-  document.getElementById('pills').innerHTML = FILTERS.map(f=>
-    `<button class="pill" data-f="${f.id}" aria-pressed="${f.id==='all'}">${f.l}</button>`).join('');
-
-  function passes(c){
-    if(filter==='buy')   return c.access==='Buyable';
-    if(filter==='train') return /Train/.test(c.role);
-    if(filter==='inf')   return /Inference/.test(c.role);
-    return true;
-  }
-  function cell(c,col){
-    const k=col.k;
-    if(k==='name') return `<td class="chip"><span class="dot" style="background:${c.color}"></span>${c.name}<span class="vd"> · ${c.vendor}</span></td>`;
-    if(col.t==='s') return `<td>${c[k]}</td>`;
-    let v=c[k];
-    if(v==null){
-      let note = k==='fp8' ? 'FP16: '+(c.fp16||'—')
-               : k==='tdp' ? 'undisclosed'
-               : (c.priceNote||'—');
-      if(k==='mem' && c.memSram) return `<td class="num">0.23<span class="vd"> SRAM</span></td>`;
-      return `<td class="dash num" title="${note}">—</td>`;
-    }
-    let s = fmt(v);
-    if((k==='mem'&&c.memEst)||(k==='bw'&&c.bwEst)||(k==='tdp'&&c.tdpEst)) s+='<span class="vd"> est</span>';
-    return `<td class="num">${s}</td>`;
-  }
-  function render(){
-    thead.innerHTML='<tr>'+COLS.map(col=>{
-      const a = sort.k===col.k ? `<span class="arr">${sort.dir<0?'▼':'▲'}</span>`:'';
-      return `<th data-k="${col.k}" data-t="${col.t}">${col.l}${a}</th>`;
-    }).join('')+'</tr>';
-    let rows=CHIPS.filter(passes).slice().sort((a,b)=>{
-      let x=a[sort.k], y=b[sort.k];
-      if(x==null&&y==null)return 0; if(x==null)return 1; if(y==null)return -1;
-      if(sort.k==='name'){x=a.name;y=b.name;}
-      if(typeof x==='string') return x.localeCompare(y)*sort.dir;
-      return (x-y)*sort.dir;
-    });
-    tbody.innerHTML=rows.map(c=>'<tr>'+COLS.map(col=>cell(c,col)).join('')+'</tr>').join('');
-    thead.querySelectorAll('th').forEach(th=>th.onclick=()=>{
-      const k=th.dataset.k;
-      if(sort.k===k) sort.dir*=-1; else sort={k, dir: th.dataset.t==='s'?1:-1};
-      render();
-    });
-  }
-  document.querySelectorAll('#pills .pill').forEach(p=>p.onclick=()=>{
-    filter=p.dataset.f;
-    document.querySelectorAll('#pills .pill').forEach(x=>x.setAttribute('aria-pressed', x===p));
-    render();
-  });
-  render();
-  document.getElementById('tbl-note').innerHTML='Also in the market, outside this grid: Cerebras WSE-3 (wafer-scale, 44&nbsp;GB on-chip SRAM), Intel Gaudi 3, and captive hyperscaler silicon (Microsoft Maia, Meta MTIA). "est" marks figures not officially published.';
-})();
 </script>
 </body>
 </html>
