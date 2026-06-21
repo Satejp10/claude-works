@@ -8,6 +8,27 @@ served live via **GitHub Pages** so you can view them rendered, not just as sour
 
 🔗 **Live site:** https://satejp10.github.io/claude-infographics/
 
+## Gallery
+
+<!-- GALLERY:START -->
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-infographics/claude-design-works/how-india-got-online-pixel-quest.html"><img src="assets/thumbnails/how-india-got-online-pixel-quest.png" alt="How India Got Online — Pixel Quest" width="420"></a><br><sub><b>How India Got Online — Pixel Quest</b></sub></td>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-infographics/claude-design-works/india-online-data-report.html"><img src="assets/thumbnails/india-online-data-report.png" alt="India Online — How a Billion Got Connected" width="420"></a><br><sub><b>India Online — How a Billion Got Connected</b></sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-infographics/claude-design-works/glass-morphism-design-trials.html"><img src="assets/thumbnails/glass-morphism-design-trials.png" alt="Liquid Glass — Design Trials" width="420"></a><br><sub><b>Liquid Glass — Design Trials</b></sub></td>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-infographics/claude-design-works/ai-accelerators-2026.html"><img src="assets/thumbnails/ai-accelerators-2026.png" alt="AI Accelerators, Compared" width="420"></a><br><sub><b>AI Accelerators, Compared</b></sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-infographics/claude-design-works/agentic-capabilities-june-2026.html"><img src="assets/thumbnails/agentic-capabilities-june-2026.png" alt="Agentic Capabilities" width="420"></a><br><sub><b>Agentic Capabilities</b></sub></td>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-infographics/claude-design-works/ai-lab-headcount.html"><img src="assets/thumbnails/ai-lab-headcount.png" alt="AI Labs, by Headcount" width="420"></a><br><sub><b>AI Labs, by Headcount</b></sub></td>
+  </tr>
+</table>
+<!-- GALLERY:END -->
+
+_Thumbnails above are generated automatically from the works below — see [Adding a work](#adding-a-work)._
+
 ## Works
 
 | Work | Type | Date | Links |
@@ -28,3 +49,8 @@ served live via **GitHub Pages** so you can view them rendered, not just as sour
 1. Drop the file (or folder) into `claude-design-works/`.
 2. Add a row to the **Works** table above — name, type, date, and a `View` (live Pages URL) + `Source` link.
 3. Commit and push. The Pages site updates automatically.
+
+The **Gallery** thumbnails are generated automatically: a [GitHub Actions workflow](.github/workflows/thumbnails.yml)
+renders each work in the Works table, writes a thumbnail to `assets/thumbnails/`, and rebuilds the gallery
+block — so you never edit thumbnails by hand. Just add the table row; the picture follows on the next push.
+To regenerate locally, run `node .github/scripts/gen-thumbnails.mjs` (needs `npm install playwright`).

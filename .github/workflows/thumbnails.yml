@@ -1,0 +1,51 @@
+name: Generate work thumbnails
+
+# Renders each work under claude-design-works/ to a thumbnail and rebuilds the
+# README gallery. Triggers only on changes to the works themselves (or the
+# generator), never on README/asset changes — so the bot's own commit, which
+# touches README.md + assets/thumbnails/, cannot retrigger this workflow.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'claude-design-works/**'
+      - '.github/scripts/gen-thumbnails.mjs'
+      - '.github/workflows/thumbnails.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thumbnails-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  thumbnails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright + Chromium
+        run: |
+          npm install playwright@1.61.0
+          npx playwright install --with-deps chromium
+
+      - name: Generate thumbnails + README gallery
+        run: node .github/scripts/gen-thumbnails.mjs
+
+      - name: Commit changes (if any)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/thumbnails README.md
+          if git diff --cached --quiet; then
+            echo "No thumbnail/gallery changes."
+          else
+            git commit -m "chore: regenerate work thumbnails [skip ci]"
+            git push
+          fi
