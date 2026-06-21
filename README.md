@@ -17,6 +17,7 @@ served live via **GitHub Pages** so you can view them rendered, not just as sour
 | **Liquid Glass — Design Trials** — interactive glass-morphism design experiments (flick, drag, refract). | Design experiment (HTML) | Jun 2026 | [View](https://satejp10.github.io/claude-infographics/claude-design-works/glass-morphism-design-trials.html) · [Source](claude-design-works/glass-morphism-design-trials.html) |
 | **AI Accelerators, Compared** — FP8 compute-per-watt vs. memory bandwidth across 2026 AI chips, normalized to comparable definitions. | Infographic (HTML) | Jun 2026 | [View](https://satejp10.github.io/claude-infographics/claude-design-works/ai-accelerators-2026.html) · [Source](claude-design-works/ai-accelerators-2026.html) |
 | **Agentic Capabilities** — how far agents got by mid-2026: METR task-completion time horizons, the coding ceiling, and computer use crossing into the human band. | Infographic (HTML) | Jun 2026 | [View](https://satejp10.github.io/claude-infographics/claude-design-works/agentic-capabilities-june-2026.html) · [Source](claude-design-works/agentic-capabilities-june-2026.html) |
+| **AI Labs, by Headcount** — estimated employee counts across ten frontier model builders: lean, five-figure-adjacent US teams vs. a few hundred people at China's open-weight leaders. | Infographic (HTML) | Jun 2026 | [View](https://satejp10.github.io/claude-infographics/claude-design-works/ai-lab-headcount.html) · [Source](claude-design-works/ai-lab-headcount.html) |
 
 ## Structure
 

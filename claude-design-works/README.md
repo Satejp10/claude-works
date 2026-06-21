@@ -12,3 +12,4 @@ See the [main index](../README.md#works) for the full list with live-view links.
 - `glass-morphism-design-trials.html` — interactive glass-morphism (Liquid Glass) design experiments, Jun 2026.
 - `ai-accelerators-2026.html` — AI accelerators compared (FP8 compute-per-watt vs. memory bandwidth), Jun 2026.
 - `agentic-capabilities-june-2026.html` — agentic capability progress (METR time horizons, coding, computer use), Jun 2026.
+- `ai-lab-headcount.html` — estimated employee counts across ten frontier AI labs, Jun 2026.
