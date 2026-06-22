@@ -13,3 +13,4 @@ See the [main index](../README.md#works) for the full list with live-view links.
 - `ai-accelerators-2026.html` — "AI engines, what runs your AI?": FP8 compute-per-watt vs. memory bandwidth across 2026 chips, Jun 2026.
 - `agentic-capabilities-june-2026.html` — agentic capability progress (METR time horizons, coding, computer use), Jun 2026.
 - `ai-lab-headcount.html` — estimated employee counts across ten frontier AI labs, Jun 2026.
+- `terminal-portfolio.html` — terminal-styled personal portfolio for an AI Product Manager (Satej Patil): skills, experience, metrics, and contact rendered as shell commands, Jun 2026.
