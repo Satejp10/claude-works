@@ -24,6 +24,9 @@ served live via **GitHub Pages** so you can view them rendered, not just as sour
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/agentic-capabilities-june-2026.html"><img src="assets/thumbnails/agentic-capabilities-june-2026.png" alt="Agentic Capabilities" width="420"></a><br><sub><b>Agentic Capabilities</b></sub></td>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/ai-lab-headcount.html"><img src="assets/thumbnails/ai-lab-headcount.png" alt="AI Labs, by Headcount" width="420"></a><br><sub><b>AI Labs, by Headcount</b></sub></td>
   </tr>
+  <tr>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/terminal-portfolio.html"><img src="assets/thumbnails/terminal-portfolio.png" alt="Terminal Portfolio" width="420"></a><br><sub><b>Terminal Portfolio</b></sub></td>
+  </tr>
 </table>
 <!-- GALLERY:END -->
 
