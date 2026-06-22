@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# CodeRabbit is turned off for this repo. This is a personal publishing space for
+# static HTML infographics plus a README index, with PRs merged by the author —
+# automated code review adds noise here without much value. Auto-reviews and the
+# status / "review skipped" notices are disabled below.
+#
+# To run a one-off review anyway, comment `@coderabbitai review` on a PR.
+# To remove CodeRabbit entirely, uninstall the GitHub App in repo/org settings
+# (Settings → GitHub Apps → CodeRabbit → Configure) — that part is UI-only.
+reviews:
+  review_status: false        # no "review in progress / skipped" status comments
+  high_level_summary: false
+  poem: false
+  auto_review:
+    enabled: false            # don't review PRs automatically
+    drafts: false
+chat:
+  auto_reply: false
