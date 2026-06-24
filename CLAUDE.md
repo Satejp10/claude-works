@@ -29,15 +29,17 @@ The **Works table in `README.md`** is the source of truth. `gen-thumbnails.mjs`
 
 ```
 | **Name** — description | Type | Date | [View](https://…/FILE.html) · [Source](claude-design-works/FILE.html) |
+| **Name** — description | Type | Date | [View](https://…) · [Source](https://…) · [Thumb](assets/thumbnails/FILE) |
 ```
 
-- A row is recognized as a work **only** if it contains a `(claude-design-works/FILE.html)` Source link. Header/separator/other rows are skipped.
-- The thumbnail name, the displayed title, and the gallery link are derived from the row — the `**bold**` name, the `[View](url)`, and the source filename (`.html` → `.png`).
+- A row is recognized as a work if it contains **either** a `(claude-design-works/FILE.html)` Source link **or** an explicit `[Thumb](assets/thumbnails/…)` link. Header/separator/other rows are skipped.
+- The displayed title and gallery link are derived from the row — the `**bold**` name and the `[View](url)`.
+- The thumbnail is the explicit `[Thumb]` image if present; otherwise it's the rendered PNG derived from the source filename (`.html` → `.png`).
+- An explicit `[Thumb]` (e.g. a `.gif`) is used **as-is and the work is not rendered**. This is also how an **external** project (one hosted in another repo, with no `claude-design-works/` file) gets a gallery entry: a `View` link to its live demo, a `Source` link to its repo, and a `Thumb`.
 
 From each parsed row the generator:
-1. Serves the repo root over a local static server (port 8731) and renders the work in headless Chromium at **1200×750**, capturing the **top fold** (works use a 640px mobile breakpoint, so 1200 forces the desktop layout; it waits ~2.2s for fonts/animations).
-2. Writes a PNG to `assets/thumbnails/`.
-3. Rewrites the block between `<!-- GALLERY:START -->` and `<!-- GALLERY:END -->` in `README.md`.
+1. **Local works without a `Thumb`:** serves the repo root over a local static server (port 8731) and renders the work in headless Chromium at **1200×750**, capturing the **top fold** (works use a 640px mobile breakpoint, so 1200 forces the desktop layout; it waits ~2.2s for fonts/animations), writing a PNG to `assets/thumbnails/`. Works with a `Thumb` are skipped (their image is committed by hand). Playwright is imported lazily, so `SKIP_RENDER=1` (or a table with nothing to render) rebuilds only the gallery without it.
+2. Rewrites the block between `<!-- GALLERY:START -->` and `<!-- GALLERY:END -->` in `README.md`.
 
 **Never hand-edit the gallery block or `assets/thumbnails/` — both are generated.**
 The generator refuses to run if it parses zero works (guard against wiping the

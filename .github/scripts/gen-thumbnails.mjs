@@ -1,13 +1,17 @@
 #!/usr/bin/env node
 // Regenerate work thumbnails + the README gallery block.
 //
-// Source of truth is the **Works** table in README.md: each row names a work and
-// links to its source file under claude-design-works/. For every row we render
-// the page in headless Chromium, save a thumbnail under assets/thumbnails/, and
-// rebuild the block between <!-- GALLERY:START --> and <!-- GALLERY:END -->.
+// Source of truth is the **Works** table in README.md. A row is a work if it has
+// either a local `claude-design-works/FILE.html` source OR an explicit
+// `[Thumb](assets/thumbnails/FILE)` link. For local works without a Thumb we
+// render the page in headless Chromium and save a PNG under assets/thumbnails/;
+// works with an explicit Thumb (e.g. a GIF, or an external project hosted in
+// another repo) use that image as-is and are not rendered. Either way we rebuild
+// the block between <!-- GALLERY:START --> and <!-- GALLERY:END -->.
 //
 // Run: node .github/scripts/gen-thumbnails.mjs
-import { chromium } from 'playwright';
+//   SKIP_RENDER=1 node ...  — rebuild only the gallery block, skipping rendering
+//   (and Playwright); useful after editing the table without touching a work.
 import http from 'node:http';
 import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
@@ -48,24 +52,31 @@ function serve(rootDir) {
   });
 }
 
-// Parse the Works table. Each row looks like:
-// | **Name** — desc | Type | Date | [View](https://…/FILE) · [Source](claude-design-works/FILE) |
+// Parse the Works table. Rows look like:
+// | **Name** — desc | Type | Date | [View](https://…) · [Source](claude-design-works/FILE) |
+// | **Name** — desc | Type | Date | [View](https://…) · [Source](https://…) · [Thumb](assets/thumbnails/FILE) |
+// A row counts as a work if it has a local claude-design-works/*.html source OR
+// an explicit [Thumb](assets/thumbnails/…) link (external/custom-thumbnail works).
 function parseWorks(md) {
   const works = [];
   for (const line of md.split('\n')) {
     if (!line.startsWith('| ')) continue;
     const src = line.match(/\(claude-design-works\/([^)\s]+\.html)\)/);
-    if (!src) continue;                                   // skip header/separator/non-work rows
-    const name = (line.match(/\*\*(.+?)\*\*/) || [, src[1]])[1];
+    const thumb = line.match(/\[Thumb\]\((assets\/thumbnails\/[^)\s]+)\)/);
+    if (!src && !thumb) continue;                         // skip header/separator/non-work rows
+    const name = (line.match(/\*\*(.+?)\*\*/) || [, (src ? src[1] : 'work')])[1];
     const view = (line.match(/\[View\]\((https?:\/\/[^)]+)\)/) || [])[1] || null;
-    works.push({ file: src[1], name: name.trim(), view });
+    works.push({ file: src ? src[1] : null, name: name.trim(), view, thumb: thumb ? thumb[1] : null });
   }
   return works;
 }
 
+// An explicit [Thumb] wins; otherwise a local work's thumbnail is its rendered PNG.
+const thumbSrc = (w) => w.thumb || `assets/thumbnails/${w.file.replace(/\.html$/, '.png')}`;
+
 function galleryHTML(works) {
   const cell = (w) => {
-    const img = `<img src="assets/thumbnails/${w.file.replace(/\.html$/, '.png')}" alt="${w.name}" width="${IMG_W}">`;
+    const img = `<img src="${thumbSrc(w)}" alt="${w.name}" width="${IMG_W}">`;
     const inner = w.view ? `<a href="${w.view}">${img}</a>` : img;
     return `<td width="50%" align="center" valign="top">${inner}<br><sub><b>${w.name}</b></sub></td>`;
   };
@@ -84,21 +95,27 @@ async function main() {
   const works = parseWorks(md);
   if (!works.length) throw new Error('No works parsed from README table — refusing to wipe the gallery.');
 
-  const server = await serve(ROOT);
-  const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: VW, height: VH }, deviceScaleFactor: DSF });
+  // Only local works without an explicit [Thumb] get rendered; Thumb works
+  // (GIFs, external projects) supply their own image and are left untouched.
+  const toRender = works.filter((w) => w.file && !w.thumb);
+  if (toRender.length && !process.env.SKIP_RENDER) {
+    const { chromium } = await import('playwright');
+    const server = await serve(ROOT);
+    const browser = await chromium.launch();
+    const page = await browser.newPage({ viewport: { width: VW, height: VH }, deviceScaleFactor: DSF });
 
-  for (const w of works) {
-    const url = `http://127.0.0.1:${PORT}/claude-design-works/${w.file}`;
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
-    await page.waitForTimeout(2200);                      // let fonts + bar animations settle
-    const outPng = path.join(THUMB_DIR, w.file.replace(/\.html$/, '.png'));
-    await page.screenshot({ path: outPng, clip: { x: 0, y: 0, width: VW, height: VH } });
-    console.log('thumb', path.relative(ROOT, outPng));
+    for (const w of toRender) {
+      const url = `http://127.0.0.1:${PORT}/claude-design-works/${w.file}`;
+      await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
+      await page.waitForTimeout(2200);                    // let fonts + bar animations settle
+      const outPng = path.join(THUMB_DIR, w.file.replace(/\.html$/, '.png'));
+      await page.screenshot({ path: outPng, clip: { x: 0, y: 0, width: VW, height: VH } });
+      console.log('thumb', path.relative(ROOT, outPng));
+    }
+
+    await browser.close();
+    server.close();
   }
-
-  await browser.close();
-  server.close();
 
   const block = `<!-- GALLERY:START -->\n${galleryHTML(works)}\n<!-- GALLERY:END -->`;
   const re = /<!-- GALLERY:START -->[\s\S]*?<!-- GALLERY:END -->/;
