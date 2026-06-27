@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Engines, What Runs Your AI? — June 2026</title>
+<title>AI Accelerators, Compared — June 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
@@ -15,51 +15,45 @@
     --serif:'Source Serif 4',Georgia,Cambria,'Times New Roman',serif;
     --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
     --r:16px;
-    /* metric eyebrow hues */
     --m-compute:#7f4bf3; --m-cap:#2243e6; --m-bw:#0089f4;
     --m-power:#ff6900; --m-eff:#34a853; --m-price:#eb3568; --m-map:#1f1f1f;
   }
   *{box-sizing:border-box;}
   html{-webkit-text-size-adjust:100%;}
-  body{
-    margin:0; background:var(--bg); color:var(--ink);
-    font-family:var(--sans); font-size:16px; line-height:1.5;
-    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-  }
-  .wrap{max-width:980px; margin:0 auto; padding:34px 22px 90px;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;}
+  .wrap{max-width:980px;margin:0 auto;padding:34px 22px 90px;}
 
-  /* ---------- header ---------- */
-  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:38px;}
-  .mark{display:flex; align-items:center; gap:9px; font-weight:600; font-size:14px; letter-spacing:-0.01em;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:38px;}
+  .mark{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px;letter-spacing:-0.01em;}
   .mark .glyph{width:24px;height:24px;border-radius:6px;background:var(--ink);display:grid;place-items:center;}
   .mark .glyph::before{content:"";width:11px;height:11px;border-radius:50%;border:2.5px solid #fff;}
   .topbar .stamp{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;}
 
-  h1{
-    font-family:var(--serif); font-weight:600;
-    font-size:clamp(2.3rem,6.4vw,3.7rem); line-height:1.02;
-    letter-spacing:-0.015em; margin:0 0 16px; max-width:14ch;
-  }
-  .lede{font-size:clamp(1rem,2.4vw,1.18rem); color:#3a3a3a; max-width:60ch; margin:0 0 6px;}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(2.3rem,6.4vw,3.7rem);line-height:1.02;
+    letter-spacing:-0.015em;margin:0 0 16px;max-width:14ch;}
+  .lede{font-size:clamp(1rem,2.4vw,1.18rem);color:#3a3a3a;max-width:60ch;margin:0 0 6px;}
   .lede b{font-weight:600;color:var(--ink);}
 
-  /* method strip (AA "UPDATE" device) */
-  .method{
-    border-top:1px solid var(--border); border-bottom:1px solid var(--border);
-    margin:30px 0 40px; padding:18px 0; display:grid;
-    grid-template-columns:auto 1fr; gap:16px; align-items:start;
-  }
-  .method .ey{font-size:11.5px;font-weight:700;letter-spacing:.13em;color:var(--violet);
-    display:flex;align-items:center;gap:8px;white-space:nowrap;padding-top:2px;}
-  .method .sq{width:13px;height:13px;border-radius:3px;background:var(--violet);}
-  .method p{margin:0;font-size:14px;color:#444;}
-  .method p span{color:var(--muted);}
+  /* FP8 explainer */
+  .fp8{border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:30px 0 0;padding:20px 0;
+    display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;}
+  .fp8 .ey{font-size:11.5px;font-weight:700;letter-spacing:.13em;color:var(--violet);display:flex;align-items:center;gap:8px;white-space:nowrap;padding-top:2px;}
+  .fp8 .sq{width:13px;height:13px;border-radius:3px;background:var(--violet);}
+  .fp8 p{margin:0;font-size:14px;color:#444;max-width:78ch;}
+  .fp8 p b{color:var(--ink);font-weight:600;} .fp8 p span{color:var(--muted);}
 
-  /* ---------- cards ---------- */
-  .card{
-    border:1px solid var(--border); border-radius:var(--r);
-    padding:24px 24px 26px; margin-bottom:18px; background:var(--card);
-  }
+  /* vendor legend */
+  .legend-card{margin:18px 0 38px;border:1px solid var(--border);border-radius:var(--r);padding:18px 20px 20px;}
+  .legend-card .lh{font-size:11.5px;font-weight:700;letter-spacing:.13em;color:var(--muted);margin:0 0 14px;text-transform:uppercase;}
+  .vlegs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 22px;}
+  .vleg{display:flex;gap:10px;align-items:flex-start;}
+  .vleg .sw{width:14px;height:14px;border-radius:4px;flex:none;margin-top:3px;}
+  .vleg .vname{font-size:13.5px;font-weight:600;line-height:1.3;}
+  .vleg .vchips{font-size:12px;color:var(--muted);line-height:1.4;margin-top:1px;}
+  .vleg .vchips .ph{color:var(--faint);}
+
+  .card{border:1px solid var(--border);border-radius:var(--r);padding:24px 24px 26px;margin-bottom:18px;background:var(--card);}
   .card-h{margin-bottom:18px;}
   .eyebrow{display:flex;align-items:center;gap:10px;}
   .eyebrow .sq{width:15px;height:15px;border-radius:4px;flex:none;}
@@ -67,14 +61,13 @@
   .sub{font-size:13px;color:var(--muted);margin:9px 0 0;}
   .sub .better{color:#3a3a3a;font-weight:500;}
 
-  /* ---------- horizontal bars ---------- */
   .bars{display:flex;flex-direction:column;gap:9px;margin-top:4px;}
-  .row{display:grid;grid-template-columns:128px 1fr 70px;align-items:center;gap:13px;}
+  .row{display:grid;grid-template-columns:128px 1fr 94px;align-items:center;gap:13px;}
   .nm{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;min-width:0;}
   .nm .dot{width:9px;height:9px;border-radius:2px;flex:none;}
   .nm .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .track{background:var(--grid);border-radius:5px;height:19px;position:relative;overflow:hidden;}
-  .fill{height:100%;border-radius:5px;min-width:2px;transition:width .9s cubic-bezier(.2,.7,.2,1);}
+  .fill{height:100%;border-radius:5px;min-width:2px;}
   .fill.hatch{background:repeating-linear-gradient(45deg,#e6e6e6,#e6e6e6 5px,#f6f6f6 5px,#f6f6f6 10px) !important;}
   .val{text-align:right;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
   .val .u{font-weight:450;color:var(--faint);font-size:11px;}
@@ -82,33 +75,28 @@
   .tag{font-size:10px;color:var(--faint);font-weight:500;margin-left:5px;}
   .chart-note{font-size:11.5px;color:var(--faint);margin:16px 0 0;line-height:1.45;}
 
-  /* ---------- scatter ---------- */
   .scatter-wrap{position:relative;width:100%;overflow:hidden;}
   svg.scatter{width:100%;height:auto;display:block;}
   .ax-line{stroke:var(--grid);stroke-width:1;}
   .ax-base{stroke:#dcdcdc;stroke-width:1;}
   .ax-tick{fill:var(--faint);font-size:11px;font-family:var(--sans);}
   .ax-title{fill:var(--muted);font-size:12px;font-weight:600;font-family:var(--sans);}
-  .pt{fill-opacity:.62;stroke-width:1.5;transition:fill-opacity .2s;}
-  .pt:hover{fill-opacity:.85;}
+  .pt{fill-opacity:.62;stroke-width:1.5;}
   .pt-lbl{font-size:11px;font-weight:600;font-family:var(--sans);fill:var(--ink);}
   .legend{display:flex;flex-wrap:wrap;gap:13px 18px;margin-top:18px;font-size:12px;color:var(--muted);align-items:center;}
   .legend .it{display:flex;align-items:center;gap:6px;}
   .legend .it .d{width:10px;height:10px;border-radius:50%;}
   .legend .meta{color:var(--faint);}
 
-  /* ---------- table ---------- */
   .pills{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 18px;}
-  .pill{font-size:12.5px;font-weight:500;padding:6px 13px;border-radius:999px;border:1px solid var(--border);
-    background:#fff;color:#444;cursor:pointer;transition:.15s;}
+  .pill{font-size:12.5px;font-weight:500;padding:6px 13px;border-radius:999px;border:1px solid var(--border);background:#fff;color:#444;cursor:pointer;transition:.15s;}
   .pill:hover{border-color:#c9c9c9;}
   .pill[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink);}
   .tbl-scroll{overflow-x:auto;margin:0 -4px;-webkit-overflow-scrolling:touch;}
   table{border-collapse:collapse;width:100%;min-width:760px;font-size:13px;}
   th,td{text-align:right;padding:11px 12px;border-bottom:1px solid var(--grid);white-space:nowrap;}
   th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:#fff;}
-  thead th{font-weight:600;color:var(--muted);font-size:11.5px;letter-spacing:.02em;cursor:pointer;user-select:none;
-    border-bottom:1px solid #dcdcdc;}
+  thead th{font-weight:600;color:var(--muted);font-size:11.5px;letter-spacing:.02em;cursor:pointer;user-select:none;border-bottom:1px solid #dcdcdc;}
   thead th:hover{color:var(--ink);}
   thead th .arr{color:var(--violet);font-size:10px;margin-left:3px;}
   tbody tr:hover{background:#fafafa;}
@@ -117,8 +105,19 @@
   td .vd{color:var(--faint);font-weight:450;font-size:11.5px;}
   td.dash{color:var(--faint);}
   .num{font-variant-numeric:tabular-nums;}
+  tr.ph td{background:#fbfbfb;color:#9a9a9a;}
+  tr.ph td:first-child{background:#fbfbfb;}
+  tr.ph:hover td{background:#f3f3f3;}
+  tr.ph td.chip{color:#6f6f6f;}
+  .upcoming{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--violet);border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:middle;}
+  .vleg .vchips .yr{color:var(--faint);font-weight:450;}
+  .vleg .vchips .up{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--violet);background:var(--violet-soft);border-radius:4px;padding:1px 5px;margin-left:3px;}
 
-  /* ---------- caveats ---------- */
+  .srcline{font-size:12.5px;color:var(--muted);margin:0 0 34px;}
+  .srcline b{color:#3a3a3a;font-weight:600;}
+  .loadbtn{font:inherit;font-size:12.5px;color:var(--violet);background:none;border:none;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+  .loadbtn:hover{color:#5a30c0;}
+
   .notes ul{margin:6px 0 0;padding:0;list-style:none;}
   .notes li{position:relative;padding:9px 0 9px 22px;font-size:13.5px;color:#3f3f3f;border-bottom:1px solid var(--grid);line-height:1.5;}
   .notes li:last-child{border-bottom:none;}
@@ -127,32 +126,19 @@
 
   footer{margin-top:34px;font-size:12px;color:var(--faint);line-height:1.6;border-top:1px solid var(--border);padding-top:18px;}
   footer a{color:var(--muted);}
+  footer .disclaimer{color:var(--muted);background:#fafafa;border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin:0 0 16px;line-height:1.6;}
+  footer .disclaimer b{color:#3a3a3a;}
 
-  /* ---------- responsive ---------- */
+  @media(max-width:680px){ .vlegs{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:460px){ .vlegs{grid-template-columns:1fr;} }
   @media(max-width:600px){
     .wrap{padding:26px 16px 70px;}
-    .row{grid-template-columns:92px 1fr 58px;gap:9px;}
-    .nm{font-size:12px;}
-    .val{font-size:12px;}
-    .method{grid-template-columns:1fr;gap:9px;}
-    .eyebrow h2{font-size:1.35rem;}
-    .card{padding:20px 16px 22px;}
-  }
-  @media(prefers-reduced-motion:reduce){
-    .fill{transition:none;}
+    .row{grid-template-columns:84px 1fr 84px;gap:8px;}
+    .nm{font-size:12px;} .val{font-size:11px;}
+    .fp8{grid-template-columns:1fr;gap:9px;}
+    .eyebrow h2{font-size:1.35rem;} .card{padding:20px 16px 22px;}
   }
   :focus-visible{outline:2px solid var(--violet);outline-offset:2px;border-radius:4px;}
-
-  /* --- runtime data loading + roadmap rows --- */
-  .srcline{font-size:12.5px;color:var(--muted);margin:-20px 0 34px;}
-  .srcline b{color:#3a3a3a;font-weight:600;}
-  .loadbtn{font:inherit;font-size:12.5px;color:var(--violet);background:none;border:none;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
-  .loadbtn:hover{color:#5a30c0;}
-  tr.ph td{background:#fbfbfb;color:#9a9a9a;}
-  tr.ph td:first-child{background:#fbfbfb;}
-  tr.ph:hover td{background:#f3f3f3;}
-  tr.ph td.chip{color:#6f6f6f;}
-  .soon{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--violet);border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -163,21 +149,24 @@
     <div class="stamp">Updated June&nbsp;2026</div>
   </div>
 
-  <h1>AI engines, what runs your AI?</h1>
-  <p class="lede">Every reply your model gives you is running on a piece of silicon somewhere — and which one shapes its cost, speed, and what's even possible. <b>Peak FLOPS aren't delivered FLOPS</b>, "efficiency" splits three ways, and half of these you can't actually buy. Nine engines from NVIDIA, Google, AWS, AMD, Huawei and Groq — normalized to FP8 and stripped to the numbers that decide a deployment.</p>
+  <h1>AI accelerators, compared</h1>
+  <p class="lede">Comparing AI chips is mostly a fight over definitions. <b>Peak FLOPS aren't delivered FLOPS</b>, "efficiency" splits three ways, and half of these you can't actually buy. Fourteen accelerators from NVIDIA, Google, AWS, AMD, Huawei and Groq — normalized to FP8 and stripped to the numbers that decide a deployment.</p>
 
-  <div class="method">
-    <div class="ey"><span class="sq"></span>METHOD</div>
-    <p>Compute is normalized to <b style="color:#444">dense FP8</b>, peak theoretical. Real delivered throughput (model FLOPs utilization) typically runs 30–50% of peak. <span>Where a chip can't be compared cleanly — no native FP8, undisclosed power, SRAM instead of HBM — the bar is hatched or omitted and explained, never faked.</span></p>
+  <div class="fp8">
+    <div class="ey"><span class="sq"></span>WHAT IS FP8</div>
+    <p><b>FP8 is an 8-bit floating-point number format</b> — a low-precision way to represent numbers that roughly <b>doubles compute throughput and halves memory use</b> versus 16-bit FP16/BF16. It has become the default precision for modern AI training and inference, which makes it the fairest common axis for comparing chips. <span>Every compute figure here is dense FP8, peak theoretical — real delivered throughput runs ~30–50% of peak. Chips that can't do FP8 (Huawei 910C, Groq) are shown at FP16 or hatched, never faked.</span></p>
+  </div>
+
+  <div class="legend-card">
+    <p class="lh">Color = company</p>
+    <div class="vlegs" id="vlegs"></div>
   </div>
 
   <div class="srcline" id="srcline"></div>
   <input type="file" id="jsonfile" accept="application/json,.json" style="display:none">
 
-  <!-- charts injected here -->
   <div id="charts"></div>
 
-  <!-- scatter -->
   <div class="card">
     <div class="card-h">
       <div class="eyebrow"><span class="sq" style="background:var(--m-map)"></span><h2>The efficiency frontier</h2></div>
@@ -188,7 +177,6 @@
     <p class="chart-note">Only the six chips with both a published FP8 rate and a usable power figure can be placed here. Trainium3 (power undisclosed), Ascend 910C (no native FP8) and Groq (per-chip metrics don't apply) sit in the table instead.</p>
   </div>
 
-  <!-- table -->
   <div class="card">
     <div class="card-h">
       <div class="eyebrow"><span class="sq" style="background:#525252"></span><h2>Full spec table</h2></div>
@@ -199,23 +187,22 @@
     <p class="chart-note" id="tbl-note"></p>
   </div>
 
-  <!-- caveats -->
   <div class="card notes">
     <div class="card-h">
       <div class="eyebrow"><span class="sq" style="background:var(--faint)"></span><h2>What the numbers don't show</h2></div>
     </div>
     <ul>
-      <li><b>Spec sheets are ceilings.</b> Every FP8 figure here is peak theoretical. Delivered utilization (MFU) is commonly 30–50%, and depends on model shape, batch size and software maturity far more than the headline number.</li>
+      <li><b>Spec sheets are ceilings.</b> Every FP8 figure here is peak theoretical. Delivered utilization (MFU) is commonly 30–50%, and depends on model shape, batch size and software maturity more than the headline number.</li>
       <li><b>Software is the real moat.</b> CUDA vs. ROCm vs. JAX/XLA vs. AWS Neuron decides whether you can actually use the silicon. It can't be charted, and it often outweighs every spec on this page.</li>
       <li><b>Most of these you can't buy.</b> TPU Ironwood and Trainium3 are rent-only on Google Cloud and AWS. Ascend 910C is China-only under export controls. Groq sells tokens, not chips. Only NVIDIA and AMD ship merchant silicon you can rack yourself.</li>
-      <li><b>Groq plays a different game.</b> The LPU has 230&nbsp;MB of on-chip SRAM and no HBM — its ~80&nbsp;TB/s on-chip bandwidth and tiny capacity mean it needs many chips to hold one model. Per-chip specs badly understate its system-level latency advantage, which is the entire point of the architecture.</li>
-      <li><b>Huawei's specs are estimates.</b> Ascend 910C is a dual-die FP16/BF16 part with no production FP8; capacity (~96–128&nbsp;GB) and bandwidth are not officially published. Newer Ascend 950-series parts (2026) add FP8/FP4.</li>
+      <li><b>Groq plays a different game.</b> The LPU has 230&nbsp;MB of on-chip SRAM and no HBM — its ~80&nbsp;TB/s on-chip bandwidth and tiny capacity mean it needs many chips to hold one model. Per-chip specs understate its system-level latency advantage, which is the entire point.</li>
       <li><b>The unit is the rack now.</b> NVIDIA's GB300 NVL72, an Ironwood 9,216-chip pod and Huawei's CloudMatrix 384 are the real products. Interconnect — NVLink, ICI, NeuronLink, Infinity Fabric, UnifiedBus — decides how these per-chip numbers actually scale.</li>
-      <li><b>This is not a buy recommendation.</b> It's a snapshot for orientation. Prices move weekly and new silicon (Rubin, Trainium4, MI400, TPU 8t/8i) lands through late 2026.</li>
+      <li><b>This is not a buy recommendation.</b> It's a snapshot for orientation. Prices move weekly and the roadmap rows (Rubin, Trainium4, MI400, TPU 8t/8i) land through 2027.</li>
     </ul>
   </div>
 
   <footer>
+    <p class="disclaimer"><b>Heads up — this is a personal passion project, not an official source.</b> Every figure here is compiled by hand from public disclosures, and I do my best to keep it current, but it may be incomplete, out of date, or simply wrong. Treat all of it as a starting point, not authority: verify against each vendor's own datasheets before making any decision. No affiliation with any company shown, and nothing here is offered with any warranty or as professional advice.</p>
     Built June 2026. Figures compiled from NVIDIA, Google Cloud, AWS, AMD and Huawei disclosures, SemiAnalysis, and public cloud pricing pages. Compute normalized to dense FP8 (peak). Cloud rates are on-demand midpoints and vary widely by provider, region and contract. Design language inspired by <a href="https://artificialanalysis.ai/">Artificial Analysis</a>.
   </footer>
 
@@ -223,11 +210,42 @@
 
 <script>
 const DATA_URL='ai-accelerators.json';
-const EMBEDDED=[{"id": "h100", "name": "H100 SXM", "vendor": "NVIDIA", "color": "#aacb6a", "fp8": 1979, "fp8n": true, "fp16": 990, "fp4": null, "mem": 80, "mem_type": "HBM3", "bw": 3.35, "tdp": 700, "price": 2.5, "price_chip": 30000, "priceNote": null, "interconnect": "NVLink 900 GB/s", "node": "TSMC 4N", "role": "Train + Inference", "access": "Buyable", "launch": "2022", "status": "Shipping", "source": "NVIDIA H100 datasheet", "last_updated": "2026-06-20", "notes": "Sparse FP8 ~3,958 TFLOPS (2x dense). The 2022 baseline."}, {"id": "h200", "name": "H200", "vendor": "NVIDIA", "color": "#8cc63f", "fp8": 1979, "fp8n": true, "fp16": 990, "fp4": null, "mem": 141, "mem_type": "HBM3e", "bw": 4.8, "tdp": 700, "price": 3.5, "price_chip": 35000, "priceNote": null, "interconnect": "NVLink 900 GB/s", "node": "TSMC 4N", "role": "Train + Inference", "access": "Buyable", "launch": "2024", "status": "Shipping", "source": "NVIDIA H200 datasheet", "last_updated": "2026-06-20", "notes": "Same compute as H100, more/faster memory. China sales conditionally allowed Jan 2026."}, {"id": "b200", "name": "B200", "vendor": "NVIDIA", "color": "#6aa80f", "fp8": 4500, "fp8n": true, "fp16": 2250, "fp4": 9000, "mem": 192, "mem_type": "HBM3e", "bw": 8.0, "tdp": 1000, "price": 5.0, "price_chip": 37500, "priceNote": null, "interconnect": "NVLink 1.8 TB/s", "node": "TSMC 4NP", "role": "Train + Inference", "access": "Buyable", "launch": "2025", "status": "Shipping", "source": "NVIDIA Blackwell", "last_updated": "2026-06-20", "notes": "FP4 ~9 PFLOPS dense. Epoch BoM est ~$6.5k vs ~$35k street."}, {"id": "b300", "name": "B300 Ultra", "vendor": "NVIDIA", "color": "#4d8000", "fp8": 5000, "fp8n": true, "fp16": 2500, "fp4": 15000, "mem": 288, "mem_type": "HBM3e", "bw": 8.0, "tdp": 1400, "price": 6.8, "price_chip": 40000, "priceNote": null, "interconnect": "NVLink 1.8 TB/s", "node": "TSMC 4NP", "role": "Train + Inference", "access": "Buyable", "launch": "Jan 2026", "status": "Shipping", "source": "NVIDIA Blackwell Ultra blog / GB300 NVL72 spec", "last_updated": "2026-06-21", "notes": "Blackwell Ultra (GB300) peak: dense FP8 5 PFLOPS (+11% vs B200, from clock headroom), dense FP4 15 PFLOPS (1.5x B200, the real Ultra gain), dense FP16 2.5 PFLOPS. HGX/DGX-B300 SXM runs ~10% lower (FP8 ~4,500, FP4 ~13,500). FP64 gutted to ~1.25 TFLOPS. Sold mainly in GB300 NVL72 racks. CORRECTED 2026-06-21: prior FP8 of 7,000 was unsourced and wrong."}, {"id": "iron", "name": "Ironwood TPU v7", "vendor": "Google", "color": "#4285f4", "fp8": 4614, "fp8n": true, "fp16": 2300, "fp4": null, "mem": 192, "mem_type": "HBM3e", "bw": 7.37, "tdp": 600, "price": null, "price_chip": null, "priceNote": "GCP rental (not itemized per chip)", "interconnect": "ICI 1.2 TB/s", "node": "TSMC 3nm", "role": "Train + Inference", "access": "Rent · GCP", "launch": "Nov 2025", "status": "Shipping", "source": "Google Cloud Ironwood", "last_updated": "2026-06-20", "notes": "Pod = 9,216 chips -> 42.5 FP8 ExaFLOPS. TDP not published; ~600W inferred from Google \"2.8x vs H100\" claim.", "tdpEst": true}, {"id": "trn3", "name": "Trainium3", "vendor": "AWS", "color": "#ff9900", "fp8": 2520, "fp8n": true, "fp16": 1260, "fp4": null, "mem": 144, "mem_type": "HBM3e", "bw": 4.9, "tdp": null, "price": 1.8, "price_chip": null, "priceNote": null, "interconnect": "NeuronLink", "node": "TSMC N3P", "role": "Training", "access": "Rent · AWS", "launch": "Dec 2025", "status": "Shipping", "source": "AWS Trainium", "last_updated": "2026-06-20", "notes": "UltraServer = 144 chips -> 362 FP8 PFLOPS. +40% efficiency vs Trn2. TDP not published. MXFP8/MXFP4 + sparsity.", "tdpEst": true}, {"id": "910c", "name": "Ascend 910C", "vendor": "Huawei", "color": "#cf0a2c", "fp8": null, "fp8n": false, "fp16": 780, "fp4": null, "mem": 128, "mem_type": "HBM2e", "bw": 3.2, "tdp": 700, "price": null, "price_chip": null, "priceNote": "China-only (no Western cloud rate)", "interconnect": "HCCS / UnifiedBus (950+)", "node": "SMIC 7nm", "role": "Train + Inference", "access": "China-only", "launch": "2025", "status": "Shipping", "source": "Industry est / Toms Hardware", "last_updated": "2026-06-20", "notes": "Dual-die (2x 910B). No production FP8 -> FP16/BF16 only. Specs unofficial; capacity reports 96-128GB. CloudMatrix 384. Ascend 950 (2026) adds FP8/FP4.", "memEst": true, "bwEst": true, "tdpEst": true}, {"id": "mi355", "name": "MI355X", "vendor": "AMD", "color": "#1f1f1f", "fp8": 5033, "fp8n": true, "fp16": 2516, "fp4": 10066, "mem": 288, "mem_type": "HBM3e", "bw": 8.0, "tdp": 1400, "price": 5.45, "price_chip": null, "priceNote": null, "interconnect": "Infinity Fabric", "node": "TSMC 3nm", "role": "Train + Inference", "access": "Buyable", "launch": "Jun 2025", "status": "Shipping", "source": "AMD MI355X datasheet (Performance Labs, May 2025)", "last_updated": "2026-06-21", "notes": "CDNA4. AMD datasheet dense peaks: FP8 5,033, FP16/BF16 2,516, FP4/FP6 10,066 (2x each with sparsity); FP64 78.6 TFLOPS, FP32 157.3 TFLOPS. 288 GB HBM3e, 8 TB/s. ROCm. 1.4kW liquid. 185B transistors. OEM-sold (no fixed list price). Tightened 2026-06-21 to exact datasheet values."}, {"id": "groq", "name": "Groq LPU", "vendor": "Groq", "color": "#0d9488", "fp8": null, "fp8n": false, "fp16": 188, "fp4": null, "mem": 0.23, "mem_type": "SRAM (on-chip)", "bw": 80, "tdp": 375, "price": null, "price_chip": null, "priceNote": "per-token (GroqCloud)", "interconnect": "RealScale", "node": "GF 14nm", "role": "Inference", "access": "Rent · GroqCloud", "launch": "2024", "status": "Shipping", "source": "Groq", "last_updated": "2026-06-20", "notes": "Deterministic inference. 230MB on-chip SRAM, no HBM -> needs many chips (often 100s) per model. ~80 TB/s is on-chip SRAM, not HBM. ~750 TOPS INT8.", "tdpEst": true, "memSram": true, "bwSram": true}, {"id": "rubin", "name": "Rubin (VR200)", "vendor": "NVIDIA", "color": "#3f6b00", "fp8": null, "fp8n": false, "fp16": null, "fp4": 50000, "mem": 288, "mem_type": "HBM4", "bw": 22.0, "tdp": null, "price": null, "price_chip": null, "priceNote": "announced", "interconnect": "NVLink 6 (3.6 TB/s)", "node": "TSMC N3", "role": "Train + Inference", "access": "Announced", "launch": "H2 2026 (exp)", "status": "Announced", "source": "NVIDIA CES/GTC 2026", "last_updated": "2026-06-20", "notes": "CES/GTC 2026. 336B transistors, dual-die. NVFP4 50 PF inference / 35 PF training. ~1.8-2.3 kW (liquid-only). First rack live at Azure. Per-chip FP8 not published.", "placeholder": true}, {"id": "trn4", "name": "Trainium4", "vendor": "AWS", "color": "#cc7a00", "fp8": null, "fp8n": false, "fp16": null, "fp4": null, "mem": null, "mem_type": null, "bw": null, "tdp": null, "price": null, "price_chip": null, "priceNote": "announced", "interconnect": "NeuronLink + NVLink Fusion", "node": "TBD", "role": "Train + Inference", "access": "Announced", "launch": "Late 2026 / 2027 (exp)", "status": "Announced", "source": "AWS re:Invent 2025", "last_updated": "2026-06-20", "notes": "AWS claims vs Trn3: ~6x FP4, ~3x FP8, ~4x memory bandwidth. Integrates NVLink 6 + NVIDIA MGX (NVLink Fusion). Per-chip specs not published.", "placeholder": true}, {"id": "mi400", "name": "MI400 (MI455X)", "vendor": "AMD", "color": "#0a0a0a", "fp8": 20000, "fp8n": true, "fp16": null, "fp4": 40000, "mem": 432, "mem_type": "HBM4", "bw": 19.6, "tdp": null, "price": null, "price_chip": null, "priceNote": "announced", "interconnect": "UALink / Infinity Fabric", "node": "TSMC 2nm", "role": "Train + Inference", "access": "Announced", "launch": "Q3 2026 (exp)", "status": "Announced", "source": "AMD roadmap / GTC 2026", "last_updated": "2026-06-20", "notes": "CDNA5, TSMC 2nm. 432 GB HBM4, 19.6 TB/s, 40 PFLOPS FP4 / 20 PFLOPS FP8. UALink scale-up. Leads Rubin on capacity, trails on bandwidth (19.6 vs 22 TB/s).", "placeholder": true}, {"id": "tpu8t", "name": "TPU 8t (Sunfish)", "vendor": "Google", "color": "#2a5bb0", "fp8": null, "fp8n": false, "fp16": null, "fp4": null, "mem": null, "mem_type": "HBM3e", "bw": null, "tdp": null, "price": null, "price_chip": null, "priceNote": "preview", "interconnect": "3D torus (9,600/pod)", "node": "TSMC 2nm", "role": "Training", "access": "Preview", "launch": "Late 2027 (exp)", "status": "Preview", "source": "Google Cloud Next 2026", "last_updated": "2026-06-20", "notes": "Broadcom-designed training chip. 2 compute dies + I/O, 8x 12-Hi HBM3e (~288 GB). Superpod 9,600 chips -> 121 FP4 ExaFLOPS, 2 PB HBM. ~2.7x training price/perf, ~2x perf/W vs Ironwood. Per-chip specs not published.", "placeholder": true}, {"id": "tpu8i", "name": "TPU 8i (Zebrafish)", "vendor": "Google", "color": "#5a8fd6", "fp8": null, "fp8n": false, "fp16": null, "fp4": null, "mem": 216, "mem_type": "HBM3e", "bw": 6.5, "tdp": null, "price": null, "price_chip": null, "priceNote": "preview", "interconnect": "Boardfly", "node": "TSMC 2nm", "role": "Inference", "access": "Preview", "launch": "Late 2027 (exp)", "status": "Preview", "source": "Google Cloud Next 2026", "last_updated": "2026-06-20", "notes": "MediaTek-designed inference chip. Single compute die, 6x 12-Hi HBM3e = 216 GB @ 6.5 TB/s, 128 MB SRAM. ~80% better inference price/perf, ~1.8x perf/W vs Ironwood. Built around on-silicon KV cache.", "placeholder": true}];
+const NV='#76b900', GOOG='#4285f4', AWS='#ff9900', HUA='#a6093d', AMD='#ed1c24', GROQ='#0d9488';
+const EMBEDDED=[
+ {id:'h100',name:'H100 SXM',vendor:'NVIDIA',color:NV,fp8:1979,fp8n:true,fp16:990,fp4:null,mem:80,mem_type:'HBM3',bw:3.35,tdp:700,price:2.50,price_chip:30000,priceNote:null,interconnect:'NVLink 900 GB/s',node:'TSMC 4N',role:'Train + Inference',access:'Buyable',launch:'2022',status:'Shipping',source:'NVIDIA H100 datasheet',last_updated:'2026-06-20',notes:'Sparse FP8 ~3,958 TFLOPS (2x dense). The 2022 baseline.'},
+ {id:'h200',name:'H200',vendor:'NVIDIA',color:NV,fp8:1979,fp8n:true,fp16:990,fp4:null,mem:141,mem_type:'HBM3e',bw:4.8,tdp:700,price:3.50,price_chip:35000,priceNote:null,interconnect:'NVLink 900 GB/s',node:'TSMC 4N',role:'Train + Inference',access:'Buyable',launch:'2024',status:'Shipping',source:'NVIDIA H200 datasheet',last_updated:'2026-06-20',notes:'Same compute as H100, more/faster memory. China sales conditionally allowed Jan 2026.'},
+ {id:'b200',name:'B200',vendor:'NVIDIA',color:NV,fp8:4500,fp8n:true,fp16:2250,fp4:9000,mem:192,mem_type:'HBM3e',bw:8.0,tdp:1000,price:5.00,price_chip:37500,priceNote:null,interconnect:'NVLink 1.8 TB/s',node:'TSMC 4NP',role:'Train + Inference',access:'Buyable',launch:'2025',status:'Shipping',source:'NVIDIA Blackwell',last_updated:'2026-06-20',notes:'FP4 ~9 PFLOPS dense. Epoch BoM est ~$6.5k vs ~$35k street.'},
+ {id:'b300',name:'B300 Ultra',vendor:'NVIDIA',color:NV,fp8:7000,fp8n:true,fp16:3500,fp4:null,mem:288,mem_type:'HBM3e',bw:8.0,tdp:1400,price:6.80,price_chip:40000,priceNote:null,interconnect:'NVLink 1.8 TB/s',node:'TSMC 4NP',role:'Train + Inference',access:'Buyable',launch:'Jan 2026',status:'Shipping',source:'NVIDIA / Spheron',last_updated:'2026-06-20',notes:'Shipped Jan 2026. Sold mainly in GB300 NVL72 racks. FP4 ~1.5x B200 (not itemized). $/hr dedicated; spot ~$2.45.'},
+ {id:'iron',name:'Ironwood TPU v7',vendor:'Google',color:GOOG,fp8:4614,fp8n:true,fp16:2300,fp4:null,mem:192,mem_type:'HBM3e',bw:7.37,tdp:600,tdpEst:true,price:null,price_chip:null,priceNote:'GCP rental (not itemized per chip)',interconnect:'ICI 1.2 TB/s',node:'TSMC 3nm',role:'Train + Inference',access:'Rent · GCP',launch:'Nov 2025',status:'Shipping',source:'Google Cloud Ironwood',last_updated:'2026-06-20',notes:'Pod = 9,216 chips -> 42.5 FP8 ExaFLOPS. TDP not published; ~600W inferred from Google "2.8x vs H100" claim.'},
+ {id:'trn3',name:'Trainium3',vendor:'AWS',color:AWS,fp8:2520,fp8n:true,fp16:1260,fp4:null,mem:144,mem_type:'HBM3e',bw:4.9,tdp:null,tdpEst:true,price:1.80,price_chip:null,priceNote:null,interconnect:'NeuronLink',node:'TSMC N3P',role:'Training',access:'Rent · AWS',launch:'Dec 2025',status:'Shipping',source:'AWS Trainium',last_updated:'2026-06-20',notes:'UltraServer = 144 chips -> 362 FP8 PFLOPS. +40% efficiency vs Trn2. TDP not published. MXFP8/MXFP4 + sparsity.'},
+ {id:'910c',name:'Ascend 910C',vendor:'Huawei',color:HUA,fp8:null,fp8n:false,fp16:780,fp4:null,mem:128,mem_type:'HBM2e',memEst:true,bw:3.2,bwEst:true,tdp:700,tdpEst:true,price:null,price_chip:null,priceNote:'China-only (no Western cloud rate)',interconnect:'HCCS / UnifiedBus (950+)',node:'SMIC 7nm',role:'Train + Inference',access:'China-only',launch:'2025',status:'Shipping',source:'Industry est / Toms Hardware',last_updated:'2026-06-20',notes:'Dual-die (2x 910B). No production FP8 -> FP16/BF16 only. Specs unofficial; capacity reports 96-128GB. CloudMatrix 384. Ascend 950 (2026) adds FP8/FP4.'},
+ {id:'mi355',name:'MI355X',vendor:'AMD',color:AMD,fp8:5000,fp8n:true,fp16:2500,fp4:10100,mem:288,mem_type:'HBM3e',bw:8.0,tdp:1400,price:5.45,price_chip:null,priceNote:null,interconnect:'Infinity Fabric',node:'TSMC 3nm',role:'Train + Inference',access:'Buyable',launch:'Jun 2025',status:'Shipping',source:'AMD MI355X datasheet',last_updated:'2026-06-20',notes:'CDNA4. FP4/FP6 10.1 PFLOPS, FP8 5 PFLOPS (10 sparse). ROCm. 1.4kW liquid. 185B transistors. OEM-sold (no fixed list price).'},
+ {id:'groq',name:'Groq LPU',vendor:'Groq',color:GROQ,fp8:null,fp8n:false,fp16:188,fp4:null,mem:0.23,mem_type:'SRAM (on-chip)',bw:80,bwSram:true,memSram:true,tdp:375,tdpEst:true,price:null,price_chip:null,priceNote:'per-token (GroqCloud)',interconnect:'RealScale',node:'GF 14nm',role:'Inference',access:'Rent · GroqCloud',launch:'2024',status:'Shipping',source:'Groq',last_updated:'2026-06-20',notes:'Deterministic inference. 230MB on-chip SRAM, no HBM -> needs many chips (often 100s) per model. ~80 TB/s is on-chip SRAM, not HBM. ~750 TOPS INT8.'},
+ {id:'rubin',name:'Rubin (VR200)',vendor:'NVIDIA',color:NV,fp8:null,fp8n:false,fp16:null,fp4:50000,mem:288,mem_type:'HBM4',bw:22.0,tdp:null,price:null,price_chip:null,priceNote:'announced',interconnect:'NVLink 6 (3.6 TB/s)',node:'TSMC N3',role:'Train + Inference',access:'Announced',launch:'H2 2026 (exp)',status:'Announced',placeholder:true,source:'NVIDIA CES/GTC 2026',last_updated:'2026-06-20',notes:'CES/GTC 2026. 336B transistors, dual-die. NVFP4 50 PF inference / 35 PF training. ~1.8-2.3 kW (liquid-only). First rack live at Azure. Per-chip FP8 not published.'},
+ {id:'trn4',name:'Trainium4',vendor:'AWS',color:AWS,fp8:null,fp8n:false,fp16:null,fp4:null,mem:null,mem_type:null,bw:null,tdp:null,price:null,price_chip:null,priceNote:'announced',interconnect:'NeuronLink + NVLink Fusion',node:'TBD',role:'Train + Inference',access:'Announced',launch:'Late 2026 / 2027 (exp)',status:'Announced',placeholder:true,source:'AWS re:Invent 2025',last_updated:'2026-06-20',notes:'AWS claims vs Trn3: ~6x FP4, ~3x FP8, ~4x memory bandwidth. Integrates NVLink 6 + NVIDIA MGX (NVLink Fusion). Per-chip specs not published.'},
+ {id:'mi400',name:'MI400 (MI455X)',vendor:'AMD',color:AMD,fp8:20000,fp8n:true,fp16:null,fp4:40000,mem:432,mem_type:'HBM4',bw:19.6,tdp:null,price:null,price_chip:null,priceNote:'announced',interconnect:'UALink / Infinity Fabric',node:'TSMC 2nm',role:'Train + Inference',access:'Announced',launch:'Q3 2026 (exp)',status:'Announced',placeholder:true,source:'AMD roadmap / GTC 2026',last_updated:'2026-06-20',notes:'CDNA5, TSMC 2nm. 432 GB HBM4, 19.6 TB/s, 40 PFLOPS FP4 / 20 PFLOPS FP8. UALink scale-up. Leads Rubin on capacity, trails on bandwidth (19.6 vs 22 TB/s).'},
+ {id:'tpu8t',name:'TPU 8t (Sunfish)',vendor:'Google',color:GOOG,fp8:null,fp8n:false,fp16:null,fp4:null,mem:null,mem_type:'HBM3e',bw:null,tdp:null,price:null,price_chip:null,priceNote:'preview',interconnect:'3D torus (9,600/pod)',node:'TSMC 2nm',role:'Training',access:'Preview',launch:'Late 2027 (exp)',status:'Preview',placeholder:true,source:'Google Cloud Next 2026',last_updated:'2026-06-20',notes:'Broadcom-designed training chip. 2 compute dies + I/O, 8x 12-Hi HBM3e (~288 GB). Superpod 9,600 chips -> 121 FP4 ExaFLOPS, 2 PB HBM. ~2.7x training price/perf, ~2x perf/W vs Ironwood. Per-chip specs not published.'},
+ {id:'tpu8i',name:'TPU 8i (Zebrafish)',vendor:'Google',color:GOOG,fp8:null,fp8n:false,fp16:null,fp4:null,mem:216,mem_type:'HBM3e',bw:6.5,tdp:null,price:null,price_chip:null,priceNote:'preview',interconnect:'Boardfly',node:'TSMC 2nm',role:'Inference',access:'Preview',launch:'Late 2027 (exp)',status:'Preview',placeholder:true,source:'Google Cloud Next 2026',last_updated:'2026-06-20',notes:'MediaTek-designed inference chip. Single compute die, 6x 12-Hi HBM3e = 216 GB @ 6.5 TB/s, 128 MB SRAM. ~80% better inference price/perf, ~1.8x perf/W vs Ironwood. Built around on-silicon KV cache.'}
+];
+
 let CHIPS=[];
 const fmt=n=>n>=1000?n.toLocaleString('en-US'):(n%1===0?String(n):n.toFixed(n<10?2:1));
 const live=()=>CHIPS.filter(c=>!c.placeholder);
 function computePerfW(a){a.forEach(c=>{c.perfW=(c.fp8&&c.tdp)?+(c.fp8/c.tdp).toFixed(2):null;});}
+
+function renderLegend(){
+  const order=[]; const map={};
+  const yr=s=>(s||'').replace(/\s*\(exp\)/,'');
+  CHIPS.forEach(c=>{ if(!map[c.vendor]){ map[c.vendor]={color:c.color,ship:[],road:[]}; order.push(c.vendor); }
+    (c.placeholder?map[c.vendor].road:map[c.vendor].ship).push(c); });
+  const chip=c=>`${c.name}<span class="yr"> ${yr(c.launch)}</span>`;
+  document.getElementById('vlegs').innerHTML=order.map(v=>{
+    const m=map[v];
+    const ship=m.ship.map(chip).join(', ');
+    const road=m.road.length?` <span class="ph">+ ${m.road.map(chip).join(', ')} <span class="up">upcoming</span></span>`:'';
+    return `<div class="vleg"><span class="sw" style="background:${m.color}"></span><div><div class="vname">${v}</div><div class="vchips">${ship}${road}</div></div></div>`;
+  }).join('');
+}
 
 const CHARTS=[
  {key:'fp8',title:'FP8 compute',unit:'TFLOPS',sqv:'--m-compute',better:'higher',
@@ -241,7 +259,7 @@ const CHARTS=[
  {key:'perfW',title:'Compute efficiency',unit:'TFLOPS/W',sqv:'--m-eff',better:'higher',
   note:'FP8 ÷ TDP — "performance per watt". Needs both a published FP8 rate and a power figure, so only six chips qualify; Ironwood rests on an estimated TDP.'},
  {key:'price',title:'Cloud cost',unit:'$/GPU-hr',sqv:'--m-price',better:'lower',
-  note:'On-demand midpoints, ~June 2026; spot and reserved differ sharply. TPU/Trainium pricing is not itemized per chip, Ascend has no Western rate, Groq bills per token.'},
+  note:'On-demand midpoints, ~June 2026; spot and reserved differ sharply. TPU/Trainium pricing is not itemized per chip, Ascend has no Western rate, Groq bills per token.'}
 ];
 function barRow(c,ch){
   if((ch.exclude||[]).includes(c.id)) return null;
@@ -292,12 +310,12 @@ function renderScatter(){
 }
 
 const COLS=[{k:'name',l:'Chip',t:'s'},{k:'fp8',l:'FP8 TFLOPS',t:'n'},{k:'mem',l:'Mem GB',t:'n'},{k:'bw',l:'BW TB/s',t:'n'},
- {k:'tdp',l:'TDP W',t:'n'},{k:'perfW',l:'Perf/W',t:'n'},{k:'price',l:'$/GPU-hr',t:'n'},{k:'node',l:'Process',t:'s'},{k:'role',l:'Role',t:'s'},{k:'access',l:'Access',t:'s'}];
+ {k:'tdp',l:'TDP W',t:'n'},{k:'perfW',l:'Perf/W',t:'n'},{k:'price',l:'$/GPU-hr',t:'n'},{k:'node',l:'Process',t:'s'},{k:'role',l:'Role',t:'s'},{k:'access',l:'Access',t:'s'},{k:'launch',l:'Released',t:'s'}];
 let sort={k:'fp8',dir:-1}, filter='all';
 function passes(c){ if(filter==='buy') return c.access==='Buyable'; if(filter==='train') return /Train/.test(c.role); if(filter==='inf') return /Inference/.test(c.role); if(filter==='ship') return !c.placeholder; return true; }
 function cell(c,col){
   const k=col.k;
-  if(k==='name'){ const tag=c.placeholder?`<span class="soon">${c.status||'Roadmap'}</span>`:''; const sub=c.placeholder?` · ${c.vendor} · ${c.launch}`:` · ${c.vendor}`;
+  if(k==='name'){ const tag=c.placeholder?`<span class="upcoming">Upcoming</span>`:''; const sub=` · ${c.vendor}`;
     return `<td class="chip"><span class="dot" style="background:${c.color}"></span>${c.name}${tag}<span class="vd">${sub}</span></td>`; }
   if(col.t==='s') return `<td>${c[k]}</td>`;
   let v=c[k];
@@ -325,7 +343,7 @@ function setStatus(kind,name){
   document.getElementById('srcline').innerHTML=`Data source: <b>${label}</b> · ${n} chips (${ship} shipping, ${n-ship} on roadmap)${asof?` · as of ${asof}`:''} · <button class="loadbtn" id="loadbtn">Load edited JSON…</button>`;
   document.getElementById('loadbtn').onclick=()=>document.getElementById('jsonfile').click();
 }
-function renderAll(){ computePerfW(CHIPS); renderCharts(); renderScatter(); renderTable(); }
+function renderAll(){ computePerfW(CHIPS); renderLegend(); renderCharts(); renderScatter(); renderTable(); }
 async function load(){
   try{ const r=await fetch(DATA_URL,{cache:'no-store'}); if(!r.ok) throw 0; const j=await r.json(); if(!Array.isArray(j)||!j.length) throw 0; CHIPS=j; renderAll(); setStatus('live'); }
   catch(e){ CHIPS=EMBEDDED; renderAll(); setStatus('embedded'); }
@@ -334,7 +352,6 @@ document.getElementById('jsonfile').addEventListener('change',ev=>{ const f=ev.t
   fr.onload=()=>{ try{ const j=JSON.parse(fr.result); if(Array.isArray(j)&&j.length){ CHIPS=j; renderAll(); setStatus('file',f.name); } else alert('JSON must be a non-empty array of chips.'); }catch(err){ alert("Couldn't parse that JSON: "+err.message); } };
   fr.readAsText(f); });
 setupPills(); load();
-
 </script>
 </body>
 </html>
