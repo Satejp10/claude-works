@@ -49,3 +49,42 @@ jobs:
             git commit -m "chore: regenerate work thumbnails [skip ci]"
             git push
           fi
+
+      # Mirror the freshly-rebuilt gallery into the landing profile's
+      # "Selected work" section. Cross-repo write needs a PAT (the default
+      # GITHUB_TOKEN can't push to another repo), so the whole thing no-ops
+      # until LANDING_SYNC_TOKEN is configured — see .github/scripts/sync-landing.mjs.
+      - name: Check for landing sync token
+        id: landing
+        env:
+          LANDING_SYNC_TOKEN: ${{ secrets.LANDING_SYNC_TOKEN }}
+        run: |
+          if [ -n "$LANDING_SYNC_TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "LANDING_SYNC_TOKEN not set — skipping profile sync."
+          fi
+
+      - name: Checkout landing profile repo
+        if: steps.landing.outputs.enabled == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: Satejp10/Satejp10
+          token: ${{ secrets.LANDING_SYNC_TOKEN }}
+          path: _landing
+
+      - name: Mirror gallery into landing profile
+        if: steps.landing.outputs.enabled == 'true'
+        run: |
+          node .github/scripts/sync-landing.mjs _landing/README.md
+          cd _landing
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          if git diff --cached --quiet; then
+            echo "Profile Selected work already up to date."
+          else
+            git commit -m "chore: mirror Selected work from claude-works gallery"
+            git push
+          fi
