@@ -13,19 +13,22 @@ served live via **GitHub Pages** so you can view them rendered, not just as sour
 <!-- GALLERY:START -->
 <table>
   <tr>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/Sun-light-shadow-plot/Solar%20light%20study.html"><img src="assets/thumbnails/sun-light-shadow-plot.png" alt="Plot Light Study" width="420"></a><br><sub><b>Plot Light Study</b></sub></td>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/how-india-got-online-pixel-quest.html"><img src="assets/thumbnails/how-india-got-online-pixel-quest.gif" alt="How India Got Online — Pixel Quest" width="420"></a><br><sub><b>How India Got Online — Pixel Quest</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/india-online-data-report.html"><img src="assets/thumbnails/india-online-data-report.png" alt="India Online — How a Billion Got Connected" width="420"></a><br><sub><b>India Online — How a Billion Got Connected</b></sub></td>
-  </tr>
-  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/ai-accelerators-2026.html"><img src="assets/thumbnails/ai-accelerators-2026.png" alt="AI Engines, What Runs Your AI?" width="420"></a><br><sub><b>AI Engines, What Runs Your AI?</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/EDGE/"><img src="assets/thumbnails/edge.gif" alt="EDGE — Browser Recreation" width="420"></a><br><sub><b>EDGE — Browser Recreation</b></sub></td>
-  </tr>
-  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/agentic-capabilities-june-2026.html"><img src="assets/thumbnails/agentic-capabilities-june-2026.png" alt="Agentic Capabilities" width="420"></a><br><sub><b>Agentic Capabilities</b></sub></td>
-    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/ai-lab-headcount.html"><img src="assets/thumbnails/ai-lab-headcount.png" alt="AI Labs, by Headcount" width="420"></a><br><sub><b>AI Labs, by Headcount</b></sub></td>
   </tr>
   <tr>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/ai-lab-headcount.html"><img src="assets/thumbnails/ai-lab-headcount.png" alt="AI Labs, by Headcount" width="420"></a><br><sub><b>AI Labs, by Headcount</b></sub></td>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/terminal-portfolio.html"><img src="assets/thumbnails/terminal-portfolio.png" alt="Terminal Portfolio" width="420"></a><br><sub><b>Terminal Portfolio</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/claude-design-works/glass-morphism-design-trials.html"><img src="assets/thumbnails/glass-morphism-design-trials.png" alt="Liquid Glass — Design Trials" width="420"></a><br><sub><b>Liquid Glass — Design Trials</b></sub></td>
   </tr>
 </table>
@@ -35,8 +38,22 @@ _Thumbnails above are generated automatically from the works below — see [Addi
 
 ## Works
 
+<!-- LOG — external works (read before editing this table):
+     Some rows are hosted in OTHER repos, not under claude-design-works/. They use
+     the [Thumb] pattern (a hand-captured screenshot committed to assets/thumbnails/)
+     and are NOT auto-rendered. Because adding/removing one only touches README.md +
+     assets/, it does NOT match thumbnails.yml's paths filter, so the workflow will
+     not auto-run — rebuild the gallery locally with
+       SKIP_RENDER=1 node .github/scripts/gen-thumbnails.mjs
+     (and, to mirror to the satejp10 profile, trigger the workflow manually so the
+     sync-landing.mjs step runs). External entries currently in the gallery:
+       - EDGE — Browser Recreation  →  https://github.com/Satejp10/EDGE
+       - Plot Light Study           →  https://github.com/Satejp10/Sun-light-shadow-plot
+     Snapshot for Plot Light Study captured 2026-07-12 at 1200x750 from the live site. -->
+
 | Work | Type | Date | Links |
 |------|------|------|-------|
+| **Plot Light Study** — an interactive shadow study for a single plot across a whole year: drag the time slider for any moment, or switch to a full-year view to see where the sun actually lands (hour-totalled), dragging buildings and trees to match your surroundings. Lives in its [own repo](https://github.com/Satejp10/Sun-light-shadow-plot). | Interactive (HTML) | Jul 2026 | [View](https://satejp10.github.io/Sun-light-shadow-plot/Solar%20light%20study.html) · [Source](https://github.com/Satejp10/Sun-light-shadow-plot) · [Thumb](assets/thumbnails/sun-light-shadow-plot.png) |
 | **How India Got Online — Pixel Quest** — an interactive, gamified scrollytelling quest through the story of India's internet adoption. *(Completely overhauled rebuild.)* | Interactive (HTML) | Jun 2026 | [View](https://satejp10.github.io/claude-works/claude-design-works/how-india-got-online-pixel-quest.html) · [Source](claude-design-works/how-india-got-online-pixel-quest.html) · [Thumb](assets/thumbnails/how-india-got-online-pixel-quest.gif) |
 | **India Online — How a Billion Got Connected** — the standalone data report: the charts and numbers behind India's path from a handful of users to a billion connected. | Data report (HTML) | Jun 2026 | [View](https://satejp10.github.io/claude-works/claude-design-works/india-online-data-report.html) · [Source](claude-design-works/india-online-data-report.html) |
 | **AI Engines, What Runs Your AI?** — what's actually powering today's models: FP8 compute-per-watt vs. memory bandwidth across 2026 AI chips, normalized to comparable definitions. | Infographic (HTML) | Jun 2026 | [View](https://satejp10.github.io/claude-works/claude-design-works/ai-accelerators-2026.html) · [Source](claude-design-works/ai-accelerators-2026.html) |
