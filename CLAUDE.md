@@ -69,6 +69,30 @@ the generator and Pages hosting keep working.
 2. Add a row to the Works table in `README.md` following the format above (and a matching bullet in `claude-design-works/README.md`).
 3. Commit and push to `main`. The workflow renders the thumbnail, rebuilds the gallery, and Pages redeploys automatically.
 
+### External works (hosted in another repo)
+
+A work living in its **own repo** (e.g. EDGE, Plot Light Study) is listed via
+the `[Thumb]` pattern instead of a `claude-design-works/` file: give the Works
+row a `[View]` (live demo), `[Source]` (repo), and `[Thumb](assets/thumbnails/…)`
+where the thumbnail is a **hand-captured** screenshot you commit (external works
+are never auto-rendered). Do **not** add them to `claude-design-works/README.md`.
+Because such an addition only touches `README.md` + `assets/`, it does **not**
+match `thumbnails.yml`'s `paths:` filter, so the workflow won't auto-run —
+rebuild the gallery locally with `SKIP_RENDER=1 node .github/scripts/gen-thumbnails.mjs`
+and, to mirror to the profile, trigger the workflow manually.
+
+## Profile mirror
+
+The gallery is mirrored into the `Satejp10/Satejp10` profile README's
+`## Selected work` section by `.github/scripts/sync-landing.mjs`, run as the
+final steps of `thumbnails.yml`. It replaces only the block between the
+`<!-- SELECTED-WORK:START/END -->` markers in the profile README and rewrites
+thumbnail `src` paths to absolute `raw.githubusercontent.com` URLs. It is gated
+on the `LANDING_SYNC_TOKEN` secret (a fine-grained PAT with `Contents: write` on
+`Satejp10/Satejp10`); without it the sync steps skip and CI stays green. **Local
+works auto-sync on push to `main`; external works don't trigger the workflow, so
+run it manually to sync them.** Full write-up: [`docs/sync-log.md`](docs/sync-log.md).
+
 ## Note
 
 Automated review (CodeRabbit) is intentionally disabled via `.coderabbit.yaml`;
