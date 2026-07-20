@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koyna Dam · Monsoon Water & Power Dashboard</title>
+<!-- Open Graph (basic; add og:image thumbnail before hosting) -->
+<meta property="og:title" content="Koyna Dam — Monsoon Water & Power Dashboard">
+<meta property="og:description" content="How Koyna fills through the monsoon and splits its water between hydropower (west) and irrigation/drinking (east). 2026 live data.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff; --ink:#1f1f1f; --lede:#3a3a3a; --muted:#737373; --faint:#a3a3a3;
+    --border:#e8e8e8; --grid:#f1f1f1; --axis:#d4d4d4; --hover:#fafafa;
+    --accent:#7F4BF3; --accent-soft:#f2ecff;
+    --water:#2E7DD1;         /* storage / reservoir */
+    --power:#D9822B;         /* westward hydropower */
+    --irrig:#2FA36B;         /* irrigation */
+    --drink:#4B78C9;         /* drinking / domestic */
+    --thermal:#4a5058;       /* coal + gas */
+    --solar:#EDB93C;         /* solar */
+    --wind:#2FA39A;          /* wind */
+    --bio:#7E9E42;           /* biopower */
+    --nuclear:#B95E9F;       /* nuclear */
+    --hydro:#2E7DD1;         /* hydro = same blue as water */
+    --hydro-mid:#7FB2E0;     /* other large hydro */
+    --hydro-pale:#BCD8F0;    /* small hydro */
+    --other:#d0d0d0;         /* unclassified */
+    --display:'Space Grotesk', 'Inter', system-ui, sans-serif;
+    --sans:'Inter', system-ui, -apple-system, sans-serif;
+    --mono:ui-monospace, 'SF Mono', Menlo, monospace;
+    --r:16px; --r-sm:5px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;line-height:1.5;}
+  .wrap{max-width:980px;margin:0 auto;padding:34px 22px 90px;}
+
+  /* Topbar */
+  .topbar{display:flex;justify-content:space-between;align-items:center;
+    padding-bottom:26px;border-bottom:1px solid var(--border);margin-bottom:34px;}
+  .wordmark{font-family:var(--display);font-weight:600;font-size:.95rem;letter-spacing:-.01em;}
+  .wordmark .dot{color:var(--accent);}
+  .stamp{font-size:.8rem;color:var(--faint);font-variant-numeric:tabular-nums;}
+
+  /* Hero */
+  h1{font-family:var(--display);font-weight:600;letter-spacing:-.015em;
+    font-size:clamp(2.1rem,6vw,3.3rem);line-height:1.03;max-width:17ch;margin-bottom:16px;}
+  .lede{color:var(--lede);font-size:1.05rem;max-width:64ch;margin-bottom:34px;}
+
+  /* Hero */
+  .hero{margin-bottom:22px;}
+  .hero h1{margin-bottom:16px;}
+  .hero .lede{margin-bottom:0;}
+  .hero-viz{border:1px solid var(--border);border-radius:var(--r);padding:18px 20px 16px;margin-bottom:38px;}
+  .hero-viz .hv-top{font-family:var(--display);font-weight:600;font-size:.82rem;letter-spacing:-.01em;
+    margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .hero-viz .hv-top .sq{width:10px;height:10px;border-radius:3px;background:var(--hydro);flex:none;}
+  .hero-viz svg{width:100%;height:auto;display:block;overflow:visible;}
+  .hero-viz .hv-note{font-size:.75rem;color:var(--muted);margin-top:11px;line-height:1.4;}
+  .hero-viz .hv-note b{color:var(--ink);font-weight:600;}
+  .hero-viz .hv-note a{color:var(--accent);text-decoration:none;font-weight:600;}
+  .hero-viz .hv-note a:hover{text-decoration:underline;}
+  .hero-viz .mini-seg{font-family:var(--sans);font-size:10.5px;font-weight:600;fill:#fff;}
+  .hero-viz .mini-seg.dark{fill:var(--ink);}
+  .hero-viz .mini-cap{font-family:var(--sans);font-size:10px;font-weight:600;fill:var(--ink);}
+
+  /* KPI cards */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:38px;}
+  .kpi{border:1px solid var(--border);border-radius:var(--r);padding:16px 16px 18px;}
+  .kpi .val{font-family:var(--display);font-weight:600;font-size:1.55rem;
+    font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+  .kpi .lbl{font-size:.76rem;color:var(--muted);margin-top:5px;line-height:1.3;}
+  .kpi .sq{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:middle;}
+
+  /* Cards */
+  .card{border:1px solid var(--border);border-radius:var(--r);padding:24px 22px 26px;margin-bottom:22px;}
+  .eyebrow{display:flex;align-items:center;gap:9px;margin-bottom:3px;}
+  .eyebrow .sq{width:12px;height:12px;border-radius:4px;}
+  .eyebrow h2{font-family:var(--display);font-weight:600;font-size:1.12rem;letter-spacing:-.01em;}
+  .subline{color:var(--muted);font-size:.85rem;margin-bottom:20px;}
+  .subline b{color:var(--ink);font-weight:600;}
+
+  /* Fill chart */
+  .chart svg{width:100%;height:auto;display:block;overflow:visible;}
+  .axislbl{font-family:var(--sans);font-size:11px;fill:var(--muted);}
+  .valtag{font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--water);}
+  .annot{font-family:var(--sans);font-size:11px;fill:var(--muted);}
+  .annot b{fill:var(--ink);}
+  .linelbl{font-family:var(--sans);font-size:10.5px;font-weight:600;}
+
+  /* Allocation bars */
+  .bars{display:flex;flex-direction:column;gap:15px;margin-top:4px;}
+  .bar-row{display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:14px;}
+  .bar-lbl{font-size:.86rem;}
+  .bar-lbl .sub{display:block;color:var(--faint);font-size:.72rem;margin-top:1px;}
+  .track{height:14px;background:var(--grid);border-radius:var(--r-sm);overflow:hidden;}
+  .fill{height:100%;border-radius:var(--r-sm);width:0;transition:width 1s cubic-bezier(.22,.61,.36,1);}
+  .bar-val{font-family:var(--sans);font-variant-numeric:tabular-nums;font-weight:600;font-size:.9rem;white-space:nowrap;}
+  .bar-val .u{color:var(--faint);font-weight:400;font-size:.78rem;margin-left:2px;}
+
+  /* Schematic */
+  .flow{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px;}
+  .flow-side{border:1px solid var(--border);border-radius:12px;padding:16px 16px 18px;}
+  .flow-side .tag{font-family:var(--display);font-weight:600;font-size:.82rem;
+    text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+  .flow-side .tag .sq{width:9px;height:9px;border-radius:2px;}
+  .flow-side p{font-size:.85rem;color:var(--lede);line-height:1.45;}
+  .flow-side .dest{font-size:.76rem;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);}
+  .gen-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px;
+    padding-top:18px;border-top:1px solid var(--grid);}
+  .gen-strip .g .v{font-family:var(--display);font-weight:600;font-size:1.15rem;font-variant-numeric:tabular-nums;}
+  .gen-strip .g .k{font-size:.74rem;color:var(--muted);margin-top:2px;}
+
+  /* Method strip */
+  .method{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);
+    padding:16px 0;margin:30px 0 22px;}
+  .method .kicker{font-family:var(--display);font-size:.72rem;font-weight:600;
+    letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;}
+  .method p{font-size:.84rem;color:var(--lede);max-width:78ch;}
+  .method p+p{margin-top:7px;}
+
+  footer{color:var(--faint);font-size:.78rem;border-top:1px solid var(--border);
+    padding-top:16px;line-height:1.6;}
+  footer b{color:var(--muted);font-weight:600;}
+
+  /* Grid-mix stacked bar + legend */
+  .gridmix svg, .dumbbell svg{width:100%;height:auto;display:block;overflow:visible;}
+  .seglbl{font-family:var(--sans);font-size:11.5px;font-weight:600;fill:#fff;}
+  .seglbl.dark{fill:var(--ink);}
+  .calloutlbl{font-family:var(--sans);font-size:11px;font-weight:600;fill:var(--ink);}
+  .minicap{font-family:var(--sans);font-size:10.5px;fill:var(--muted);}
+  .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:11px 18px;margin-top:22px;}
+  .leg{display:flex;gap:8px;font-size:.82rem;align-items:flex-start;}
+  .leg .sw{width:11px;height:11px;border-radius:3px;flex:none;margin-top:3px;}
+  .leg .body{display:flex;flex-direction:column;line-height:1.25;}
+  .leg .nm{color:var(--ink);}
+  .leg .sub{color:var(--muted);font-size:.73rem;font-variant-numeric:tabular-nums;}
+  .zoomcap{font-size:.78rem;color:var(--muted);margin-top:14px;}
+  .zoomcap b{color:var(--ink);font-weight:600;}
+  /* Dumbbell */
+  .dbl-src{font-family:var(--sans);font-size:12px;fill:var(--ink);}
+  .dbl-src.hl{font-weight:600;}
+  .dbl-val{font-family:var(--sans);font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;fill:var(--muted);}
+  .dbl-ax{font-family:var(--sans);font-size:10.5px;fill:var(--faint);}
+  .readnote{font-size:.8rem;color:var(--muted);margin-top:18px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
+  .readnote .k{display:inline-flex;align-items:center;gap:7px;}
+  .readnote .dotf{width:10px;height:10px;border-radius:50%;background:var(--ink);display:inline-block;}
+  .readnote .doth{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--ink);display:inline-block;box-sizing:border-box;}
+
+  @media (max-width:760px){
+    .hero{margin-bottom:20px;}
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .flow{grid-template-columns:1fr;}
+    .gen-strip{grid-template-columns:repeat(2,1fr);}
+    .bar-row{grid-template-columns:105px 1fr auto;gap:9px;}
+    .legend{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (prefers-reduced-motion:reduce){.fill{transition:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="wordmark">KOYNA DAM<span class="dot"> · </span>MONSOON DASHBOARD</div>
+    <div class="stamp">Updated July 2026</div>
+  </div>
+
+  <div class="hero">
+    <div>
+      <h1>Filling the reservoir, powering the state</h1>
+      <p class="lede">Each year Koyna is drained to near-empty by pre-monsoon, then refilled to its 105 TMC brim in a matter of weeks. The same water then splits two ways — west through the turbines to the Arabian Sea, east to the fields and taps of the Krishna basin.</p>
+    </div>
+  </div>
+
+  <div class="hero-viz">
+      <div class="hv-top"><span class="sq"></span>Maharashtra's energy sources</div>
+      <svg viewBox="0 0 440 150" role="img" aria-label="Compact stacked bar of Maharashtra's installed capacity, with Koyna's 3.2% share expanded within hydro">
+        <!-- hydro zoom bar (focus) -->
+        <text class="mini-cap" x="129.1" y="10" text-anchor="middle">1,960 MW</text>
+        <text class="mini-cap" x="408.2" y="10" text-anchor="middle" font-size="9">Small 11%</text>
+        <g>
+          <rect x="8"     y="14" width="242.1" height="26" rx="4" fill="var(--hydro)"/>
+          <rect x="250.1" y="14" width="134.4" height="26" fill="var(--hydro-mid)"/>
+          <rect x="384.5" y="14" width="47.5"  height="26" fill="var(--hydro-pale)"/>
+        </g>
+        <text class="mini-seg"      x="129.1" y="31" text-anchor="middle">Koyna 57%</text>
+        <text class="mini-seg dark" x="317.3" y="31" text-anchor="middle">Other hydro 32%</text>
+        <!-- explode down to overview -->
+        <polygon points="8,40 432,40 390.9,84 377.3,84" fill="var(--hydro)" fill-opacity="0.06"/>
+        <line x1="8"   y1="40" x2="377.3" y2="84" stroke="var(--hydro-mid)" stroke-width="1" stroke-dasharray="3 4" opacity="0.55"/>
+        <line x1="432" y1="40" x2="390.9" y2="84" stroke="var(--hydro-mid)" stroke-width="1" stroke-dasharray="3 4" opacity="0.55"/>
+        <!-- main stacked bar (overview) -->
+        <g>
+          <rect x="8"     y="84" width="193.8" height="26" rx="4" fill="var(--thermal)"/>
+          <rect x="201.8" y="84" width="134.8" height="26" fill="var(--solar)"/>
+          <rect x="336.6" y="84" width="40.7"  height="26" fill="var(--wind)"/>
+          <rect x="377.3" y="84" width="13.6"  height="26" fill="var(--hydro)"/>
+          <rect x="390.9" y="84" width="7.6"   height="26" fill="var(--hydro-mid)"/>
+          <rect x="398.5" y="84" width="2.5"   height="26" fill="var(--hydro-pale)"/>
+          <rect x="401.0" y="84" width="20.8"  height="26" fill="var(--bio)"/>
+          <rect x="421.8" y="84" width="7.6"   height="26" fill="var(--nuclear)"/>
+          <rect x="429.4" y="84" width="2.6"   height="26" rx="0" fill="var(--other)"/>
+        </g>
+        <text class="mini-seg"      x="104.9" y="101" text-anchor="middle">Thermal 46%</text>
+        <text class="mini-seg dark" x="269.2" y="101" text-anchor="middle">Solar 32%</text>
+        <!-- Koyna callout -->
+        <line x1="384.1" y1="110" x2="384.1" y2="118" stroke="var(--faint)" stroke-width="1"/>
+        <text class="mini-cap" x="384.1" y="128" text-anchor="middle" font-size="9.5">Koyna 3.2%</text>
+      </svg>
+      <div class="hv-note"><b>Koyna dam generates 3.2%</b> of Maharashtra's 60,905 MW — but over <b>half of all its hydro</b>. <a href="#gridcard">Full breakdown ↓</a></div>
+    </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="val"><span class="sq" style="background:var(--water)"></span>105</div><div class="lbl">TMC gross capacity (Shivsagar Lake)</div></div>
+    <div class="kpi"><div class="val">8.6</div><div class="lbl">TMC pre-monsoon low · 28 Jun 2026</div></div>
+    <div class="kpi"><div class="val">+41</div><div class="lbl">TMC added in ≈12 days of rain</div></div>
+    <div class="kpi"><div class="val"><span class="sq" style="background:var(--power)"></span>1,960</div><div class="lbl">MW installed hydropower</div></div>
+    <div class="kpi"><div class="val">3,586</div><div class="lbl">GWh avg / yr · peaks in monsoon</div></div>
+  </div>
+
+  <!-- CARD A: FILL CURVE -->
+  <div class="card chart">
+    <div class="eyebrow"><span class="sq" style="background:var(--water)"></span><h2>Reservoir fill — 2026 monsoon</h2></div>
+    <div class="subline">Higher is fuller · gross storage in <b>TMC</b>, against the 105 TMC ceiling. Slow start, then an explosive climb once the Mahabaleshwar catchment opened up.</div>
+
+    <svg viewBox="0 0 900 380" role="img" aria-label="Line chart of Koyna reservoir storage rising from 8.6 to 53 TMC over early July 2026">
+      <!-- gridlines -->
+      <g stroke="var(--grid)" stroke-dasharray="2 4">
+        <line x1="50" y1="340" x2="880" y2="340"/>
+        <line x1="50" y1="269.5" x2="880" y2="269.5"/>
+        <line x1="50" y1="199.1" x2="880" y2="199.1"/>
+        <line x1="50" y1="128.6" x2="880" y2="128.6"/>
+        <line x1="50" y1="58.2" x2="880" y2="58.2"/>
+      </g>
+      <!-- y labels -->
+      <g class="axislbl" text-anchor="end">
+        <text x="42" y="344">0</text>
+        <text x="42" y="273">25</text>
+        <text x="42" y="203">50</text>
+        <text x="42" y="132">75</text>
+        <text x="42" y="62">100</text>
+      </g>
+      <!-- baseline -->
+      <line x1="50" y1="340" x2="880" y2="340" stroke="var(--axis)"/>
+
+      <!-- 105 TMC capacity ceiling -->
+      <line x1="50" y1="44.1" x2="880" y2="44.1" stroke="var(--faint)" stroke-width="1.4" stroke-dasharray="6 4"/>
+      <text class="linelbl" x="54" y="39" fill="var(--muted)">105 TMC — full capacity (typically reached by ≈31 Oct)</text>
+
+      <!-- 67.5 TMC power quota line -->
+      <line x1="50" y1="149.8" x2="880" y2="149.8" stroke="var(--power)" stroke-width="1.3" stroke-dasharray="2 4" opacity="0.9"/>
+      <text class="linelbl" x="54" y="145" fill="var(--power)">≈67.5 TMC — annual westward power quota</text>
+
+      <!-- area under curve -->
+      <path d="M50,315.7 L196.5,313.5 L294.1,310.7 L440.6,261.9 L489.4,252.6 L538.2,221.4 L587.1,199.1 L684.7,190.6 L684.7,340 L50,340 Z"
+            fill="var(--water)" fill-opacity="0.10"/>
+      <!-- projection to capacity (dashed) -->
+      <path d="M684.7,190.6 C760,150 820,95 868,60" fill="none" stroke="var(--water)" stroke-width="1.6" stroke-dasharray="4 5" opacity="0.65"/>
+      <text class="annot" x="748" y="128" text-anchor="middle"><tspan>projected</tspan></text>
+      <text class="annot" x="748" y="142" text-anchor="middle"><tspan>→ full by Oct</tspan></text>
+
+      <!-- main line -->
+      <path d="M50,315.7 L196.5,313.5 L294.1,310.7 L440.6,261.9 L489.4,252.6 L538.2,221.4 L587.1,199.1 L684.7,190.6"
+            fill="none" stroke="var(--water)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+
+      <!-- points -->
+      <g fill="var(--water)">
+        <circle cx="50" cy="315.7" r="4"/>
+        <circle cx="196.5" cy="313.5" r="3.2"/>
+        <circle cx="294.1" cy="310.7" r="3.2"/>
+        <circle cx="440.6" cy="261.9" r="3.2"/>
+        <circle cx="489.4" cy="252.6" r="3.2"/>
+        <circle cx="538.2" cy="221.4" r="3.2"/>
+        <circle cx="587.1" cy="199.1" r="3.2"/>
+        <circle cx="684.7" cy="190.6" r="4.5"/>
+      </g>
+      <!-- value tags -->
+      <text class="valtag" x="50" y="305" text-anchor="start">8.6</text>
+      <text class="valtag" x="440.6" y="252" text-anchor="middle">27.7</text>
+      <text class="valtag" x="694" y="187" text-anchor="start">53.0</text>
+
+      <!-- rain-event annotation -->
+      <line x1="465" y1="238" x2="500" y2="200" stroke="var(--faint)" stroke-width="1"/>
+      <text class="annot" x="360" y="192"><tspan x="360" dy="0">7 Jul: <tspan class="annot" style="font-weight:600" fill="var(--ink)">~400&#160;mm</tspan> rain at Mahabaleshwar</tspan></text>
+      <text class="annot" x="360" y="207"><tspan x="360" dy="0">inflow ≈89,600 cusecs · <tspan style="font-weight:600" fill="var(--ink)">+8.3 TMC/day</tspan></tspan></text>
+
+      <!-- x labels -->
+      <g class="axislbl" text-anchor="middle">
+        <text x="50" y="358">28 Jun</text>
+        <text x="196.5" y="358">1 Jul</text>
+        <text x="294.1" y="358">3 Jul</text>
+        <text x="440.6" y="358">6 Jul</text>
+        <text x="538.2" y="358">8 Jul</text>
+        <text x="684.7" y="358">11 Jul</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- CARD B: ALLOCATION -->
+  <div class="card">
+    <div class="eyebrow"><span class="sq" style="background:var(--power)"></span><h2>Where the 105 TMC goes</h2></div>
+    <div class="subline">Normal-year allocation. The westward power quota is a fixed inter-state share; east-side splits are approximate and get <b>cut first in drought years</b>.</div>
+
+    <div class="bars">
+      <div class="bar-row">
+        <div class="bar-lbl">Hydropower<span class="sub">westward → Arabian Sea</span></div>
+        <div class="track"><div class="fill" style="background:var(--power)" data-w="100"></div></div>
+        <div class="bar-val">67.5<span class="u">TMC</span></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl">Irrigation<span class="sub">eastward → Krishna basin</span></div>
+        <div class="track"><div class="fill" style="background:var(--irrig)" data-w="30.4"></div></div>
+        <div class="bar-val">≈20.5<span class="u">TMC</span></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl">Drinking &amp; other<span class="sub">Satara · Sangli · Solapur</span></div>
+        <div class="track"><div class="fill" style="background:var(--drink)" data-w="25.2"></div></div>
+        <div class="bar-val">≈17.0<span class="u">TMC</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD C: GENERATION vs IRRIGATION -->
+  <div class="card">
+    <div class="eyebrow"><span class="sq" style="background:var(--irrig)"></span><h2>Two directions out of one lake</h2></div>
+    <div class="subline">Koyna's quirk: turbine water leaves the basin <b>permanently</b>. So every unit generated is a unit the east side never sees — hence the fixed quota above.</div>
+
+    <div class="flow">
+      <div class="flow-side">
+        <div class="tag"><span class="sq" style="background:var(--power)"></span>West · Power</div>
+        <p>Water drops down the steep Western Ghats escarpment through the powerhouses. Monsoon = abundant water = <b>peak generation season</b>.</p>
+        <div class="dest">Discharges to the Konkan coast → Arabian Sea. Lost to the eastern basin.</div>
+      </div>
+      <div class="flow-side">
+        <div class="tag"><span class="sq" style="background:var(--irrig)"></span>East · Water &amp; flood</div>
+        <p>Released through 6 radial spillway gates for irrigation, drinking, and monsoon <b>flood control</b> — coordinated with Almatti Dam downstream.</p>
+        <div class="dest">Flows into the Koyna → Krishna river → Sangli, Kolhapur, Karnataka.</div>
+      </div>
+    </div>
+
+    <div class="gen-strip">
+      <div class="g"><div class="v">1,960 MW</div><div class="k">Installed capacity</div></div>
+      <div class="g"><div class="v">18</div><div class="k">Francis turbines · 5 units</div></div>
+      <div class="g"><div class="v">1,000 MW</div><div class="k">Stage 4 (underground)</div></div>
+      <div class="g"><div class="v">Monsoon</div><div class="k">Peak-output season</div></div>
+    </div>
+  </div>
+
+  <!-- CARD D: KOYNA IN THE GRID -->
+  <div class="card gridmix" id="gridcard">
+    <div class="eyebrow"><span class="sq" style="background:var(--hydro)"></span><h2>Koyna in Maharashtra's grid</h2></div>
+    <div class="subline">State installed capacity, <b>60,905 MW</b> (Feb 2026). Koyna is just <b>~3.2%</b> of the whole — but <b>~57%</b> of all hydro. Longer = more capacity.</div>
+
+    <svg viewBox="0 0 900 272" role="img" aria-label="Stacked bar of Maharashtra's installed capacity by source, with Koyna's 3.2% share highlighted within hydro">
+      <defs>
+        <clipPath id="barclip"><rect x="60" y="60" width="800" height="44" rx="6"/></clipPath>
+        <clipPath id="zoomclip"><rect x="60" y="196" width="800" height="44" rx="6"/></clipPath>
+      </defs>
+
+      <!-- Koyna callout -->
+      <line x1="770.2" y1="44" x2="770.2" y2="60" stroke="var(--faint)" stroke-width="1"/>
+      <text class="calloutlbl" x="770.2" y="38" text-anchor="middle">Koyna · 3.2%</text>
+
+      <!-- main stacked bar -->
+      <g clip-path="url(#barclip)">
+        <rect x="60"    y="60" width="365.7" height="44" fill="var(--thermal)"/>
+        <rect x="425.7" y="60" width="254.4" height="44" fill="var(--solar)"/>
+        <rect x="680.1" y="60" width="77.2"  height="44" fill="var(--wind)"/>
+        <rect x="757.3" y="60" width="25.7"  height="44" fill="var(--hydro)"/>
+        <rect x="783.0" y="60" width="14.3"  height="44" fill="var(--hydro-mid)"/>
+        <rect x="797.3" y="60" width="5.0"   height="44" fill="var(--hydro-pale)"/>
+        <rect x="802.3" y="60" width="39.4"  height="44" fill="var(--bio)"/>
+        <rect x="841.7" y="60" width="14.0"  height="44" fill="var(--nuclear)"/>
+        <rect x="855.7" y="60" width="4.3"   height="44" fill="var(--other)"/>
+      </g>
+      <text class="seglbl"      x="242.8" y="86.5" text-anchor="middle">Thermal · 45.7%</text>
+      <text class="seglbl dark" x="552.9" y="86.5" text-anchor="middle">Solar · 31.8%</text>
+      <text class="seglbl"      x="718.7" y="86.5" text-anchor="middle">Wind</text>
+
+      <!-- explode trapezoid to zoom -->
+      <polygon points="757.3,104 802.3,104 860,196 60,196" fill="var(--hydro)" fill-opacity="0.06"/>
+      <line x1="757.3" y1="104" x2="60"  y2="196" stroke="var(--hydro-mid)" stroke-width="1" stroke-dasharray="3 4" opacity="0.6"/>
+      <line x1="802.3" y1="104" x2="860" y2="196" stroke="var(--hydro-mid)" stroke-width="1" stroke-dasharray="3 4" opacity="0.6"/>
+      <text class="minicap" x="460" y="154" text-anchor="middle">the 5.6% hydro slice, unpacked ↓</text>
+
+      <!-- hydro zoom bar (3,431 MW total) -->
+      <g clip-path="url(#zoomclip)">
+        <rect x="60"    y="196" width="457.0" height="44" fill="var(--hydro)"/>
+        <rect x="517.0" y="196" width="253.5" height="44" fill="var(--hydro-mid)"/>
+        <rect x="770.5" y="196" width="89.5"  height="44" fill="var(--hydro-pale)"/>
+      </g>
+      <text class="seglbl"      x="288.5" y="222" text-anchor="middle">Koyna · 57.1%</text>
+      <text class="seglbl dark" x="643.7" y="222" text-anchor="middle">Other large hydro · 31.7%</text>
+      <text class="seglbl dark" x="815.2" y="222" text-anchor="middle">Small · 11.2%</text>
+      <text class="minicap" x="288.5" y="258" text-anchor="middle">1,960 MW</text>
+      <text class="minicap" x="643.7" y="258" text-anchor="middle">1,087 MW</text>
+      <text class="minicap" x="815.2" y="258" text-anchor="middle">384 MW</text>
+    </svg>
+
+    <div class="legend">
+      <div class="leg"><span class="sw" style="background:var(--thermal)"></span><span class="body"><span class="nm">Thermal (coal &amp; gas)</span><span class="sub">45.7% · 27,839 MW</span></span></div>
+      <div class="leg"><span class="sw" style="background:var(--solar)"></span><span class="body"><span class="nm">Solar</span><span class="sub">31.8% · 19,364 MW</span></span></div>
+      <div class="leg"><span class="sw" style="background:var(--wind)"></span><span class="body"><span class="nm">Wind</span><span class="sub">9.6% · 5,873 MW</span></span></div>
+      <div class="leg"><span class="sw" style="background:var(--hydro)"></span><span class="body"><span class="nm">Koyna</span><span class="sub">3.2% · 1,960 MW</span></span></div>
+      <div class="leg"><span class="sw" style="background:var(--hydro-mid)"></span><span class="body"><span class="nm">Other large hydro</span><span class="sub">1.8% · 1,087 MW</span></span></div>
+      <div class="leg"><span class="sw" style="background:var(--hydro-pale)"></span><span class="body"><span class="nm">Small hydro</span><span class="sub">0.6% · 384 MW</span></span></div>
+      <div class="leg"><span class="sw" style="background:var(--bio)"></span><span class="body"><span class="nm">Biopower</span><span class="sub">4.9% · 2,998 MW</span></span></div>
+      <div class="leg"><span class="sw" style="background:var(--nuclear)"></span><span class="body"><span class="nm">Nuclear</span><span class="sub">1.8% · 1,069 MW</span></span></div>
+      <div class="leg"><span class="sw" style="background:var(--other)"></span><span class="body"><span class="nm">Other</span><span class="sub">0.5% · ~330 MW</span></span></div>
+    </div>
+    <div class="zoomcap">Hydro/dams are only about <b>5.6%</b> of the state's capacity, and Koyna alone is over half of that. Maharashtra runs mostly on <b>coal</b> (thermal) with a large paper fleet of <b>solar</b>.</div>
+  </div>
+
+  <!-- CARD E: CAPACITY vs GENERATION -->
+  <div class="card dumbbell">
+    <div class="eyebrow"><span class="sq" style="background:var(--power)"></span><h2>Capacity isn't generation</h2></div>
+    <div class="subline">Share of installed <b>capacity</b> (●) vs share of electricity actually <b>generated</b> (○, est). Low-utilisation sources — solar, hydro — punch <b>below</b> their weight; coal and nuclear punch <b>above</b>.</div>
+
+    <svg viewBox="0 0 900 322" role="img" aria-label="Dumbbell chart comparing each source's share of capacity versus share of generation">
+      <!-- gridlines -->
+      <g stroke="var(--grid)" stroke-dasharray="2 4">
+        <line x1="120" y1="28" x2="120" y2="298"/>
+        <line x1="300" y1="28" x2="300" y2="298"/>
+        <line x1="480" y1="28" x2="480" y2="298"/>
+        <line x1="660" y1="28" x2="660" y2="298"/>
+        <line x1="840" y1="28" x2="840" y2="298"/>
+      </g>
+      <line x1="120" y1="298" x2="840" y2="298" stroke="var(--axis)"/>
+      <g class="dbl-ax" text-anchor="middle">
+        <text x="120" y="314">0%</text>
+        <text x="300" y="314">20%</text>
+        <text x="480" y="314">40%</text>
+        <text x="660" y="314">60%</text>
+        <text x="840" y="314">80%</text>
+      </g>
+
+      <!-- Koyna highlight band -->
+      <rect x="40" y="188" width="852" height="32" rx="6" fill="var(--accent-soft)"/>
+
+      <!-- Thermal (row y=44) -->
+      <line x1="531.3" y1="44" x2="813" y2="44" stroke="var(--axis)" stroke-width="2"/>
+      <circle cx="531.3" cy="44" r="5" fill="var(--thermal)"/>
+      <circle cx="813" cy="44" r="5" fill="#fff" stroke="var(--thermal)" stroke-width="2"/>
+      <text class="dbl-src" x="112" y="48" text-anchor="end">Thermal</text>
+      <text class="dbl-val" x="898" y="48" text-anchor="end">45.7% → ~77% ▲</text>
+
+      <!-- Solar (y=84) -->
+      <line x1="219" y1="84" x2="406.2" y2="84" stroke="var(--axis)" stroke-width="2"/>
+      <circle cx="406.2" cy="84" r="5" fill="var(--solar)"/>
+      <circle cx="219" cy="84" r="5" fill="#fff" stroke="var(--solar)" stroke-width="2"/>
+      <text class="dbl-src" x="112" y="88" text-anchor="end">Solar</text>
+      <text class="dbl-val" x="898" y="88" text-anchor="end">31.8% → ~11% ▼</text>
+
+      <!-- Wind (y=124) -->
+      <line x1="156" y1="124" x2="206.4" y2="124" stroke="var(--axis)" stroke-width="2"/>
+      <circle cx="206.4" cy="124" r="5" fill="var(--wind)"/>
+      <circle cx="156" cy="124" r="5" fill="#fff" stroke="var(--wind)" stroke-width="2"/>
+      <text class="dbl-src" x="112" y="128" text-anchor="end">Wind</text>
+      <text class="dbl-val" x="898" y="128" text-anchor="end">9.6% → ~4% ▼</text>
+
+      <!-- Hydro all (y=164) -->
+      <line x1="156" y1="164" x2="170.4" y2="164" stroke="var(--axis)" stroke-width="2"/>
+      <circle cx="170.4" cy="164" r="5" fill="var(--hydro)"/>
+      <circle cx="156" cy="164" r="5" fill="#fff" stroke="var(--hydro)" stroke-width="2"/>
+      <text class="dbl-src" x="112" y="168" text-anchor="end">Hydro (all)</text>
+      <text class="dbl-val" x="898" y="168" text-anchor="end">5.6% → ~4% ▼</text>
+
+      <!-- Koyna (y=204) -->
+      <line x1="138" y1="204" x2="148.8" y2="204" stroke="var(--hydro)" stroke-width="2"/>
+      <circle cx="148.8" cy="204" r="5.5" fill="var(--hydro)"/>
+      <circle cx="138" cy="204" r="5.5" fill="#fff" stroke="var(--hydro)" stroke-width="2"/>
+      <text class="dbl-src hl" x="112" y="208" text-anchor="end">Koyna</text>
+      <text class="dbl-val" x="898" y="208" text-anchor="end" style="fill:var(--ink)">3.2% → ~2% ▼</text>
+
+      <!-- Nuclear (y=244) -->
+      <line x1="136.2" y1="244" x2="156" y2="244" stroke="var(--axis)" stroke-width="2"/>
+      <circle cx="136.2" cy="244" r="5" fill="var(--nuclear)"/>
+      <circle cx="156" cy="244" r="5" fill="#fff" stroke="var(--nuclear)" stroke-width="2"/>
+      <text class="dbl-src" x="112" y="248" text-anchor="end">Nuclear</text>
+      <text class="dbl-val" x="898" y="248" text-anchor="end">1.8% → ~4% ▲</text>
+
+      <!-- Biopower (y=284) -->
+      <line x1="142.5" y1="284" x2="164.1" y2="284" stroke="var(--axis)" stroke-width="2"/>
+      <circle cx="164.1" cy="284" r="5" fill="var(--bio)"/>
+      <circle cx="142.5" cy="284" r="5" fill="#fff" stroke="var(--bio)" stroke-width="2"/>
+      <text class="dbl-src" x="112" y="288" text-anchor="end">Biopower</text>
+      <text class="dbl-val" x="898" y="288" text-anchor="end">4.9% → ~3% ▼</text>
+    </svg>
+
+    <div class="readnote">
+      <span class="k"><span class="dotf"></span> share of capacity</span>
+      <span class="k"><span class="doth"></span> share of generation (est)</span>
+      <span class="k">▲ generates more than its capacity share · ▼ less</span>
+    </div>
+  </div>
+
+  <!-- METHOD -->
+  <div class="method">
+    <div class="kicker">Method &amp; caveats</div>
+    <p><b>Fill curve:</b> gross-storage readings from daily 2026 monsoon reports (28 Jun low → 11 Jul); the dashed segment is an illustrative projection to full capacity, which Koyna typically reaches by 31 October.</p>
+    <p><b>Allocation:</b> the ≈67.5 TMC westward power share reflects Koyna's fixed inter-state (Krishna) allocation; the east-side irrigation/drinking sub-split is approximate and directional — actual releases shift year to year, and in drought years drinking water is prioritised while power is cut first.</p>
+    <p><b>Grid mix:</b> installed-capacity figures are firm — CEA/MNRE, February 2026 (large hydro 3,047 MW + small hydro 384 MW = 3,431 MW; Koyna 1,960 MW). Segments sum to ~60,574 MW; the ~330 MW "Other" reconciles to the CEA state total of 60,905 MW. The <b>generation</b> shares (○) are estimates — coal does the bulk of actual generation while solar/hydro run at low capacity factors (Koyna ≈21%), and hydro output swings with the monsoon, so its energy share moves year to year.</p>
+  </div>
+
+  <footer>
+    <b>Sources:</b> daily reservoir reports (July 2026) · Wikipedia / project records for capacity &amp; turbine specs · state water-department allocation figures. &nbsp;·&nbsp; <b>Units:</b> TMC = thousand million cubic feet; 105 TMC ≈ 2,981 million m³. &nbsp;·&nbsp; <b>≈</b> = approximate / directional. &nbsp;·&nbsp; As of 19 Jul 2026.
+  </footer>
+
+</div>
+
+<script>
+  // animate bars in on load (respects reduced-motion via CSS)
+  window.addEventListener('load', function(){
+    requestAnimationFrame(function(){
+      document.querySelectorAll('.fill').forEach(function(el){
+        el.style.width = el.getAttribute('data-w') + '%';
+      });
+    });
+  });
+</script>
+</body>
+</html>
