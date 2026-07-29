@@ -103,7 +103,7 @@ isn't auto-updated.
 
 | Change type | Auto-triggers workflow? | How the profile updates |
 |---|---|---|
-| **Local HTML work** (file under `claude-design-works/**`) | **Yes** — matches the workflow `paths:` filter. | Fully automatic: push to `main` → render → rebuild gallery → sync to profile. |
+| **Local HTML work** (file under `works/**`) | **Yes** — matches the workflow `paths:` filter. | Fully automatic: push to `main` → render → rebuild gallery → sync to profile. |
 | **External work** (another repo; only `README.md` + `assets/` change) | **No** — `paths:` filter excludes README/assets by design (CI-loop avoidance). | Rebuild the gallery locally, then **run the workflow manually** (Actions → *Generate work thumbnails* → **Run workflow**) to fire the sync. |
 
 The manual **Run workflow** button also works as a "sync now" for any state.
@@ -123,7 +123,7 @@ Follow the EDGE / Plot Light Study pattern:
 2. **Add a Works-table row** with `[View](live URL)`, `[Source](repo URL)`, and
    `[Thumb](assets/thumbnails/<name>.png)`; note "Lives in its own repo" in the
    description.
-3. **Do NOT** add it to `claude-design-works/README.md` (there's no local file).
+3. **Do NOT** add it to `works/README.md` (there's no local file).
 4. **Rebuild the gallery:** `SKIP_RENDER=1 node .github/scripts/gen-thumbnails.mjs`
 5. Commit `README.md` + the thumbnail. To mirror to the profile, run the
    workflow manually (see §4).

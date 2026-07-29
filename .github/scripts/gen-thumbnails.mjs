@@ -2,7 +2,7 @@
 // Regenerate work thumbnails + the README gallery block.
 //
 // Source of truth is the **Works** table in README.md. A row is a work if it has
-// either a local `claude-design-works/FILE.html` source OR an explicit
+// either a local `works/FILE.html` source OR an explicit
 // `[Thumb](assets/thumbnails/FILE)` link. For local works without a Thumb we
 // render the page in headless Chromium and save a PNG under assets/thumbnails/;
 // works with an explicit Thumb (e.g. a GIF, or an external project hosted in
@@ -53,15 +53,15 @@ function serve(rootDir) {
 }
 
 // Parse the Works table. Rows look like:
-// | **Name** — desc | Type | Date | [View](https://…) · [Source](claude-design-works/FILE) |
+// | **Name** — desc | Type | Date | [View](https://…) · [Source](works/FILE) |
 // | **Name** — desc | Type | Date | [View](https://…) · [Source](https://…) · [Thumb](assets/thumbnails/FILE) |
-// A row counts as a work if it has a local claude-design-works/*.html source OR
+// A row counts as a work if it has a local works/*.html source OR
 // an explicit [Thumb](assets/thumbnails/…) link (external/custom-thumbnail works).
 function parseWorks(md) {
   const works = [];
   for (const line of md.split('\n')) {
     if (!line.startsWith('| ')) continue;
-    const src = line.match(/\(claude-design-works\/([^)\s]+\.html)\)/);
+    const src = line.match(/\(works\/([^)\s]+\.html)\)/);
     const thumb = line.match(/\[Thumb\]\((assets\/thumbnails\/[^)\s]+)\)/);
     if (!src && !thumb) continue;                         // skip header/separator/non-work rows
     const name = (line.match(/\*\*(.+?)\*\*/) || [, (src ? src[1] : 'work')])[1];
@@ -105,7 +105,7 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: VW, height: VH }, deviceScaleFactor: DSF });
 
     for (const w of toRender) {
-      const url = `http://127.0.0.1:${PORT}/claude-design-works/${w.file}`;
+      const url = `http://127.0.0.1:${PORT}/works/${w.file}`;
       await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
       await page.waitForTimeout(2200);                    // let fonts + bar animations settle
       const outPng = path.join(THUMB_DIR, w.file.replace(/\.html$/, '.png'));

@@ -1,12 +1,13 @@
-# Claude Design Works
+# Works
 
-Design pieces and visual artifacts produced by Claude — infographics, data visualizations, mockups,
+Visual artifacts produced by Claude — infographics, data visualizations, dashboards, mockups,
 and illustrations. Works may be single HTML/MHTML files, images, GIFs, or whole site folders.
 
 See the [main index](../README.md#works) for the full list with live-view links.
 
 ## Contents
 
+- `koyna-monsoon-dashboard.html` — Koyna Dam monsoon dashboard: Shivsagar Lake filling against gross capacity, and the power it drives within Maharashtra's energy mix, Jul 2026.
 - `how-india-got-online-pixel-quest.html` — interactive, gamified "Pixel Quest" through India's internet-adoption story (completely overhauled rebuild), Jun 2026.
 - `india-online-data-report.html` — standalone data report behind the Pixel Quest: charts on India's path to a billion connected, Jun 2026.
 - `glass-morphism-design-trials.html` — interactive glass-morphism (Liquid Glass) design experiments, Jun 2026.
