@@ -2,10 +2,60 @@
 
 _Last updated: 2026-07-29 — the sync is **live**; setup in §3 is done, not pending._
 
+---
+
+# 📋 For claude.ai — tap the copy icon, paste into chat
+
+Everything below in the grey box is a self-contained catch-up for a Claude with no
+memory of this repo. It is **rewritten in place** whenever something changes, so it
+is always current — you never need to paste more than this one block.
+
+````text
+CONTEXT: Satej's claude-works repo (github.com/Satejp10/claude-works).
+Current as of 2026-07-29.
+
+WHAT IT IS
+A publishing space for visual work made with Claude — infographics, dashboards,
+design experiments. Each work is one self-contained HTML file (inline CSS/JS,
+Google Fonts CDN only, no libraries) in works/. Served live via GitHub Pages at
+satejp10.github.io/claude-works/. No build, no tests, no linter.
+
+HOW IT'S WIRED
+- The Works table in README.md is the single source of truth.
+- A GitHub Action renders a thumbnail for each work and rebuilds the gallery.
+- The gallery is then mirrored automatically into the Satejp10/Satejp10 profile
+  README's "Selected work" section. Both are generated — never hand-edit them.
+
+STATUS: all of this is live and verified working as of 2026-07-29.
+
+HOW SATEJ WORKS
+He builds in Claude Design (claude.ai), then uploads the file straight to GitHub
+via the web UI. Those uploads land at the REPO ROOT, not in works/. That's normal
+and expected, not a mistake — a new root file just means "this is a new work,
+please file it properly": move it into works/, add a Works-table row, add a bullet
+to works/README.md.
+
+TWO GOTCHAS
+1. Adding an EXTERNAL work (one hosted in its own repo, listed via a hand-made
+   thumbnail) does NOT trigger the workflow, because it only touches README.md and
+   assets/. It has to be triggered manually.
+2. GitHub Pages does not redirect renamed paths. Renaming a folder breaks every
+   live URL pointing at the old one. This already happened once: works/ used to be
+   called claude-design-works/, which broke 7 links on the profile before the
+   mirror repaired them.
+
+CURRENT CONTENTS: 10 works — 8 local, plus 2 hosted in their own repos
+(EDGE, Plot Light Study).
+````
+
+---
+
 This log documents the automation that keeps the **satejp10 profile README's
 "Selected work" section** in sync with the **claude-works gallery**, plus the
-external-project pattern used to list sites that live in other repos. Written so
-it can be folded into `CLAUDE.md` / claude.ai project instructions.
+external-project pattern used to list sites that live in other repos.
+
+**Maintaining this file:** rewrite the copy-block above so it reflects reality;
+append to the history below. See "Keeping this log current" in `CLAUDE.md`.
 
 ---
 

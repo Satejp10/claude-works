@@ -65,12 +65,17 @@ gallery or the profile mirror. Promoting it means first rewriting it as a single
 self-contained HTML file per the authoring conventions below, then moving it into
 `works/` and adding a table row.
 
-"Add files via upload" commits drop files at the **root**, not into `works/` —
-that is how this one (and, historically, several others) got there. When a new
-root file appears, decide whether it is meant to be a work: if so, move it into
-`works/` and index it; if it duplicates an existing work, diff the two before
-assuming the indexed copy is current. Pages serves the repo root, so anything
-left there is publicly reachable but unlisted.
+**Expect new files to arrive at the root.** Satej builds works in Claude Design on
+claude.ai and uploads them straight to GitHub through the web UI; "Add files via
+upload" commits always land at the **root**, never in `works/`. This is his normal
+workflow, not a mistake — a new root file generally means "here is a new work,
+please file it properly." So when one appears: move it into `works/`, add a Works
+table row, and add a bullet to `works/README.md`. If it looks like it duplicates an
+existing work, **diff the two before assuming the indexed copy is newer** — an
+upload has already turned out to be a newer revision of a published work
+(`ai-accelerators-2026.html`, Jul 2026), meaning the gallery was serving a stale
+page. Pages serves the repo root, so anything left there is publicly reachable but
+unlisted.
 
 ## CI loop avoidance (read before touching the workflow)
 
@@ -119,6 +124,26 @@ on the `LANDING_SYNC_TOKEN` secret (a fine-grained PAT with `Contents: write` on
 `Satejp10/Satejp10`); without it the sync steps skip and CI stays green. **Local
 works auto-sync on push to `main`; external works don't trigger the workflow, so
 run it manually to sync them.** Full write-up: [`docs/sync-log.md`](docs/sync-log.md).
+
+## Keeping this log current
+
+[`docs/sync-log.md`](docs/sync-log.md) is the human-readable history of how this
+repo works, and it is the file Satej pastes into claude.ai to catch up a Claude
+that has no memory of this project. It has two parts:
+
+1. A **fenced copy-block at the top** — a self-contained summary of the current
+   state, sized to be copied in one tap on mobile.
+2. **Dated history below it** — how things came to be.
+
+**When you make a change that alters how the repo works** — the workflow, the
+scripts, the folder layout, the mirror, the set of works — update both:
+**rewrite** the copy-block so it describes reality (do not append to it; it must
+stay short and must never describe a past state), and **append** a dated entry to
+the history. A change that only touches a single work's content doesn't need an
+entry.
+
+This matters because nothing enforces it automatically. The log previously sat
+for two weeks telling readers to go create a PAT that already existed.
 
 ## Note
 
