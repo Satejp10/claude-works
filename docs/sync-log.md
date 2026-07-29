@@ -1,6 +1,6 @@
 # claude-works → satejp10 profile mirror — setup & change log
 
-_Last updated: 2026-07-12_
+_Last updated: 2026-07-29 — the sync is **live**; setup in §3 is done, not pending._
 
 This log documents the automation that keeps the **satejp10 profile README's
 "Selected work" section** in sync with the **claude-works gallery**, plus the
@@ -86,16 +86,21 @@ Links, titles, and layout are copied verbatim, so the two stay identical.
 
 ---
 
-## 3. One-time setup (required to activate the sync)
+## 3. One-time setup — ✅ DONE (2026-07-29)
 
-1. Create a **fine-grained Personal Access Token**:
+**This is already configured. Nothing to do here.** Recorded for reference only:
+
+1. A **fine-grained Personal Access Token** was created:
    - Repository access: **only `Satejp10/Satejp10`**
    - Permissions: **Contents → Read and write**
-2. Add it to the **claude-works** repo as an Actions secret named
-   **`LANDING_SYNC_TOKEN`** (Settings → Secrets and variables → Actions).
+2. It is stored in the **claude-works** repo as an Actions secret named
+   **`LANDING_SYNC_TOKEN`** (Settings → Secrets and variables → Actions). Note the
+   secret lives on claude-works — the repo doing the pushing — not on the profile repo.
 
-Until this secret exists the sync steps skip — nothing breaks, the profile just
-isn't auto-updated.
+If the secret is ever missing or expired, the sync behaves differently in each case:
+without it the sync steps **skip** and CI stays green (the profile just goes stale);
+with an **expired** token the `Checkout landing profile repo` step **fails** and CI goes
+red — that red build is the renewal signal.
 
 ---
 
@@ -162,15 +167,47 @@ Consider adding a short section to `claude-works/CLAUDE.md`:
 - `Satejp10/Satejp10#2` — add `SELECTED-WORK` markers. **Merged.**
 - `Satejp10/claude-works#8` — sync automation (script + workflow). **Merged.**
 - `Satejp10/claude-works#9` — add external work "Plot Light Study". **Merged.**
+- `Satejp10/claude-works#10` — document the external-work pattern + profile mirror in CLAUDE.md. **Merged.**
+- `Satejp10/claude-works#11` — CLAUDE.md rewrite via `/init`. **Merged.**
+- `Satejp10/claude-works#12` — rename `claude-design-works/` → `works/`; index Koyna; publish newer AI accelerators revision. **Merged.**
 
-## 9. End-to-end test result (2026-07-12)
+## 8b. Repo changes since the original write-up (2026-07-29)
 
-Manually dispatched the workflow after #9 merged (run #7,
-`actions/runs/29189565487`) → **success**. The render + gallery-rebuild steps
-ran, and the two sync steps (`Checkout landing profile repo`,
-`Mirror gallery into landing profile`) correctly reported **`skipped`** because
-**`LANDING_SYNC_TOKEN` is not set yet**. So the whole pipeline and the token
-gate are validated; the profile will update on the next run once the token is
-added (§3). To activate: add the secret, then re-run the workflow (Actions →
-*Generate work thumbnails* → **Run workflow**) — Plot Light Study will appear in
-the profile's `Selected work` section.
+- **`claude-design-works/` → `works/`.** The repo name stayed `claude-works` —
+  renaming the repo would have changed every live Pages URL. 39 references, 3 of
+  them functional (two in `gen-thumbnails.mjs`, one `paths:` filter in the workflow).
+  **This rename broke 7 profile links**, which the mirror then repaired (§9).
+- **Three files uploaded to the repo root were triaged.** "Add files via upload"
+  commits land at the root, not in `works/`:
+  - `koyna-monsoon-dashboard.html` → moved into `works/` and indexed.
+  - `ai-accelerators-2026.html` → was a **newer revision** than the published copy
+    (15 accelerators vs 14, adds OpenAI "Jalapeño"). The gallery had been serving
+    the older page; the newer one was promoted.
+  - `llm_cheatsheet_website.jsx` → **left at the root on purpose.** It's a React
+    component (imports `react`, `lucide-react`), so it can't be served as a static
+    page. See CLAUDE.md § "Unindexed files at the repo root".
+
+## 9. End-to-end test results
+
+### Gate test — 2026-07-12 (run #7, `actions/runs/29189565487`) → success
+
+Manually dispatched after #9 merged. Render + gallery-rebuild ran; the two sync
+steps (`Checkout landing profile repo`, `Mirror gallery into landing profile`)
+correctly reported **`skipped`** because `LANDING_SYNC_TOKEN` was not yet set.
+This validated the token gate: no secret, no failure.
+
+### Live test — 2026-07-29 (run #9, `actions/runs/30445468205`) → success, 82s
+
+First run with the token in place. The sync steps executed and pushed commit
+`1eed0cd` ("chore: mirror Selected work from claude-works gallery") to
+`Satejp10/Satejp10`. Verified against the live profile rather than the run log:
+
+- **7 dead `claude-design-works/…` links → 0.** All 10 links in `Selected work`
+  return HTTP 200. (Those links broke when `claude-design-works/` was renamed to
+  `works/` — GitHub Pages does not redirect renamed paths.)
+- **Plot Light Study** and **Koyna Dam** reached the profile — both had been
+  waiting on the token since 12 July.
+- Diff was 11 insertions / 7 deletions, **entirely inside the marker block**.
+  Nothing else in the profile README was touched.
+
+The mirror is therefore confirmed working end to end, including its blast radius.
