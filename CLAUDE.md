@@ -10,13 +10,23 @@ there is no build system, no test suite, and no linter. Each work is a
 self-contained static HTML file in `claude-design-works/`, served live via
 **GitHub Pages** at https://satejp10.github.io/claude-works/.
 
-## The one command
+## Commands
 
-There is a single piece of tooling — the thumbnail/gallery generator:
+There is no build, test, or lint step. The only tooling is two Node scripts under
+`.github/scripts/` (CI runs them on Node 20):
 
 ```bash
 npm install playwright   # then: npx playwright install chromium (first run only)
+
+# render thumbnails for local works + rebuild the README gallery block
 node .github/scripts/gen-thumbnails.mjs
+
+# rebuild only the gallery block — skips rendering, needs no Playwright
+SKIP_RENDER=1 node .github/scripts/gen-thumbnails.mjs
+
+# preview the profile mirror against a local clone of Satejp10/Satejp10
+# (writes to that clone; inspect with `git diff` there, don't commit blindly)
+node .github/scripts/sync-landing.mjs ../Satejp10/README.md
 ```
 
 `package.json`, `package-lock.json`, and `node_modules/` are **gitignored** —
@@ -44,6 +54,22 @@ From each parsed row the generator:
 **Never hand-edit the gallery block or `assets/thumbnails/` — both are generated.**
 The generator refuses to run if it parses zero works (guard against wiping the
 gallery), and throws if the gallery markers are missing.
+
+## Unindexed files at the repo root
+
+Not everything tracked here is a *work*. A few files sit at the **repo root**
+rather than in `claude-design-works/` — `koyna-monsoon-dashboard (1).html`,
+`llm_cheatsheet_website.jsx`, and a copy of `ai-accelerators-2026.html` — added
+by ad-hoc "Add files via upload" commits. None are in the Works table, so the
+generator ignores them and they never reach the gallery or the profile mirror.
+Pages serves the repo root, so they are publicly reachable but unlisted.
+
+Careful: root `ai-accelerators-2026.html` is a **different and newer** file than
+the indexed `claude-design-works/ai-accelerators-2026.html`, which is the one the
+gallery links to and renders. Check which is canonical before editing "the AI
+accelerators work". Promoting any root file into a real work means moving it into
+`claude-design-works/` and adding a table row — and `.jsx` would first have to be
+rewritten as self-contained HTML.
 
 ## CI loop avoidance (read before touching the workflow)
 
