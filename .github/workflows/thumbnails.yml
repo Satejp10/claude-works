@@ -1,6 +1,6 @@
 name: Generate work thumbnails
 
-# Renders each work under claude-design-works/ to a thumbnail and rebuilds the
+# Renders each work under works/ to a thumbnail and rebuilds the
 # README gallery. Triggers only on changes to the works themselves (or the
 # generator), never on README/asset changes — so the bot's own commit, which
 # touches README.md + assets/thumbnails/, cannot retrigger this workflow.
@@ -8,7 +8,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'claude-design-works/**'
+      - 'works/**'
       - '.github/scripts/gen-thumbnails.mjs'
       - '.github/workflows/thumbnails.yml'
   workflow_dispatch:
