@@ -138,6 +138,14 @@ wrangler d1 execute claude-works-analytics --remote \
   --command "SELECT country, device, SUM(views) v FROM pageviews GROUP BY country, device ORDER BY v DESC LIMIT 20"
 ```
 
+## Why CI renders don't pollute the numbers
+
+`thumbnails.yml` opens every work in headless Chromium to render thumbnails, so
+the beacon fires on each one. Those renders are served from `localhost:8731`,
+which is not in `ALLOWED_ORIGINS`, so `/hit` rejects them with a 403 and nothing
+is recorded. The origin lock is what makes this safe — if you ever widen it,
+widen it to specific hosts, never to `*`.
+
 ## Free-tier headroom
 
 D1's free tier allows 100k writes/day. Each pageview costs two writes, so this
