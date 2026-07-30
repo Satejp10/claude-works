@@ -89,17 +89,21 @@ you edit the trigger.
 ## Authoring conventions for works
 
 The HTML files are fully self-contained: all CSS and JS live **inline**, the only
-external references are Google Fonts CDN links, and there are no local asset
-dependencies and no charting libraries (charts/animation are hand-written in a
-single inline `<script>`). This means any work can be opened directly in a
-browser to preview it. Keep new works to this single-file, CDN-only pattern so
-the generator and Pages hosting keep working.
+external references are Google Fonts CDN links **and the visit beacon** (see
+"Analytics" below), and there are no local asset dependencies and no charting
+libraries (charts/animation are hand-written in a single inline `<script>`).
+This means any work can be opened directly in a browser to preview it. Keep new
+works to this single-file, CDN-only pattern so the generator and Pages hosting
+keep working.
 
 ## Adding a work
 
 1. Drop the self-contained `.html` into `works/`.
 2. Add a row to the Works table in `README.md` following the format above (and a matching bullet in `works/README.md`).
-3. Commit and push to `main`. The workflow renders the thumbnail, rebuilds the gallery, and Pages redeploys automatically.
+3. Copy the `<!-- visit-beacon:start -->…<!-- visit-beacon:end -->` block from any
+   existing work in `works/` to just before `</body>` — it is identical in every
+   file. A work without it is invisible to analytics.
+4. Commit and push to `main`. The workflow renders the thumbnail, rebuilds the gallery, and Pages redeploys automatically.
 
 ### External works (hosted in another repo)
 
@@ -112,6 +116,37 @@ Because such an addition only touches `README.md` + `assets/`, it does **not**
 match `thumbnails.yml`'s `paths:` filter, so the workflow won't auto-run —
 rebuild the gallery locally with `SKIP_RENDER=1 node .github/scripts/gen-thumbnails.mjs`
 and, to mirror to the profile, trigger the workflow manually.
+
+## Analytics
+
+Visit counting lives in [`analytics/`](analytics/) — a Cloudflare Worker backed
+by D1. Full deploy steps and privacy notes are in
+[`analytics/README.md`](analytics/README.md).
+
+The thing to understand before touching any of it: **GitHub proxies every README
+image through its Camo service**, which fetches the image server-side. Anything
+hit from a README sees Camo's IP and a `github-camo` user-agent, never the
+visitor's — and README markdown is sanitised, so no script runs there. Region and
+device therefore **cannot** be measured on the profile README, by this Worker or
+by any of the badge services. So the split is:
+
+- **Collected** on the Pages site, where our own JS runs in a real browser: the
+  `<!-- visit-beacon -->` block sits at the bottom of all eight files in `works/`
+  and at the bottom of the root `README.md`.
+- **Displayed** on the profile README, as SVG the Worker renders (`/badge.svg`
+  for demographics, `/views.svg` for an approximate profile hit count).
+
+Two things to keep in mind when editing:
+
+- The beacon in the root `README.md` is what instruments the **gallery landing
+  page**, which Pages renders from that markdown. GitHub.com strips `<script>`
+  when rendering the repo page, so it is invisible there and live on Pages. It
+  sits after the gallery block and does not affect `parseWorks`.
+- The Worker hostname appears in **10 places** (8 works, root `README.md`, and
+  two badge URLs in the profile README). `analytics/README.md` has the `sed` one-liner.
+
+`analytics/**` is deliberately outside `thumbnails.yml`'s `paths:` filter, so
+editing the Worker never triggers a thumbnail rebuild.
 
 ## Profile mirror
 
