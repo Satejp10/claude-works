@@ -1,0 +1,17 @@
+name = "claude-works-analytics"
+main = "src/index.js"
+compatibility_date = "2026-07-30"
+
+# Origins allowed to POST /hit. Anything else is rejected, so a stray copy of a
+# work hosted elsewhere can't pollute the numbers.
+[vars]
+ALLOWED_ORIGINS = "https://satejp10.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "claude-works-analytics"
+# Filled in by `wrangler d1 create` — see analytics/README.md step 2.
+database_id = "REPLACE_WITH_DATABASE_ID"
+
+[observability]
+enabled = true

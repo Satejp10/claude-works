@@ -454,5 +454,21 @@ footer .src{margin-top:6px}
   }
 })();
 </script>
+<!-- visit-beacon:start -->
+<script>
+/* Counts a pageview via analytics/ (Cloudflare Worker). No cookies, no storage,
+   no IP retained; geography is resolved at Cloudflare's edge. Fails silently. */
+(function(){try{
+var w=innerWidth,d=w<640?"mobile":w<1024?"tablet":"desktop";
+if(navigator.userAgentData&&navigator.userAgentData.mobile&&d!=="mobile")d="mobile";
+var r="direct";
+if(document.referrer){try{var h=new URL(document.referrer).hostname;if(h&&h!==location.hostname)r=h;}catch(e){}}
+var p=JSON.stringify({s:(location.pathname.split("/").pop()||"").replace(/\.html$/,"")||"gallery",r:r,d:d});
+var u="https://claude-works-analytics.satejp10.workers.dev/hit";
+if(navigator.sendBeacon){navigator.sendBeacon(u,new Blob([p],{type:"text/plain"}));}
+else{fetch(u,{method:"POST",body:p,keepalive:true});}
+}catch(e){}})();
+</script>
+<!-- visit-beacon:end -->
 </body>
 </html>

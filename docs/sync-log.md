@@ -1,6 +1,7 @@
 # claude-works → satejp10 profile mirror — setup & change log
 
-_Last updated: 2026-07-29 — the sync is **live**; setup in §3 is done, not pending._
+_Last updated: 2026-07-30 — the sync is **live**; setup in §3 is done, not pending.
+Analytics (§10) is committed but **not yet deployed** — it needs one `wrangler` run._
 
 ---
 
@@ -12,7 +13,7 @@ is always current — you never need to paste more than this one block.
 
 ````text
 CONTEXT: Satej's claude-works repo (github.com/Satejp10/claude-works).
-Current as of 2026-07-29.
+Current as of 2026-07-30.
 
 WHAT IT IS
 A publishing space for visual work made with Claude — infographics, dashboards,
@@ -25,17 +26,21 @@ HOW IT'S WIRED
 - A GitHub Action renders a thumbnail for each work and rebuilds the gallery.
 - The gallery is then mirrored automatically into the Satejp10/Satejp10 profile
   README's "Selected work" section. Both are generated — never hand-edit them.
+- analytics/ holds a Cloudflare Worker + D1 that counts visits to the Pages site
+  and renders the numbers back onto the profile README as SVG.
 
-STATUS: all of this is live and verified working as of 2026-07-29.
+STATUS: the mirror is live and verified (2026-07-29). Analytics is committed but
+NOT DEPLOYED — it needs one wrangler run; see analytics/README.md. Until then the
+two badge images on the profile README are broken links.
 
 HOW SATEJ WORKS
 He builds in Claude Design (claude.ai), then uploads the file straight to GitHub
 via the web UI. Those uploads land at the REPO ROOT, not in works/. That's normal
 and expected, not a mistake — a new root file just means "this is a new work,
 please file it properly": move it into works/, add a Works-table row, add a bullet
-to works/README.md.
+to works/README.md, and copy the visit-beacon block in before </body>.
 
-TWO GOTCHAS
+THREE GOTCHAS
 1. Adding an EXTERNAL work (one hosted in its own repo, listed via a hand-made
    thumbnail) does NOT trigger the workflow, because it only touches README.md and
    assets/. It has to be triggered manually.
@@ -43,6 +48,10 @@ TWO GOTCHAS
    live URL pointing at the old one. This already happened once: works/ used to be
    called claude-design-works/, which broke 7 links on the profile before the
    mirror repaired them.
+3. GitHub proxies README images through its Camo service, so region and device
+   CANNOT be measured on the profile README — the origin only ever sees Camo's IP
+   and a github-camo user-agent. Demographics are collected on the Pages site,
+   where real JS runs, and only displayed on the profile.
 
 CURRENT CONTENTS: 10 works — 8 local, plus 2 hosted in their own repos
 (EDGE, Plot Light Study).
@@ -261,3 +270,73 @@ First run with the token in place. The sync steps executed and pushed commit
   Nothing else in the profile README was touched.
 
 The mirror is therefore confirmed working end to end, including its blast radius.
+
+---
+
+## 10. Visit analytics — 2026-07-30
+
+Added `analytics/`: a Cloudflare Worker backed by D1 that counts visits to the
+Pages gallery and renders the result back onto the profile README as SVG.
+
+### The constraint that shaped it
+
+The original ask was a visit counter on `github.com/Satejp10` with estimated
+region and mobile/desktop. **Half of that is impossible, and it is worth writing
+down why so nobody tries again.**
+
+GitHub routes every image in a README through its **Camo** proxy, which fetches
+the image server-side and serves a cached copy to readers. An endpoint hit from a
+README therefore sees Camo's IP address and a `github-camo` user-agent — never
+the visitor's. Camo also caches, so one fetch serves many readers. README
+markdown is separately sanitised, so no `<script>` runs there either.
+
+Consequence: **region and device cannot be measured on a profile README** — not
+by this Worker, not by any of the off-the-shelf badge services, which are all
+counting Camo fetches and know nothing about who visited. This is deliberate
+privacy engineering on GitHub's part, not a gap to route around.
+
+So the design splits collection from display:
+
+- **Collected** on `satejp10.github.io/claude-works/`, where our own JS runs in
+  the visitor's real browser.
+- **Displayed** on the profile README, as SVG rendered by the Worker.
+
+### What was built
+
+- `analytics/src/index.js` — Worker with four endpoints: `POST /hit` (beacon
+  target, origin-locked), `GET /badge.svg` (demographics card), `GET /views.svg`
+  (approximate profile hit count), `GET /stats.json`.
+- `analytics/schema.sql` — D1 schema. Aggregate rows keyed by
+  (day, slug, country, continent, device, referrer).
+- A `<!-- visit-beacon -->` block before `</body>` in all eight files in
+  `works/`, and at the bottom of the root `README.md`.
+
+The beacon in the root `README.md` is what instruments the **gallery landing
+page** — Pages renders that page from the markdown, and raw HTML passes through,
+while GitHub.com strips `<script>` when rendering the repo page. So it is live on
+Pages and invisible on GitHub. It sits after the gallery block and does not
+affect `parseWorks` (verified: `SKIP_RENDER=1` still parses 10 works).
+
+### Privacy posture
+
+No IP is ever written to the database. Geography comes from Cloudflare's edge
+(`request.cf`), which resolves country and continent before the Worker runs.
+Unique visitors are counted with a SHA-256 of `ip + user-agent + secret salt +
+UTC day` — one-way, rotated at midnight, deleted the next day. No cookies, no
+`localStorage`, no cross-day or cross-site identifier.
+
+### Verification
+
+The Worker was exercised against a stubbed D1 before commit — 20 checks covering
+origin rejection, view/visitor counting, dedupe, device inference, the
+missing-`request.cf` fallback, both badges, and the empty state. Badges were
+rendered in headless Chromium to confirm layout; this caught a text collision
+between the "unique visitors" line and the "TOP REGIONS" heading, and an empty
+state that drew the device bar fully in the mobile colour. Both fixed.
+
+**Not yet deployed.** The Worker needs one `wrangler` run against Satej's
+Cloudflare account (create D1, apply schema, set `VISITOR_SALT`, deploy) — see
+`analytics/README.md`. Until that happens the two badge images on the profile
+README are broken links. If the deployed hostname differs from
+`claude-works-analytics.satejp10.workers.dev`, it has to be updated in 10 places;
+`analytics/README.md` has the `sed` one-liner.
