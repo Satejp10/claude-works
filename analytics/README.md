@@ -3,6 +3,10 @@
 A single Cloudflare Worker that counts visits to the Pages gallery and renders
 the results back into the GitHub profile README as SVG.
 
+> **Status: not deployed yet.** The profile badges are commented out until it is,
+> so they don't render as broken images. [`HANDOFF.md`](HANDOFF.md) is the
+> checklist for finishing the job.
+
 ## Why it is built this way
 
 GitHub routes every image in a README through its **Camo** proxy, which fetches
@@ -83,6 +87,12 @@ badge URLs in the `Satejp10/Satejp10` profile README. From the repo root:
 grep -rl "claude-works-analytics.satejp10.workers.dev" works/ README.md \
   | xargs sed -i 's|claude-works-analytics\.satejp10\.workers\.dev|YOUR-HOST-HERE|g'
 ```
+
+**7. Un-hide the profile badges.** While the Worker did not exist, the two `<img>`
+badges in the `Satejp10/Satejp10` README were wrapped in HTML comments so they would
+not render as broken images. Search that README for `analytics-badge:hidden` and
+delete both comment wrappers — otherwise you have a deployed Worker that nobody can
+see. [`HANDOFF.md`](HANDOFF.md) tracks this as a checklist.
 
 ## Verify
 
