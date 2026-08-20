@@ -1,7 +1,8 @@
 # claude-works → satejp10 profile mirror — setup & change log
 
-_Last updated: 2026-07-30 — the sync is **live**; setup in §3 is done, not pending.
-Analytics (§10) is committed but **not yet deployed** — it needs one `wrangler` run._
+_Last updated: 2026-08-20 — the sync is **live**; setup in §3 is done, not pending.
+Analytics (§10) is committed but **not yet deployed** — it needs one `wrangler` run.
+The profile badges are hidden until it is (§11); `analytics/HANDOFF.md` is the checklist._
 
 ---
 
@@ -30,8 +31,9 @@ HOW IT'S WIRED
   and renders the numbers back onto the profile README as SVG.
 
 STATUS: the mirror is live and verified (2026-07-29). Analytics is committed but
-NOT DEPLOYED — it needs one wrangler run; see analytics/README.md. Until then the
-two badge images on the profile README are broken links.
+NOT DEPLOYED — it needs one wrangler run against Satej's Cloudflare account. The
+two profile badges are commented out until then, so nothing renders as a broken
+image. The checklist for finishing it is analytics/HANDOFF.md.
 
 HOW SATEJ WORKS
 He builds in Claude Design (claude.ai), then uploads the file straight to GitHub
@@ -340,3 +342,31 @@ Cloudflare account (create D1, apply schema, set `VISITOR_SALT`, deploy) — see
 README are broken links. If the deployed hostname differs from
 `claude-works-analytics.satejp10.workers.dev`, it has to be updated in 10 places;
 `analytics/README.md` has the `sed` one-liner.
+
+> Superseded in part by §11: the badges are no longer broken links, they are
+> commented out.
+
+---
+
+## 11. Badges hidden pending deploy — 2026-08-20
+
+The Worker still is not deployed — `claude-works-analytics.satejp10.workers.dev`
+has no DNS record at all — so both badges were rendering as broken images on the
+public profile. Two changes:
+
+- **Profile README** — both `<img>` blocks are now wrapped in HTML comments, marked
+  `analytics-badge:hidden`. These are pure insertions: the markup is preserved byte
+  for byte, so restoring is just deleting the wrappers. They still sit outside the
+  `SELECTED-WORK` markers, so `sync-landing.mjs` is unaffected, and the commented
+  URLs still match the 10-places `sed` one-liner.
+- **`analytics/HANDOFF.md`** — new. Deliberately scoped to *the deploy task* rather
+  than to repo state, so it does not become a second thing to keep in sync with the
+  copy-block above. It carries a paste-ready block for claude.ai and a checklist
+  that ends in "un-hide the badges, then delete this file".
+
+Why the deploy did not simply happen: `wrangler login` is an interactive browser
+OAuth flow, and this work runs in a headless container, so it cannot authenticate as
+Satej. Everything else a deploy needs *is* reachable from there — Node 22, the npm
+registry, and `api.cloudflare.com` (verified: a genuine `cf-ray` response) — so a
+scoped `CLOUDFLARE_API_TOKEN` set as an environment secret is a workable alternative
+to running the commands by hand.
