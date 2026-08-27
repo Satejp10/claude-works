@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Switch Matrix — What Happens When One Model Finishes Another's Conversation</title>
+<meta name="description" content="A visual reading of arXiv 2603.03111 (NatWest AI Research + UCL, ICLR 2026 CAO Workshop): measuring performance drift when a deployed LLM system swaps models mid-conversation.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Switch Matrix — What Happens When One Model Finishes Another's Conversation">
+<meta property="og:description" content="Even a single mid-conversation model handoff moves outcomes by up to 13 points. A visual reading of arXiv 2603.03111.">
+<meta property="og:image" content="https://satejp10.github.io/claude-works/assets/thumbnails/model-switching-drift.png">
+<meta property="og:url" content="https://satejp10.github.io/claude-works/works/model-switching-drift.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff; --ink:#1f1f1f; --lede:#3a3a3a; --muted:#737373; --faint:#a3a3a3;
+  --border:#e8e8e8; --grid:#f1f1f1; --axis:#d4d4d4; --hover:#fafafa;
+  --accent:#7F4BF3; --accent-soft:#f2ecff;
+  --c-openai:#111111; --c-google:#34A853; --c-anthropic:#D97757;
+  --c-deepseek:#4D6BFE; --c-neutral:#8a8a8a;
+  --neg:#b2182b; --pos:#2166ac;
+  --display:'Space Grotesk','Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:16px; --r-sm:5px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:0 22px 90px}
+.num{font-variant-numeric:tabular-nums}
+
+/* topbar */
+.topbar{display:flex;justify-content:space-between;align-items:center;
+  padding:18px 0 0;font-size:12.5px;letter-spacing:.02em}
+.wordmark{font-family:var(--display);font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.stamp{color:var(--faint);font-variant-numeric:tabular-nums}
+
+/* hero */
+.hero{padding:34px 0 0}
+h1{font-family:var(--display);font-weight:600;letter-spacing:-.015em;
+  font-size:clamp(2.3rem,6.4vw,3.7rem);line-height:1.02;margin:14px 0 0;max-width:15ch}
+.lede{color:var(--lede);font-size:17.5px;line-height:1.6;margin:20px 0 0;max-width:66ch}
+.lede + .lede{margin-top:14px}
+.kicker{font-family:var(--display);font-size:12px;font-weight:600;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--accent)}
+.byline{margin-top:26px;color:var(--muted);font-size:13.5px;max-width:66ch}
+.byline a{color:var(--muted)}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;
+  background:var(--accent-soft);color:var(--accent);vertical-align:middle}
+.pill.src{background:#f4f4f4;color:var(--muted)}
+
+/* sections & cards */
+section{margin-top:38px}
+.eyebrow{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.sq{width:11px;height:11px;border-radius:3px;flex:none}
+h2{font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:-.01em;margin:0}
+.subline{color:var(--muted);font-size:13.5px;margin:0 0 18px;max-width:72ch}
+.card{border:1px solid var(--border);border-radius:var(--r);padding:22px}
+p{margin:0 0 12px}
+p:last-child{margin-bottom:0}
+.body{max-width:72ch;color:var(--lede)}
+.body strong{color:var(--ink);font-weight:600}
+
+/* method strip */
+.strip{border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:18px 0;margin-top:38px}
+.strip .kicker{display:block;margin-bottom:10px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px 22px;margin-top:4px}
+.fact .k{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint)}
+.fact .v{font-family:var(--display);font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px}
+.fact .n{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:2px}
+
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:16px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:9px;height:9px;border-radius:2px;flex:none}
+
+/* toggle pills */
+.toggle{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tg{font-family:var(--sans);font-size:13px;font-weight:500;padding:6px 14px;border-radius:999px;
+  border:1px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;transition:.15s}
+.tg:hover{background:var(--hover)}
+.tg[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tg:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* matrix */
+.mxwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -1px}
+table.mx{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;font-size:12px;table-layout:fixed;width:100%;min-width:840px}
+table.mx th,table.mx td{padding:0;text-align:center}
+table.mx thead th{font-weight:500;color:var(--muted);font-size:10px;line-height:1.22;
+  padding:0 3px 8px;vertical-align:bottom;white-space:normal;word-break:normal;hyphens:none}
+table.mx thead th.corner{position:sticky;left:0;background:#fff;z-index:3;text-align:left;
+  padding-right:10px;white-space:normal;width:132px}
+table.mx tbody th{position:sticky;left:0;background:#fff;z-index:2;text-align:left;font-weight:500;
+  font-size:11.5px;color:var(--ink);padding-right:10px;white-space:normal;line-height:1.25;
+  border-right:1px solid var(--border)}
+.cell{width:100%;height:34px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;margin:1px;font-size:11.5px;cursor:default;position:relative;
+  transition:transform .1s ease}
+.cell:hover{transform:scale(1.09);z-index:4;box-shadow:0 0 0 1px var(--ink)}
+.cell.diag{background:repeating-linear-gradient(45deg,#fff,#fff 3px,var(--grid) 3px,var(--grid) 6px);
+  color:var(--faint)}
+.star{font-size:9px;vertical-align:super;margin-left:1px;opacity:.85}
+.axtitle{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin:0 0 6px}
+.scalebar{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.ramp{height:9px;width:200px;border-radius:var(--r-sm);border:1px solid var(--border)}
+.tip{position:fixed;pointer-events:none;z-index:60;background:var(--ink);color:#fff;
+  border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.5;max-width:250px;
+  opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.16)}
+.tip b{font-weight:600}
+.tip .tv{font-variant-numeric:tabular-nums}
+.tip .tsub{color:#b9b9b9;font-size:11px}
+.scrollnote{font-size:12px;color:var(--faint);margin-top:8px;display:none}
+
+/* bars */
+.bars{display:grid;gap:9px;margin-top:4px}
+.bar{display:grid;grid-template-columns:minmax(150px,1.15fr) 1fr 92px;align-items:center;gap:12px}
+.bar .bl{font-size:12.5px;color:var(--ink);line-height:1.3}
+.bar .bl em{font-style:normal;color:var(--faint)}
+.track{background:var(--grid);height:15px;border-radius:var(--r-sm);position:relative;overflow:hidden}
+.fill{position:absolute;top:0;height:100%;border-radius:var(--r-sm);
+  transition:width .8s cubic-bezier(.22,1,.36,1),left .8s cubic-bezier(.22,1,.36,1);width:0}
+.zeroline{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--axis)}
+.bar .bv{font-size:12.5px;font-variant-numeric:tabular-nums;text-align:right;font-weight:500;white-space:nowrap}
+.bar .bv .u{color:var(--faint);font-weight:400;font-size:11px}
+
+/* timeline */
+.tl{border-left:2px solid var(--grid);margin-left:6px;padding-left:20px;display:grid;gap:20px}
+.tl .ev{position:relative}
+.tl .ev::before{content:"";position:absolute;left:-27px;top:6px;width:9px;height:9px;
+  border-radius:50%;background:#fff;border:2px solid var(--accent)}
+.tl .d{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.tl .t{font-family:var(--display);font-size:15px;font-weight:600;margin:2px 0 3px}
+.tl .x{font-size:13.5px;color:var(--lede);max-width:70ch}
+.tl .x a{color:var(--muted)}
+
+/* callout */
+.callout{border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--r) var(--r) 0;
+  padding:18px 20px;background:#fcfbff}
+.callout .h{font-family:var(--display);font-weight:600;font-size:14px;margin-bottom:6px}
+.callout p{font-size:13.5px;color:var(--lede)}
+
+/* footer */
+footer{margin-top:44px;border-top:1px solid var(--border);padding-top:20px;
+  color:var(--faint);font-size:12.5px;line-height:1.7}
+footer a{color:var(--muted)}
+footer .fh{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted);margin:16px 0 5px}
+footer ul{margin:0;padding-left:17px}
+footer li{margin-bottom:3px}
+.ver{position:fixed;right:14px;bottom:10px;font-size:10.5px;color:var(--faint);
+  font-variant-numeric:tabular-nums;letter-spacing:.04em;background:rgba(255,255,255,.9);
+  padding:2px 6px;border-radius:4px;pointer-events:none}
+a{text-decoration:none;border-bottom:1px solid var(--border)}
+a:hover{border-bottom-color:var(--muted)}
+
+@media (max-width:700px){
+  body{font-size:14.5px}
+  .wrap{padding:0 16px 80px}
+  .bar{grid-template-columns:minmax(100px,1fr) 1fr 76px;gap:8px}
+  .bar .bl{font-size:11.5px}
+  .scrollnote{display:block}
+  table.mx tbody th,table.mx thead th.corner{min-width:96px;font-size:10.5px}
+  .cell{height:30px;font-size:10.5px}
+  .ver{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="topbar">
+  <span class="wordmark">The Switch Matrix</span>
+  <span class="stamp">Updated Aug 2026</span>
+</div>
+
+<div class="hero">
+  <span class="kicker">Handoff drift in multi-turn LLM systems</span>
+  <h1>What happens when one model finishes another's conversation</h1>
+  <p class="lede">On 7 August 2025, OpenAI launched GPT&#8209;5 and removed GPT&#8209;4o from the model picker. Existing conversations did not reset. A thread with hundreds of 4o&#8209;authored turns simply received its next turn from a different model — across a product with roughly 700 million weekly users.</p>
+  <p class="lede">Nobody measured what that does. Seven months later, a team at NatWest AI Research and UCL built a benchmark for exactly this: a <strong>switch matrix</strong>, where one model writes the early turns and a different model writes the last one.</p>
+  <p class="byline">Source: <a href="https://arxiv.org/abs/2603.03111">Khraishi, Zafar, Myles &amp; Cowan, <em>Evaluating Performance Drift from Model Switching in Multi-Turn LLM Systems</em></a>, arXiv:2603.03111, accepted at the ICLR 2026 CAO Workshop. All figures on this page come from that paper unless marked <span class="pill">Analysis</span>.</p>
+</div>
+
+<div class="callout" style="margin-top:26px">
+  <div class="h"><span class="pill">Analysis</span> &nbsp;On the GPT&#8209;5 framing above</div>
+  <p>The rollout is our framing, not the paper's — the paper never mentions it. It is a useful illustration and <em>not</em> evidence for these results. The rollout changed the model, its personality, its rate limits and its routing all at once, with no counterfactual; the study below changes exactly one thing and holds the rest fixed. Treat the rollout as the reason to care, and the matrices as the actual finding.</p>
+</div>
+
+<section>
+  <div class="eyebrow"><span class="sq" style="background:var(--accent)"></span><h2>The setup</h2></div>
+  <p class="subline">A handoff is a structured distribution shift: the model writing the final turn is conditioning on a dialogue it did not write.</p>
+  <div class="card">
+    <svg viewBox="0 0 900 250" width="100%" role="img" aria-label="Diagram: in the no-switch baseline model B writes all turns; in a switch cell model A writes the early turns and model B writes only the final turn. The difference between the two final-turn scores is the drift.">
+      <defs>
+        <marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 z" fill="#a3a3a3"/>
+        </marker>
+      </defs>
+      <text x="0" y="14" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#a3a3a3" letter-spacing="1.4">NO-SWITCH BASELINE  (B &#8594; B)</text>
+      <g font-family="Inter,sans-serif" font-size="12.5">
+        <rect x="0" y="30" width="150" height="40" rx="6" fill="#f6f6f6" stroke="#e8e8e8"/>
+        <text x="75" y="55" text-anchor="middle" fill="#737373">turns 1 &#8230; L&#8722;1</text>
+        <text x="75" y="88" text-anchor="middle" fill="#1f1f1f" font-size="11.5" font-weight="600">Model B</text>
+        <line x1="158" y1="50" x2="196" y2="50" stroke="#a3a3a3" stroke-width="1.4" marker-end="url(#ar)"/>
+        <rect x="204" y="30" width="112" height="40" rx="6" fill="#f6f6f6" stroke="#e8e8e8"/>
+        <text x="260" y="55" text-anchor="middle" fill="#737373">final turn</text>
+        <text x="260" y="88" text-anchor="middle" fill="#1f1f1f" font-size="11.5" font-weight="600">Model B</text>
+        <text x="336" y="55" font-size="12.5" fill="#1f1f1f">score <tspan font-weight="600">s</tspan><tspan font-size="9" dy="3">B&#8594;B</tspan></text>
+      </g>
+      <line x1="0" y1="116" x2="900" y2="116" stroke="#f1f1f1" stroke-width="1"/>
+      <text x="0" y="146" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#7F4BF3" letter-spacing="1.4">SWITCH CELL  (A &#8594; B)</text>
+      <g font-family="Inter,sans-serif" font-size="12.5">
+        <rect x="0" y="162" width="150" height="40" rx="6" fill="#f2ecff" stroke="#ddd0ff"/>
+        <text x="75" y="187" text-anchor="middle" fill="#5b34b0">turns 1 &#8230; L&#8722;1</text>
+        <text x="75" y="220" text-anchor="middle" fill="#1f1f1f" font-size="11.5" font-weight="600">Model A &#183; the prefix</text>
+        <line x1="158" y1="182" x2="196" y2="182" stroke="#a3a3a3" stroke-width="1.4" marker-end="url(#ar)"/>
+        <rect x="204" y="162" width="112" height="40" rx="6" fill="#f6f6f6" stroke="#e8e8e8"/>
+        <text x="260" y="187" text-anchor="middle" fill="#737373">final turn</text>
+        <text x="260" y="220" text-anchor="middle" fill="#1f1f1f" font-size="11.5" font-weight="600">Model B &#183; the suffix</text>
+        <text x="336" y="187" font-size="12.5" fill="#1f1f1f">score <tspan font-weight="600">s</tspan><tspan font-size="9" dy="3">A&#8594;B</tspan></text>
+      </g>
+      <g font-family="Inter,sans-serif">
+        <line x1="470" y1="40" x2="470" y2="192" stroke="#e8e8e8" stroke-width="1"/>
+        <text x="500" y="104" font-size="13.5" font-weight="600" fill="#1f1f1f">&#916;</text>
+        <text x="518" y="104" font-size="9" fill="#1f1f1f">A&#8594;B</text>
+        <text x="551" y="104" font-size="13.5" fill="#1f1f1f">= s</text>
+        <text x="573" y="107" font-size="9" fill="#1f1f1f">A&#8594;B</text>
+        <text x="601" y="104" font-size="13.5" fill="#1f1f1f">&#8722; s</text>
+        <text x="624" y="107" font-size="9" fill="#1f1f1f">B&#8594;B</text>
+        <text x="500" y="128" font-size="12" fill="#737373">measured per episode, on the same task</text>
+        <text x="500" y="148" font-size="12" fill="#737373">negative = the foreign prefix hurt B</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<div class="strip">
+  <span class="kicker">Method</span>
+  <div class="facts">
+    <div class="fact"><div class="k">Models</div><div class="v">9</div><div class="n">each used as both prefix and suffix &#8212; a 9&#215;9 grid</div></div>
+    <div class="fact"><div class="k">Episodes</div><div class="v">200</div><div class="n">randomly sampled, per benchmark</div></div>
+    <div class="fact"><div class="k">Switch policy</div><div class="v">Final turn</div><div class="n">the suffix writes exactly one turn in every cell</div></div>
+    <div class="fact"><div class="k">Uncertainty</div><div class="v">Paired BCa</div><div class="n">1,000 bootstrap resamples, paired within episode</div></div>
+    <div class="fact"><div class="k">Settings</div><div class="v">temp 0</div><div class="n">2,048 max output tokens; reasoning effort and verbosity low where supported</div></div>
+  </div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<section>
+  <div class="eyebrow"><span class="sq" style="background:var(--neg)"></span><h2>The switch matrices</h2></div>
+  <p class="subline">Rows are the prefix model that wrote the early turns. Columns are the suffix model that wrote the final one. Each cell is &#916;<sub>A&#8594;B</sub> against that suffix model's own no-switch baseline &#8212; <strong>blue means the foreign prefix helped, red means it hurt</strong>. Hover any cell for the exact value, its significance and the underlying cell mean. The hatched diagonal is the baseline itself.</p>
+  <div class="toggle" role="group" aria-label="Choose benchmark">
+    <button class="tg" id="tg-coqa" data-b="coqa" aria-pressed="true">CoQA &#183; conversational grounding</button>
+    <button class="tg" id="tg-mif" data-b="mif" aria-pressed="false">Multi-IF &#183; constraint adherence</button>
+  </div>
+  <p class="axtitle" id="axnote">Suffix model &#8212; writes the final turn &#8594;</p>
+  <div class="mxwrap"><table class="mx" id="mx"></table></div>
+  <p class="scrollnote">&#8592; scroll the grid sideways &#183; row labels stay fixed</p>
+  <div class="scalebar">
+    <span id="scalelo" class="num"></span>
+    <span class="ramp" id="ramp"></span>
+    <span id="scalehi" class="num"></span>
+    <span style="color:var(--faint)">&#183; stars = bootstrapped CI excludes 0 at 90% (*), 95% (**), 99% (***)</span>
+  </div>
+  <p class="subline" id="mxnote" style="margin-top:14px"></p>
+</section>
+
+<section>
+  <div class="eyebrow"><span class="sq" style="background:var(--c-openai)"></span><h2>What the grid says</h2></div>
+  <p class="subline">Three findings, in the paper's own terms.</p>
+  <div class="body">
+    <p><strong>One handoff is enough.</strong> Of the 72 off-diagonal switches, 16 on CoQA (22%) and 18 on Multi-IF (25%) are significant at the 95% level &#8212; from a single final turn written by a different model.</p>
+    <p><strong>It is directional, not symmetric.</strong> A handoff that harms B after A may be neutral or beneficial in reverse. Handoff robustness is a property of the <em>ordered pair</em> and the dialogue regime the prefix establishes, not of model quality. Within-family switches among the GPT&#8209;5 variants sit near zero on CoQA, which the authors read as shared conventions reducing mismatch.</p>
+    <p><strong>It cuts both ways.</strong> The largest Multi-IF effects are positive: a stronger prefix can stabilise a compliant output regime and lift a weaker suffix. The failures look like behavioural anchoring &#8212; the suffix continuing, or failing to override, a protocol the prefix set &#8212; rather than lost capability.</p>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow"><span class="sq" style="background:var(--pos)"></span><h2>The extremes</h2></div>
+  <p class="subline">The ten largest single-handoff effects in each benchmark. Positive means the foreign prefix improved the suffix model's final answer. <strong>These are the tails, not the typical case</strong> &#8212; see the note below the chart.</p>
+  <div class="toggle" role="group" aria-label="Choose benchmark for extremes">
+    <button class="tg" id="xg-mif" data-x="mif" aria-pressed="true">Multi-IF &#183; strict success</button>
+    <button class="tg" id="xg-coqa" data-x="coqa" aria-pressed="false">CoQA &#183; last-turn F1</button>
+  </div>
+  <div class="bars" id="xbars"></div>
+  <p class="subline" id="xnote" style="margin-top:16px"></p>
+</section>
+
+<section>
+  <div class="eyebrow"><span class="sq" style="background:var(--accent)"></span><h2>Two numbers per model <span class="pill">Analysis</span></h2></div>
+  <p class="subline">The paper shows drift is largely additive: &#916;<sub>A&#8594;B</sub> &#8776; &#956; + &#945;<sub>A</sub> + &#946;<sub>B</sub>, where <strong>&#945; is prefix influence</strong> (how much a model's dialogue style helps or hurts whoever continues it) and <strong>&#946; is suffix susceptibility</strong> (how much a model gains or loses when handed a foreign history). That compresses a 9&#215;9 grid into 18 numbers you can monitor.</p>
+  <div class="toggle" role="group" aria-label="Choose benchmark for factorization">
+    <button class="tg" id="fg-coqa" data-f="coqa" aria-pressed="true">CoQA</button>
+    <button class="tg" id="fg-mif" data-f="mif" aria-pressed="false">Multi-IF</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr;gap:30px">
+    <div>
+      <p class="axtitle">&#945; &#183; prefix influence &#8212; higher means this model's history helps whoever writes next</p>
+      <div class="bars" id="abars"></div>
+    </div>
+    <div>
+      <p class="axtitle">&#946; &#183; suffix susceptibility &#8212; positive means this model tends to <em>gain</em> from a foreign prefix; negative means it degrades</p>
+      <div class="bars" id="bbars"></div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:24px">
+    <div class="h">How these values were produced</div>
+    <p>The paper publishes &#945; and &#946; as bar charts and states six &#946; values in its text, but does not print the full set. We refit the paper's own model &#8212; equation 1, ordinary least squares on the 72 off-diagonal cells with sum-to-zero constraints &#8212; to the published &#916; tables. The fit reproduces the paper's stated R&#178; (we get <span class="num" id="r2note"></span>) and all six stated &#946; values to within 0.0007. Rank order matches the paper's figures in three of four charts; the exception is CoQA &#946;, where GPT&#8209;5.2 and Gemini&#8209;2.5&#8209;Flash differ by less than 0.0001 and swap places &#8212; a rounding artefact of fitting on three-decimal published values rather than raw episode scores. Treat the ordering as sound and the last decimal as ours, not theirs.</p>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow"><span class="sq" style="background:var(--c-google)"></span><h2>What to do about it</h2></div>
+  <p class="subline">The paper's operational recommendations.</p>
+  <div class="body">
+    <p><strong>Log the authoring model per turn</strong>, and monitor the first turn after a switch specifically &#8212; a handoff is a discrete change point, and averaging across a session hides it.</p>
+    <p><strong>Run a handoff regression before upgrades or fallbacks.</strong> Replay historical prefixes through the candidate suffix model to estimate &#916;<sub>A&#8594;B</sub>, and flag risky pairs or spot uplifts before they reach users.</p>
+    <p><strong>Track &#945; and &#946; as a compressed view</strong>, then prioritise deeper evaluation for the pairs with large residuals. Gate routing when deviation from the no-switch baseline is large; the authors suggest injecting a short handoff instruction as a simple mitigation.</p>
+    <p style="color:var(--muted);font-size:13.5px">The paper measures rather than fixes. It names explicit handoff summaries, lightweight adapters and continuity-aware routing policies as future work, and does not test them.</p>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow"><span class="sq" style="background:var(--c-anthropic)"></span><h2>Where it landed <span class="pill">Analysis</span></h2></div>
+  <p class="subline">This timeline is our assembly of public, dated artefacts. The connections drawn between them are ours.</p>
+  <div class="tl">
+    <div class="ev"><div class="d">3 Mar 2026</div><div class="t">The paper is posted</div>
+      <div class="x">arXiv:2603.03111, later accepted at the ICLR 2026 CAO Workshop.</div></div>
+    <div class="ev"><div class="d">5 Mar 2026</div><div class="t">vLLM Semantic Router files the bug</div>
+      <div class="x">Issue #1439: routing is evaluated per request with no session affinity, so a short follow-up like &#8220;commit it&#8221; can land on a far smaller model than the one that wrote the code being discussed.</div></div>
+    <div class="ev"><div class="d">6 Mar 2026</div><div class="t">&#8230; and proposes the fix</div>
+      <div class="x">Issue #1458 adds Conversational Routing Momentum &#8212; an asymmetric low-pass filter borrowed from audio compressor attack/release dynamics &#8212; shipped in the v0.3 &#8220;Themis&#8221; milestone.</div></div>
+    <div class="ev"><div class="d">7 Aug 2026</div><div class="t">Lemonade SDK proposes the same thing, and cites the paper</div>
+      <div class="x">Issue #2956 proposes stateless hysteresis for its router, quoting this paper's &#8722;8 to +13 pp range as evidence that switching itself degrades outcomes &#8212; not merely that reloading a model is slow.</div></div>
+  </div>
+  <div class="callout" style="margin-top:24px">
+    <div class="h">Read this carefully</div>
+    <p>Two independent routing projects converged on the same mitigation shape within months. But the vLLM Semantic Router issues do not cite this paper, and they were filed two and three days after it was posted &#8212; suggestive timing, no demonstrated causal link, and we are not claiming one. Formal academic uptake is meanwhile close to zero: OpenAlex records no citations and Google Scholar one, as of August 2026. The paper's visible afterlife so far is as engineering justification, not as a benchmark anyone has rerun.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="fh">Primary source</div>
+  <ul>
+    <li>Raad Khraishi, Iman Zafar, Katie Myles, Greig A. Cowan. <em>Evaluating Performance Drift from Model Switching in Multi-Turn LLM Systems.</em> ICLR 2026 CAO Workshop. <a href="https://arxiv.org/abs/2603.03111">arXiv:2603.03111</a> &#8212; all &#916; values, cell means, confidence intervals, significance stars, method details and recommendations on this page.</li>
+    <li>Benchmarks: CoQA (Reddy et al., 2019), truncated to the first 10 QA turns, scored by last-turn token-overlap F1. Multi-IF (He et al., 2024), scored by turn-3 conversation-level strict success.</li>
+  </ul>
+  <div class="fh">Secondary sources, for the framing and timeline</div>
+  <ul>
+    <li>GPT&#8209;5 rollout: Sam Altman's posts on X and the r/ChatGPT AMA, 8 August 2025; Nick Turley's remarks to The Verge; OpenAI's subsequent restoration of GPT&#8209;4o and the Auto / Fast / Thinking selector.</li>
+    <li>Routing timeline: <a href="https://github.com/vllm-project/semantic-router/issues/1439">vllm-project/semantic-router #1439</a>, <a href="https://github.com/vllm-project/semantic-router/issues/1458">#1458</a>, and <a href="https://github.com/lemonade-sdk/lemonade/issues/2956">lemonade-sdk/lemonade #2956</a>.</li>
+    <li>Citation counts: OpenAlex and Google Scholar, checked 24 August 2026.</li>
+  </ul>
+  <div class="fh">Data notes</div>
+  <ul>
+    <li>Every number was extracted programmatically from the source PDF and diffed against an independent manual transcription; both matrices matched cleanly. Cross-check: the published &#916; values reconstruct from the appendix cell means to within 0.001 in 143 of 144 off-diagonal cells.</li>
+    <li>The exception is Multi-IF, GPT&#8209;5-nano &#8594; GPT&#8209;5.2, where Table 2 gives &#916; = &#8722;0.025 while Table 4's cell means differ by &#8722;0.028. We display the value as published in Table 2.</li>
+    <li>The arXiv HTML rendering of Table 4 drops two cells in the Gemini&#8209;2.5&#8209;Flash row. This page is built from the PDF, which is complete.</li>
+    <li>&#945; and &#946; are marked <span class="pill">Analysis</span> because they are our refit of the paper's equation 1, not values the paper prints. Everything else marked <span class="pill">Analysis</span> is interpretation, clearly separated from the paper's claims.</li>
+    <li>Effect sizes cited as headline ranges are the extremes of the distribution. Most cells are small and not statistically significant, particularly on CoQA where the majority of &#916; values fall between &#8722;0.02 and +0.03 F1.</li>
+  </ul>
+  <p style="margin-top:16px">Not affiliated with the authors, NatWest, or UCL. Built for <a href="https://satejp10.github.io/claude-works/">claude-works</a>.</p>
+</footer>
+
+</div>
+<div class="tip" id="tip" role="tooltip" aria-hidden="true"></div>
+<div class="ver">v1.0</div>
+<script>window.__DATA__={"models":["gpt-5-nano-2025-08-07","gpt-5-mini-2025-08-07","gpt-5.2-2025-12-11","gemini-3-flash-preview","gemini-2.5-flash","deepseek-v3.2","qwen-2.5-72b-instruct","claude-haiku-4.5","claude-sonnet-4.5"],"short":["GPT-5-nano","GPT-5-mini","GPT-5.2","Gemini-3-Flash","Gemini-2.5-Flash","DeepSeek-v3.2","Qwen-2.5-72B","Claude-Haiku-4.5","Claude-Sonnet-4.5"],"vendor":["openai","openai","openai","google","google","deepseek","neutral","anthropic","anthropic"],"bench":{"coqa":{"label":"CoQA","metric":"last-turn F1","unit":"F1","delta":[[0.0,-0.005,0.0,-0.021,-0.02,-0.045,0.002,0.013,-0.008],[0.013,0.0,0.007,0.002,0.016,-0.007,0.013,0.015,-0.002],[0.011,0.004,0.0,-0.006,0.008,-0.016,0.027,0.017,-0.003],[0.042,-0.004,0.005,0.0,0.013,-0.005,0.03,0.028,0.007],[-0.01,0.007,0.008,-0.015,0.0,-0.016,0.029,0.03,-0.002],[0.006,-0.0,0.008,-0.006,0.005,0.0,0.025,0.026,0.004],[0.014,-0.0,0.002,-0.011,0.003,-0.019,0.0,0.02,-0.006],[0.012,-0.01,0.004,-0.009,0.008,-0.026,0.017,0.0,0.0],[0.01,0.013,0.007,-0.01,0.01,-0.025,0.032,0.024,0.0]],"stars":[[0,0,0,3,2,3,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,2,2,0,0],[2,0,0,0,2,0,3,2,0],[0,0,0,1,0,0,3,3,0],[0,0,0,0,0,0,1,2,0],[0,0,0,2,0,0,0,0,0],[0,0,0,0,0,1,0,0,0],[0,0,0,2,0,2,3,0,0]],"abs":[[[0.689,0.636,0.738],[0.751,0.694,0.796],[0.751,0.7,0.801],[0.765,0.713,0.812],[0.758,0.709,0.802],[0.73,0.672,0.775],[0.726,0.674,0.773],[0.737,0.685,0.787],[0.776,0.725,0.821]],[[0.703,0.645,0.754],[0.757,0.711,0.802],[0.757,0.704,0.803],[0.788,0.726,0.831],[0.793,0.743,0.834],[0.768,0.717,0.81],[0.737,0.68,0.786],[0.739,0.686,0.782],[0.783,0.734,0.833]],[[0.7,0.645,0.757],[0.76,0.704,0.808],[0.75,0.697,0.799],[0.78,0.731,0.827],[0.786,0.735,0.832],[0.758,0.703,0.805],[0.751,0.697,0.798],[0.74,0.692,0.787],[0.781,0.731,0.822]],[[0.731,0.675,0.779],[0.753,0.705,0.802],[0.755,0.709,0.804],[0.786,0.732,0.829],[0.79,0.74,0.834],[0.769,0.717,0.815],[0.754,0.702,0.8],[0.752,0.703,0.798],[0.791,0.744,0.839]],[[0.679,0.62,0.735],[0.763,0.713,0.808],[0.759,0.709,0.803],[0.771,0.723,0.825],[0.778,0.732,0.822],[0.758,0.705,0.802],[0.753,0.696,0.798],[0.754,0.704,0.799],[0.782,0.733,0.826]],[[0.695,0.636,0.747],[0.756,0.704,0.803],[0.758,0.71,0.803],[0.781,0.728,0.825],[0.783,0.738,0.825],[0.774,0.728,0.82],[0.749,0.696,0.797],[0.75,0.703,0.796],[0.789,0.742,0.833]],[[0.703,0.649,0.753],[0.757,0.707,0.806],[0.753,0.703,0.8],[0.775,0.725,0.819],[0.781,0.73,0.827],[0.755,0.712,0.801],[0.724,0.675,0.773],[0.744,0.694,0.79],[0.779,0.73,0.819]],[[0.701,0.646,0.752],[0.746,0.691,0.789],[0.754,0.697,0.799],[0.777,0.731,0.822],[0.785,0.739,0.83],[0.749,0.698,0.794],[0.741,0.691,0.789],[0.724,0.671,0.765],[0.785,0.736,0.824]],[[0.699,0.647,0.748],[0.77,0.712,0.811],[0.757,0.707,0.8],[0.776,0.721,0.821],[0.787,0.742,0.833],[0.749,0.699,0.792],[0.756,0.701,0.799],[0.748,0.69,0.794],[0.784,0.737,0.826]]],"alpha":[-0.0137,0.0027,0.0014,0.0089,0.0,0.0015,-0.0014,-0.0024,0.003],"beta":[0.0065,-0.0031,0.0013,-0.0124,0.0013,-0.0237,0.0177,0.0173,-0.0049],"r2":0.825},"mif":{"label":"Multi-IF","metric":"turn-3 strict success","unit":"pp","delta":[[0.0,-0.015,-0.025,-0.01,0.045,0.0,-0.01,-0.076,-0.035],[0.096,0.0,-0.045,-0.061,0.051,0.005,0.0,-0.045,-0.045],[0.106,0.051,0.0,0.005,0.081,0.02,0.071,-0.015,-0.01],[0.086,-0.005,-0.005,0.0,0.086,0.04,0.061,0.015,-0.005],[0.061,0.061,0.02,0.01,0.0,0.015,0.051,-0.015,-0.035],[0.106,0.015,-0.01,-0.005,0.071,0.0,0.056,0.0,-0.035],[0.121,0.025,0.02,-0.035,0.061,-0.015,0.0,-0.04,-0.01],[0.096,0.04,0.035,-0.02,0.066,0.0,0.0,0.0,-0.02],[0.131,0.005,0.03,0.025,0.066,0.01,0.035,0.015,0.0]],"stars":[[0,0,0,0,0,0,0,2,0],[3,0,1,3,1,0,0,0,0],[3,2,0,0,3,0,3,0,0],[2,0,0,0,3,1,1,0,0],[1,2,0,0,0,0,0,0,0],[3,0,0,0,3,0,1,0,0],[3,0,0,0,2,0,0,0,0],[3,0,0,0,2,0,0,0,0],[3,0,0,0,2,0,0,0,0]],"abs":[[[0.333,0.273,0.399],[0.419,0.354,0.49],[0.447,0.382,0.513],[0.49,0.424,0.562],[0.404,0.338,0.48],[0.399,0.338,0.47],[0.333,0.268,0.394],[0.354,0.283,0.419],[0.429,0.356,0.5]],[[0.429,0.364,0.5],[0.434,0.364,0.505],[0.429,0.364,0.505],[0.439,0.374,0.51],[0.409,0.338,0.475],[0.404,0.333,0.47],[0.343,0.275,0.409],[0.384,0.318,0.444],[0.419,0.348,0.495]],[[0.439,0.374,0.515],[0.485,0.419,0.556],[0.475,0.408,0.55],[0.505,0.429,0.566],[0.439,0.374,0.51],[0.419,0.354,0.49],[0.414,0.354,0.488],[0.414,0.343,0.485],[0.455,0.384,0.52]],[[0.419,0.348,0.485],[0.429,0.359,0.5],[0.47,0.404,0.54],[0.5,0.429,0.571],[0.444,0.374,0.51],[0.439,0.374,0.505],[0.404,0.335,0.48],[0.444,0.369,0.51],[0.46,0.391,0.535]],[[0.394,0.328,0.465],[0.495,0.429,0.561],[0.495,0.424,0.566],[0.51,0.444,0.581],[0.359,0.288,0.424],[0.414,0.348,0.485],[0.394,0.326,0.47],[0.414,0.354,0.48],[0.429,0.354,0.49]],[[0.439,0.369,0.505],[0.449,0.384,0.52],[0.465,0.398,0.53],[0.495,0.424,0.561],[0.429,0.369,0.505],[0.399,0.338,0.48],[0.399,0.335,0.47],[0.429,0.362,0.495],[0.429,0.359,0.495]],[[0.455,0.384,0.525],[0.46,0.394,0.535],[0.495,0.424,0.566],[0.465,0.394,0.535],[0.419,0.358,0.49],[0.384,0.318,0.455],[0.343,0.278,0.409],[0.389,0.318,0.46],[0.455,0.389,0.525]],[[0.429,0.359,0.495],[0.475,0.4,0.545],[0.51,0.439,0.578],[0.48,0.409,0.551],[0.424,0.359,0.49],[0.399,0.328,0.47],[0.343,0.277,0.414],[0.429,0.359,0.495],[0.444,0.379,0.515]],[[0.465,0.399,0.535],[0.439,0.374,0.51],[0.505,0.439,0.571],[0.525,0.455,0.593],[0.424,0.354,0.491],[0.409,0.343,0.48],[0.379,0.313,0.449],[0.444,0.373,0.52],[0.465,0.399,0.53]]],"alpha":[-0.0258,-0.0253,0.017,0.0107,0.0072,0.0038,-0.0022,-0.0001,0.0146],"beta":[0.0774,-0.0007,-0.0151,-0.0297,0.0471,-0.0099,0.013,-0.0398,-0.0423],"r2":0.848}}};</script>
+<script>
+(function(){
+"use strict";
+var D = window.__DATA__;
+var VC = {openai:'--c-openai', google:'--c-google', anthropic:'--c-anthropic',
+          deepseek:'--c-deepseek', neutral:'--c-neutral'};
+function vcol(i){ return getComputedStyle(document.documentElement)
+  .getPropertyValue(VC[D.vendor[i]]).trim(); }
+
+/* ---------- diverging red <-> white <-> blue (colourblind-safe) ---------- */
+var NEG=[178,24,43], MID=[255,255,255], POS=[33,102,172];
+function mix(a,b,t){ return 'rgb('+a.map(function(v,i){
+  return Math.round(v+(b[i]-v)*t); }).join(',')+')'; }
+function ramp(v, max){
+  var t = Math.min(1, Math.abs(v)/max);
+  t = Math.pow(t, 0.72);                       // ease so small effects stay visible
+  return v < 0 ? mix(MID,NEG,t) : mix(MID,POS,t);
+}
+function inkOn(v, max){ return Math.abs(v)/max > 0.55 ? '#fff' : '#1f1f1f'; }
+
+/* ---------- legend ---------- */
+(function(){
+  var seen={}, out=[];
+  var names={openai:'OpenAI', google:'Google', anthropic:'Anthropic',
+             deepseek:'DeepSeek', neutral:'Alibaba / Qwen'};
+  D.vendor.forEach(function(v){ if(!seen[v]){ seen[v]=1;
+    out.push('<span><i class="dot" style="background:'+
+      getComputedStyle(document.documentElement).getPropertyValue(VC[v]).trim()+
+      '"></i>'+names[v]+'</span>'); }});
+  document.getElementById('legend').innerHTML = out.join('');
+})();
+
+/* ---------- matrix ---------- */
+var tip = document.getElementById('tip');
+function showTip(html, e){
+  tip.innerHTML = html; tip.style.opacity = '1'; tip.setAttribute('aria-hidden','false');
+  var r = tip.getBoundingClientRect();
+  var x = e.clientX + 14, y = e.clientY + 16;
+  if (x + r.width > innerWidth - 10) x = e.clientX - r.width - 14;
+  if (y + r.height > innerHeight - 10) y = e.clientY - r.height - 16;
+  tip.style.left = Math.max(8,x)+'px'; tip.style.top = Math.max(8,y)+'px';
+}
+function hideTip(){ tip.style.opacity='0'; tip.setAttribute('aria-hidden','true'); }
+
+var MINUS = '\u2212';
+function sgn(v){ return v>0 ? '+' : (v<0 ? MINUS : ''); }
+function fmt(v, key){
+  return sgn(v) + (key==='mif' ? Math.abs(v*100).toFixed(1)+' pp'
+                               : Math.abs(v).toFixed(3));
+}
+var SIGTXT = ['not significant','significant at 90%','significant at 95%','significant at 99%'];
+
+function drawMatrix(key){
+  var b = D.bench[key];
+  var max = 0;
+  for (var i=0;i<9;i++) for (var j=0;j<9;j++)
+    if (i!==j) max = Math.max(max, Math.abs(b.delta[i][j]));
+
+  var h = '<thead><tr><th class="corner">Prefix &#8595; &nbsp;/&nbsp; Suffix &#8594;</th>';
+  for (var c=0;c<9;c++)
+    h += '<th><span style="color:'+vcol(c)+'">&#9632;</span> '+
+         D.short[c]+'</th>';
+  h += '</tr></thead><tbody>';
+
+  for (i=0;i<9;i++){
+    h += '<tr><th><span style="color:'+vcol(i)+'">&#9632;</span> '+
+         D.short[i]+'</th>';
+    for (j=0;j<9;j++){
+      var v = b.delta[i][j], s = b.stars[i][j];
+      if (i===j){
+        h += '<td><div class="cell diag" data-i="'+i+'" data-j="'+j+'">&#8212;</div></td>';
+      } else {
+        h += '<td><div class="cell" data-i="'+i+'" data-j="'+j+'" style="background:'+
+             ramp(v,max)+';color:'+inkOn(v,max)+'">'+
+             (v>0?'+':v<0?'&#8722;':'')+Math.abs(v).toFixed(3).slice(1)+
+             (s?'<span class="star">'+'*'.repeat(s)+'</span>':'')+'</div></td>';
+      }
+    }
+    h += '</tr>';
+  }
+  document.getElementById('mx').innerHTML = h + '</tbody>';
+
+  document.getElementById('ramp').style.background =
+    'linear-gradient(90deg,'+mix(MID,NEG,1)+','+mix(MID,NEG,.45)+',#fff,'+
+    mix(MID,POS,.45)+','+mix(MID,POS,1)+')';
+  document.getElementById('scalelo').textContent = fmt(-max,key)+'  \u00b7 hurt';
+  document.getElementById('scalehi').textContent = 'helped \u00b7  '+fmt(max,key);
+  document.getElementById('mxnote').innerHTML = key==='coqa'
+    ? 'CoQA keeps the source passage in context the whole time, so the suffix model always has the evidence even when it did not write the earlier answers. Drift persists anyway. The authors read this as the suffix treating prior assistant answers as settled conversational state — entity choices, coreference resolutions, implied commitments — and staying consistent with them instead of fully re-grounding on the passage. Strongest degradation: GPT&#8209;5-nano into DeepSeek&#8209;v3.2, about &#8722;0.045 F1.'
+    : 'Multi-IF scores turn-3 strict success, so it is highly sensitive to formatting and accumulated instruction adherence. The largest effects here are positive, consistent with a stronger prefix stabilising a compliant output regime for a weaker suffix. The clearest example: Claude&#8209;Sonnet&#8209;4.5 into GPT&#8209;5-nano, about +13 points.';
+
+  var cells = document.querySelectorAll('#mx .cell');
+  Array.prototype.forEach.call(cells, function(el){
+    el.addEventListener('mousemove', function(e){
+      var i=+el.dataset.i, j=+el.dataset.j, a=b.abs[i][j];
+      if (i===j){
+        showTip('<b>'+D.short[j]+'</b> &#183; no-switch baseline<br>'+
+          '<span class="tv">'+a[0].toFixed(3)+'</span> <span class="tsub">[95% CI '+
+          a[1].toFixed(3)+', '+a[2].toFixed(3)+']</span><br>'+
+          '<span class="tsub">writes the whole dialogue itself</span>', e);
+      } else {
+        var v=b.delta[i][j], s=b.stars[i][j];
+        showTip('<b>'+D.short[i]+' &#8594; '+D.short[j]+'</b><br>'+
+          '<span class="tsub">'+D.short[i]+' writes turns 1&#8230;L&#8722;1, '+D.short[j]+' writes the last</span><br>'+
+          '&#916; <span class="tv">'+fmt(v,key)+'</span> <span class="tsub">'+SIGTXT[s]+'</span><br>'+
+          '<span class="tsub">cell mean '+a[0].toFixed(3)+' [CI '+a[1].toFixed(3)+', '+a[2].toFixed(3)+
+          '] vs baseline '+b.abs[j][j][0].toFixed(3)+'</span>', e);
+      }
+    });
+    el.addEventListener('mouseleave', hideTip);
+  });
+}
+
+/* ---------- horizontal bars ---------- */
+function drawBars(node, rows, max, key, signed){
+  node.innerHTML = rows.map(function(r){
+    var pct = Math.abs(r.v)/max*(signed?50:100);
+    var left = signed ? (r.v<0 ? 50-pct : 50) : 0;
+    return '<div class="bar"><div class="bl">'+r.label+'</div>'+
+      '<div class="track">'+(signed?'<div class="zeroline" style="left:50%"></div>':'')+
+      '<div class="fill" data-w="'+pct+'" style="left:'+left+'%;background:'+r.color+'"></div></div>'+
+      '<div class="bv">'+r.text+'</div></div>';
+  }).join('');
+  requestAnimationFrame(function(){
+    Array.prototype.forEach.call(node.querySelectorAll('.fill'), function(f){
+      f.style.width = f.dataset.w+'%';
+    });
+  });
+}
+
+function drawExtremes(key){
+  var b = D.bench[key], all = [];
+  for (var i=0;i<9;i++) for (var j=0;j<9;j++) if (i!==j)
+    all.push({i:i,j:j,v:b.delta[i][j],s:b.stars[i][j]});
+  all.sort(function(a,c){ return Math.abs(c.v)-Math.abs(a.v); });
+  var top = all.slice(0,10).sort(function(a,c){ return c.v-a.v; });
+  var max = Math.max.apply(null, top.map(function(r){ return Math.abs(r.v); }));
+  drawBars(document.getElementById('xbars'), top.map(function(r){
+    return { v:r.v, color: r.v<0 ? 'var(--neg)' : 'var(--pos)',
+      label: D.short[r.i]+' <em>&#8594;</em> '+D.short[r.j],
+      text: fmt(r.v,key).replace(' pp','<span class="u"> pp</span>') +
+            (r.s ? '<span class="u">'+'*'.repeat(r.s)+'</span>' : '') };
+  }), max, key, true);
+  document.getElementById('xnote').innerHTML = key==='mif'
+    ? 'Read against the distribution: only 18 of 72 Multi-IF switches clear 95% significance at all, and the median absolute effect is far smaller than these ten. Multi-IF baselines themselves sit between 0.33 and 0.50 strict success, so a 13-point swing is large relative to the metric.'
+    : 'Read against the distribution: only 16 of 72 CoQA switches clear 95% significance, and most cells fall between &#8722;0.02 and +0.03 F1 against baselines of roughly 0.72 to 0.79. The headline &#177;4 F1 figure is the tail of this grid, not its centre.';
+}
+
+function drawFactors(key){
+  var b = D.bench[key], unitScale = key==='mif' ? 100 : 1;
+  ['alpha','beta'].forEach(function(which){
+    var rows = b[which].map(function(v,i){ return {v:v,i:i}; })
+      .sort(function(a,c){ return c.v-a.v; });
+    var max = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.v); }));
+    drawBars(document.getElementById(which==='alpha'?'abars':'bbars'),
+      rows.map(function(r){
+        return { v:r.v, color: vcol(r.i), label: D.short[r.i],
+          text: sgn(r.v) + Math.abs(r.v*unitScale).toFixed(key==='mif'?1:4) +
+                (key==='mif' ? '<span class="u"> pp</span>' : '') };
+      }), max, key, true);
+  });
+  document.getElementById('r2note').textContent =
+    'R\u00B2 = 0.825 on CoQA and 0.848 on Multi-IF, against the paper\u2019s 0.827 and 0.848';
+}
+
+/* ---------- toggles ---------- */
+function bindToggle(attr, fn){
+  var btns = document.querySelectorAll('[data-'+attr+']');
+  Array.prototype.forEach.call(btns, function(btn){
+    btn.addEventListener('click', function(){
+      Array.prototype.forEach.call(btns, function(b2){
+        b2.setAttribute('aria-pressed', String(b2===btn)); });
+      fn(btn.dataset[attr]);
+    });
+  });
+}
+bindToggle('b', drawMatrix);
+bindToggle('x', drawExtremes);
+bindToggle('f', drawFactors);
+
+drawMatrix('coqa');
+drawExtremes('mif');
+drawFactors('coqa');
+window.addEventListener('scroll', hideTip, {passive:true});
+})();
+
+</script>
+<!-- visit-beacon:start -->
+<script>
+/* Counts a pageview via analytics/ (Cloudflare Worker). No cookies, no storage,
+   no IP retained; geography is resolved at Cloudflare's edge. Fails silently. */
+(function(){try{
+var w=innerWidth,d=w<640?"mobile":w<1024?"tablet":"desktop";
+if(navigator.userAgentData&&navigator.userAgentData.mobile&&d!=="mobile")d="mobile";
+var r="direct";
+if(document.referrer){try{var h=new URL(document.referrer).hostname;if(h&&h!==location.hostname)r=h;}catch(e){}}
+var p=JSON.stringify({s:(location.pathname.split("/").pop()||"").replace(/\.html$/,"")||"gallery",r:r,d:d});
+var u="https://claude-works-analytics.satejp10.workers.dev/hit";
+if(navigator.sendBeacon){navigator.sendBeacon(u,new Blob([p],{type:"text/plain"}));}
+else{fetch(u,{method:"POST",body:p,keepalive:true});}
+}catch(e){}})();
+</script>
+<!-- visit-beacon:end -->
+</body>
+</html>
