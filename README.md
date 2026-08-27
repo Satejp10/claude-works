@@ -13,23 +13,26 @@ served live via **GitHub Pages** so you can view them rendered, not just as sour
 <!-- GALLERY:START -->
 <table>
   <tr>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/gpt5-transition-reddit.html"><img src="assets/thumbnails/gpt5-transition-reddit.png" alt="The GPT-5 Backlash Wasn't Mostly About Grief" width="420"></a><br><sub><b>The GPT-5 Backlash Wasn't Mostly About Grief</b></sub></td>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/Sun-light-shadow-plot/Solar%20light%20study.html"><img src="assets/thumbnails/sun-light-shadow-plot.png" alt="Plot Light Study" width="420"></a><br><sub><b>Plot Light Study</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/koyna-monsoon-dashboard.html"><img src="assets/thumbnails/koyna-monsoon-dashboard.png" alt="Koyna Dam — Monsoon Water & Power" width="420"></a><br><sub><b>Koyna Dam — Monsoon Water & Power</b></sub></td>
-  </tr>
-  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/how-india-got-online-pixel-quest.html"><img src="assets/thumbnails/how-india-got-online-pixel-quest.gif" alt="How India Got Online — Pixel Quest" width="420"></a><br><sub><b>How India Got Online — Pixel Quest</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/india-online-data-report.html"><img src="assets/thumbnails/india-online-data-report.png" alt="India Online — How a Billion Got Connected" width="420"></a><br><sub><b>India Online — How a Billion Got Connected</b></sub></td>
-  </tr>
-  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/ai-accelerators-2026.html"><img src="assets/thumbnails/ai-accelerators-2026.png" alt="AI Engines, What Runs Your AI?" width="420"></a><br><sub><b>AI Engines, What Runs Your AI?</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/EDGE/"><img src="assets/thumbnails/edge.gif" alt="EDGE — Browser Recreation" width="420"></a><br><sub><b>EDGE — Browser Recreation</b></sub></td>
-  </tr>
-  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/agentic-capabilities-june-2026.html"><img src="assets/thumbnails/agentic-capabilities-june-2026.png" alt="Agentic Capabilities" width="420"></a><br><sub><b>Agentic Capabilities</b></sub></td>
-    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/ai-lab-headcount.html"><img src="assets/thumbnails/ai-lab-headcount.png" alt="AI Labs, by Headcount" width="420"></a><br><sub><b>AI Labs, by Headcount</b></sub></td>
   </tr>
   <tr>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/ai-lab-headcount.html"><img src="assets/thumbnails/ai-lab-headcount.png" alt="AI Labs, by Headcount" width="420"></a><br><sub><b>AI Labs, by Headcount</b></sub></td>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/terminal-portfolio.html"><img src="assets/thumbnails/terminal-portfolio.png" alt="Terminal Portfolio" width="420"></a><br><sub><b>Terminal Portfolio</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/glass-morphism-design-trials.html"><img src="assets/thumbnails/glass-morphism-design-trials.png" alt="Liquid Glass — Design Trials" width="420"></a><br><sub><b>Liquid Glass — Design Trials</b></sub></td>
   </tr>
 </table>
