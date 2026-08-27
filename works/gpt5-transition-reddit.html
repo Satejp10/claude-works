@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The GPT-5 Backlash Wasn't Mostly About Grief — a Reddit corpus study</title>
+<meta name="description" content="A 9,908-post Reddit study of the August 2025 GPT-4o→GPT-5 transition. Capability complaints led on launch day; 'long threads broke' resolves into four separate causes — and the decisive bug report predates the launch.">
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="The GPT-5 backlash wasn't mostly about grief">
+<meta property="og:description" content="One symptom, four causes — and the decisive bug report predates the launch. A 9,908-post Reddit study of the Aug 2025 GPT-4o→GPT-5 transition.">
+<meta property="og:image" content="https://satejp10.github.io/claude-works/works/assets/og-gpt5-transition.png">
+<meta property="og:url" content="https://satejp10.github.io/claude-works/works/gpt5-transition-reddit.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The GPT-5 backlash wasn't mostly about grief">
+<meta name="twitter:description" content="One symptom, four causes — and the decisive bug report predates the launch.">
+<meta name="twitter:image" content="https://satejp10.github.io/claude-works/works/assets/og-gpt5-transition.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#fff; --ink:#1f1f1f; --lede:#3a3a3a; --muted:#737373; --faint:#a3a3a3;
+  --border:#e8e8e8; --grid:#f1f1f1; --axis:#d4d4d4; --hover:#faf8ff;
+  --accent:#7F4BF3; --accent-soft:#f2ecff;
+  --r:16px; --r-sm:5px;
+  --display:'Space Grotesk','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  /* data palette — one colour per category, reused across every chart */
+  --cap:#2B6CF6;    /* capability */
+  --emo:#E0729B;    /* emotional */
+  --pers:#C6603D;   /* personality / tone */
+  --cont:#1F9A5F;   /* continuity / long-thread */
+  --neutral:#9aa0a6;
+  /* four-cause palette */
+  --cA:#C6603D; --cB:#2B6CF6; --cC:#B8890B; --cD:#1F9A5F;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:16px;line-height:1.6;
+  font-feature-settings:"kern";text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:980px;margin:0 auto;padding:0 22px 96px}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* topbar */
+.topbar{display:flex;justify-content:space-between;align-items:center;
+  max-width:980px;margin:0 auto;padding:20px 22px 0}
+.wordmark{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:-0.01em}
+.wordmark .dot{color:var(--accent)}
+.stamp{font-family:var(--sans);font-size:13px;color:var(--faint)}
+
+/* hero */
+.hero{padding:34px 0 8px}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;margin-bottom:18px}
+.sq{width:13px;height:13px;border-radius:4px;background:var(--accent);display:inline-block}
+.eyebrow span{font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--display);font-weight:600;letter-spacing:-0.015em;
+  font-size:clamp(2.3rem,6.4vw,3.7rem);line-height:1.02;margin:0;max-width:17ch}
+.lede{font-size:clamp(1.05rem,2.3vw,1.28rem);color:var(--lede);margin:20px 0 0;max-width:64ch;line-height:1.5}
+
+/* key-stat row */
+.kstats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:34px 0 6px;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.kstat{padding:18px 18px 18px 0}
+.kstat:not(:last-child){border-right:1px solid var(--border);padding-right:18px}
+.kstat .n{font-family:var(--display);font-weight:600;font-size:1.9rem;line-height:1;letter-spacing:-0.01em}
+.kstat .l{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.35}
+@media(max-width:620px){.kstats{grid-template-columns:repeat(2,1fr)}
+  .kstat{border-right:none!important;padding-right:14px}
+  .kstat:nth-child(1),.kstat:nth-child(2){border-bottom:1px solid var(--border)}}
+
+/* sections */
+section{padding-top:52px}
+.sec-head{margin-bottom:20px}
+.sec-eyebrow{display:inline-flex;align-items:center;gap:9px;margin-bottom:11px}
+.sec-eyebrow .sq2{width:12px;height:12px;border-radius:4px;display:inline-block}
+.sec-eyebrow h2{font-family:var(--display);font-weight:600;font-size:1.35rem;margin:0;letter-spacing:-0.01em}
+.sub{color:var(--muted);font-size:14.5px;margin:0;max-width:70ch;line-height:1.5}
+
+/* pills */
+.pill{display:inline-block;font-family:var(--sans);font-weight:600;font-size:10.5px;
+  letter-spacing:.045em;padding:3px 7px;border-radius:999px;text-transform:uppercase;
+  vertical-align:middle;white-space:nowrap;line-height:1.1}
+.pill-analysis{background:var(--accent-soft);color:var(--accent)}
+.pill-source{background:#fff;color:var(--muted);border:1px solid var(--border)}
+.pill-date{background:#fdf3ee;color:#b8562e;border:1px solid #f0d8cc}
+.legend-note{font-size:12.5px;color:var(--faint);margin:14px 0 0;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.legend-note .k{display:inline-flex;align-items:center;gap:6px}
+
+/* card */
+.card{border:1px solid var(--border);border-radius:var(--r);padding:22px 22px 20px;background:#fff}
+
+/* horizontal bars */
+.bars{display:flex;flex-direction:column;gap:13px;margin-top:4px}
+.bar{display:grid;grid-template-columns:190px 1fr auto;align-items:center;gap:14px}
+.bar .lbl{font-size:13.5px;color:var(--ink);text-align:right;line-height:1.25}
+.bar .lbl small{display:block;color:var(--faint);font-size:11.5px}
+.track{height:22px;background:var(--grid);border-radius:var(--r-sm);overflow:hidden;position:relative}
+.fill{height:100%;border-radius:var(--r-sm);transform-origin:left center;
+  animation:grow 1.1s cubic-bezier(.2,.7,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media(prefers-reduced-motion:reduce){.fill{animation:none}}
+.bar .val{font-family:var(--sans);font-variant-numeric:tabular-nums;font-weight:600;font-size:14px;min-width:64px;text-align:right}
+.bar .val small{color:var(--faint);font-weight:400;font-size:11px;margin-left:2px}
+@media(max-width:600px){.bar{grid-template-columns:120px 1fr auto;gap:9px}
+  .bar .lbl{font-size:12px}.bar .lbl small{font-size:10.5px}}
+
+/* four-cause diagram */
+.symptom{border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;background:#fafafa;
+  text-align:center;max-width:560px;margin:0 auto 6px;position:relative}
+.symptom .t{font-family:var(--display);font-weight:600;font-size:1.05rem}
+.symptom .d{color:var(--muted);font-size:13px;margin-top:3px}
+.branch{display:flex;justify-content:center;color:var(--axis);margin:2px 0}
+.causes{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:6px}
+@media(max-width:640px){.causes{grid-template-columns:1fr}}
+.cause{border:1px solid var(--border);border-radius:var(--r);padding:16px 16px 14px;background:#fff;
+  border-top:3px solid var(--cline)}
+.cause .ctag{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.cause .cname{font-family:var(--display);font-weight:600;font-size:1rem}
+.cause .cev{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.cause p{margin:6px 0 10px;font-size:13.5px;color:var(--lede);line-height:1.5}
+.cause .src{font-size:12px;color:var(--faint);word-break:break-word}
+.cause .src a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border)}
+.cause .src a:hover{color:var(--accent);border-color:var(--accent)}
+
+/* chart */
+.chartwrap{position:relative}
+svg.chart{width:100%;height:auto;display:block;overflow:visible;font-family:var(--sans)}
+.gl{stroke:var(--grid);stroke-width:1;stroke-dasharray:2 3}
+.axis-l{stroke:var(--axis);stroke-width:1}
+.axlab{fill:var(--faint);font-size:11px}
+.series-cap{fill:none;stroke:var(--cap);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+.series-emo{fill:none;stroke:var(--emo);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
+.dot{cursor:pointer}
+.launch-line{stroke:var(--faint);stroke-width:1;stroke-dasharray:3 3}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;
+  padding:6px 9px;border-radius:8px;opacity:0;transform:translate(-50%,-120%);transition:opacity .12s;white-space:nowrap;z-index:5}
+.tip .tc{color:#9ec2ff}.tip .te{color:#f4b6ce}
+
+/* table */
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:13.5px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--grid);vertical-align:top}
+thead th{font-family:var(--sans);font-weight:600;font-size:12px;color:var(--muted);cursor:pointer;
+  white-space:nowrap;user-select:none;position:sticky;top:0;background:#fff}
+thead th:hover{color:var(--ink)}
+thead th .arw{color:var(--accent);font-size:10px;margin-left:3px;opacity:0}
+thead th.sorted .arw{opacity:1}
+tbody tr:hover{background:var(--hover)}
+td.study{font-weight:600;white-space:nowrap}
+td.finding{color:var(--lede);min-width:240px;font-size:13px;line-height:1.45}
+td:first-child,th:first-child{position:sticky;left:0;background:#fff;z-index:1}
+tbody tr:hover td:first-child{background:var(--hover)}
+.hatch{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;color:#b8562e;
+  background:repeating-linear-gradient(45deg,#fbeee7,#fbeee7 4px,#fff 4px,#fff 7px);
+  border:1px solid #f0d8cc;font-weight:600}
+.yes-dim{color:var(--faint)}
+
+/* quotes */
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+@media(max-width:720px){.quotes{grid-template-columns:1fr}}
+.quote{border-left:2px solid var(--cont);padding:2px 0 2px 15px}
+.quote p{margin:0 0 8px;font-size:14px;color:var(--ink);line-height:1.5}
+.quote .attr{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.quote .attr b{color:var(--muted);font-weight:600}
+
+/* two-event timeline */
+.tl{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:6px;position:relative}
+.tl:before{content:"";position:absolute;top:19px;left:8%;right:8%;height:2px;background:var(--border)}
+.tlnode{padding:0 14px;position:relative}
+.tldot{width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid #fff;
+  box-shadow:0 0 0 1px var(--border);position:relative;z-index:2;margin-bottom:12px}
+.tlnode:nth-child(2) .tldot{background:var(--ink)}
+.tldate{font-family:var(--display);font-weight:600;font-size:1rem}
+.tlwhat{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+.tltag{font-size:11px;color:var(--faint);margin-top:6px;font-style:italic}
+
+/* context-window callout */
+.cwbox{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+@media(max-width:640px){.cwbox{grid-template-columns:1fr}}
+.cwcol{border:1px solid var(--border);border-radius:var(--r);padding:18px 18px 16px}
+.cwcol h4{margin:0 0 4px;font-family:var(--display);font-weight:600;font-size:.98rem}
+.cwcol .sub2{font-size:12.5px;color:var(--faint);margin:0 0 12px}
+.cwcol ul{margin:0;padding-left:0;list-style:none}
+.cwcol li{font-size:13.5px;color:var(--lede);padding:6px 0;border-top:1px solid var(--grid);display:flex;justify-content:space-between;gap:10px}
+.cwcol li:first-child{border-top:none}
+.cwcol li b{font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+
+/* method strip */
+.method{margin-top:56px;border-top:1px solid var(--ink);border-bottom:1px solid var(--border);padding:18px 0}
+.method .me{font-family:var(--sans);font-weight:600;font-size:11px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.method p{margin:0 0 10px;font-size:12.5px;color:var(--muted);line-height:1.55;max-width:88ch}
+.method p:last-child{margin-bottom:0}
+.method b{color:var(--lede)}
+
+/* footer */
+footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+footer .src{font-size:11.5px;color:var(--faint);max-width:78ch;line-height:1.55}
+footer .src a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border)}
+footer .ver{font-family:var(--sans);font-variant-numeric:tabular-nums;font-size:12px;color:var(--faint);white-space:nowrap}
+
+.disc{font-size:11.5px;color:var(--faint);margin-top:14px;font-style:italic;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wordmark">satej<span class="dot">.</span>works</div>
+  <div class="stamp tnum">Updated Aug 2026</div>
+</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="eyebrow"><span class="sq"></span><span>Reddit corpus study · Aug–Sep 2025</span></div>
+    <h1>GPT-4o to GPT-5</h1>
+    <p class="lede">When OpenAI replaced GPT-4o on 7 August 2025, the story became "people mourning their AI companion." A 9,908-post Reddit corpus tells a different one: <b>capability complaints led on launch day</b>, and the phrase "my long threads broke" hides at least four separate causes — one of them documented a month <em>before</em> GPT-5 shipped.</p>
+  </div>
+
+  <div class="kstats">
+    <div class="kstat"><div class="n tnum">9,908</div><div class="l">posts + 5,270 comments analysed</div></div>
+    <div class="kstat"><div class="n tnum">264</div><div class="l">verified within-thread continuity complaints</div></div>
+    <div class="kstat"><div class="n tnum">4</div><div class="l">distinct causes behind one symptom</div></div>
+    <div class="kstat"><div class="n tnum">6</div><div class="l">prior studies — none on capability</div></div>
+  </div>
+  <p class="disc">Numbers marked <span class="pill pill-analysis">Analysis</span> are this project's classification of a Reddit corpus, not a published statistic. Numbers and events marked <span class="pill pill-source">Source</span> are drawn from published studies, OpenAI documentation, or filed bug reports and were verified against the original on 27 Aug 2026.</p>
+
+  <!-- FOUR CAUSES -->
+  <section id="causes">
+    <div class="sec-head">
+      <div class="sec-eyebrow"><span class="sq2" style="background:var(--ink)"></span><h2>One symptom, four causes</h2></div>
+      <p class="sub">Users reported a single experience — the model losing track of a long conversation. The evidence shows that experience had at least four distinct roots, colliding in the same fortnight. No user could tell them apart from inside a chat. <span class="pill pill-source">Source</span></p>
+    </div>
+
+    <div class="symptom">
+      <div class="t">"It forgot everything in our conversation."</div>
+      <div class="d">The reported symptom — consistent across coders, writers, researchers, and companion users.</div>
+    </div>
+    <div class="branch">
+      <svg width="60" height="26" viewBox="0 0 60 26" aria-hidden="true"><path d="M30 0 V10 M30 10 H6 V26 M30 10 H54 V26 M30 10 V26" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+    </div>
+
+    <div class="causes">
+      <div class="cause" style="--cline:var(--cA)">
+        <div class="ctag"><span class="cname" style="color:var(--cA)">A · Pre-existing context limit</span></div>
+        <div class="ctag"><span class="cev">Filed bug report</span><span class="pill pill-date">Dated before launch</span></div>
+        <p>A bug report on OpenAI's own developer forum — <b>8 July 2025, a month before GPT-5</b> — already described the symptom: after roughly 30–50 messages, GPT-4o forgot the earlier part of the same chat. Within-thread forgetting existed on 4o before GPT-5 shipped.</p>
+        <div class="src">community.openai.com → <a href="https://community.openai.com/t/bug-gpt-4o-memory-regression-context-loss-across-chats-and-inside-threads/1310926" target="_blank" rel="noopener">4o memory-regression thread</a></div>
+      </div>
+
+      <div class="cause" style="--cline:var(--cB)">
+        <div class="ctag"><span class="cname" style="color:var(--cB)">B · A real GPT-5 regression</span></div>
+        <div class="ctag"><span class="cev">Filed issue · Sep 2025</span></div>
+        <p>A structured report on OpenAI's cookbook issue tracker claims GPT-5 loses previously supplied context across turns where GPT-4 did not — the reporter explicitly calls it a regression. So it is not only baseline: a technical user who could compare claimed a genuine GPT-5-specific loss.</p>
+        <div class="src">github.com → <a href="https://github.com/openai/openai-cookbook/issues/2154" target="_blank" rel="noopener">openai-cookbook issue #2154</a></div>
+      </div>
+
+      <div class="cause" style="--cline:var(--cC)">
+        <div class="ctag"><span class="cname" style="color:var(--cC)">C · A concurrent data-loss bug</span></div>
+        <div class="ctag"><span class="cev">Filed bug report · Oct 2025</span></div>
+        <p>A separate forum thread describes long conversations progressively breaking: parts of the dialogue disappearing, the interface returning a content-loading failure. A frontend/persistence bug — messages actually vanishing — that looks identical to the user but has a completely different root cause.</p>
+        <div class="src">community.openai.com → <a href="https://community.openai.com/t/critical-chatgpt-data-loss-engineering-fix-urgently-needed/1360675" target="_blank" rel="noopener">data-loss thread</a></div>
+      </div>
+
+      <div class="cause" style="--cline:var(--cD)">
+        <div class="ctag"><span class="cname" style="color:var(--cD)">D · Model swap + routing</span></div>
+        <div class="ctag"><span class="cev">Launch notes + user theory</span><span class="pill pill-analysis">Analysis</span></div>
+        <p>OpenAI's launch auto-routed retired-model chats to the nearest GPT-5 variant; "Auto" itself routes across internal models. In the corpus, users felt this as sudden tonal or capability shifts mid-conversation and theorised a hidden "safety router." The routing was real; the mechanism they inferred was mostly unverifiable.</p>
+        <div class="src">OpenAI GPT-5 launch notes (7 Aug 2025) + corpus discourse</div>
+      </div>
+    </div>
+    <p class="disc">Four causes, one symptom, same two weeks, none separable from inside a chat. The existing literature never untangled this because it never examined the continuity axis at all.</p>
+  </section>
+
+  <!-- TIMELINE CHART -->
+  <section id="timeline">
+    <div class="sec-head">
+      <div class="sec-eyebrow"><span class="sq2" style="background:var(--cap)"></span><h2>Capability complaints led on launch day</h2></div>
+      <p class="sub">Posts carrying a capability signal vs an emotional signal, by day. On 7 August — launch — task complaints outnumbered emotional ones; emotion overtook on the 8th. <span class="pill pill-analysis">Analysis</span></p>
+    </div>
+    <div class="card">
+      <div class="chartwrap">
+        <svg class="chart" viewBox="0 0 720 300" role="img" aria-label="Line chart: capability vs emotional signal posts per day, Aug 6-18 2025">
+          <!-- gridlines -->
+          <g>
+            <line class="gl" x1="44" y1="258" x2="704" y2="258"></line>
+            <line class="gl" x1="44" y1="213.4" x2="704" y2="213.4"></line>
+            <line class="gl" x1="44" y1="168.8" x2="704" y2="168.8"></line>
+            <line class="gl" x1="44" y1="124.2" x2="704" y2="124.2"></line>
+            <line class="gl" x1="44" y1="79.6" x2="704" y2="79.6"></line>
+            <line class="gl" x1="44" y1="35" x2="704" y2="35"></line>
+            <text class="axlab" x="38" y="261" text-anchor="end">0</text>
+            <text class="axlab" x="38" y="171" text-anchor="end">100</text>
+            <text class="axlab" x="38" y="82" text-anchor="end">200</text>
+            <text class="axlab" x="38" y="38" text-anchor="end">250</text>
+          </g>
+          <!-- axis baseline -->
+          <line class="axis-l" x1="44" y1="258" x2="704" y2="258"></line>
+          <!-- launch marker -->
+          <line class="launch-line" x1="99" y1="18" x2="99" y2="258"></line>
+          <text class="axlab" x="103" y="28" style="fill:#8a8a8a">GPT-5 launch</text>
+          <!-- series -->
+          <polyline class="series-emo" points="44.0,241.0 99.0,216.1 154.0,18.9 209.0,55.5 264.0,84.0 319.0,118.8 374.0,154.5 429.0,178.6 484.0,200.0 539.0,206.3 594.0,200.9 649.0,217.9 704.0,225.0"></polyline>
+          <polyline class="series-cap" points="44.0,247.3 99.0,183.9 154.0,18.0 209.0,91.2 264.0,101.0 319.0,117.0 374.0,165.2 429.0,199.1 484.0,204.5 539.0,208.9 594.0,219.6 649.0,225.9 704.0,225.0"></polyline>
+          <!-- x labels -->
+          <g class="axlab" text-anchor="middle">
+            <text x="44" y="274">Aug 6</text><text x="99" y="274">7</text><text x="154" y="274">8</text>
+            <text x="209" y="274">9</text><text x="264" y="274">10</text><text x="319" y="274">11</text>
+            <text x="374" y="274">12</text><text x="429" y="274">13</text><text x="484" y="274">14</text>
+            <text x="539" y="274">15</text><text x="594" y="274">16</text><text x="649" y="274">17</text><text x="704" y="274">18</text>
+          </g>
+          <!-- interactive dots (built to hold data-* for the tooltip) -->
+          <g id="dots"></g>
+        </svg>
+        <div class="tip" id="tip"></div>
+      </div>
+      <div class="legend-note">
+        <span class="k"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--cap)" stroke-width="2.4"/></svg> capability signal</span>
+        <span class="k"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="var(--emo)" stroke-width="2.4"/></svg> emotional signal</span>
+        <span class="k" style="color:var(--faint)">Whole storm ≈ 10 days — three-quarters of volume in the first four. An acute shock, not a slow burn.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE SPLIT -->
+  <section id="split">
+    <div class="sec-head">
+      <div class="sec-eyebrow"><span class="sq2" style="background:var(--emo)"></span><h2>The split wasn't companion-dominated</h2></div>
+      <p class="sub">Share of all 9,908 posts carrying each signal (single-label by presence). Emotional leads capability, but only just — and most posts carry neither. <span class="pill pill-analysis">Analysis</span></p>
+    </div>
+    <div class="card">
+      <div class="bars" id="splitbars">
+        <div class="bar"><div class="lbl">Neither signal</div><div class="track"><div class="fill" style="background:var(--neutral);width:63.2%" data-w="63.2"></div></div><div class="val tnum">63.2<small>%</small></div></div>
+        <div class="bar"><div class="lbl">Emotional only</div><div class="track"><div class="fill" style="background:var(--emo);width:15.8%" data-w="15.8"></div></div><div class="val tnum">15.8<small>%</small></div></div>
+        <div class="bar"><div class="lbl">Capability only</div><div class="track"><div class="fill" style="background:var(--cap);width:12.5%" data-w="12.5"></div></div><div class="val tnum">12.5<small>%</small></div></div>
+        <div class="bar"><div class="lbl">Both present</div><div class="track"><div class="fill" style="background:linear-gradient(90deg,var(--cap),var(--emo));width:8.5%" data-w="8.5"></div></div><div class="val tnum">8.5<small>%</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WEIGHTED BY UPVOTES -->
+  <section id="weighted">
+    <div class="sec-head">
+      <div class="sec-eyebrow"><span class="sq2" style="background:var(--pers)"></span><h2>Weighted by upvotes, three complaints tie</h2></div>
+      <p class="sub">Total upvotes on posts carrying each complaint type. The companion story dominated the media; in the discourse, capability and long-thread complaints sit at the same order of magnitude as tone. Higher = more community weight. <span class="pill pill-analysis">Analysis</span></p>
+    </div>
+    <div class="card">
+      <div class="bars" id="wbars">
+        <div class="bar"><div class="lbl">Personality / tone</div><div class="track"><div class="fill" style="background:var(--pers);width:100%" data-w="100"></div></div><div class="val tnum">35.5k</div></div>
+        <div class="bar"><div class="lbl">Capability / quality</div><div class="track"><div class="fill" style="background:var(--cap);width:76.9%" data-w="76.9"></div></div><div class="val tnum">27.3k</div></div>
+        <div class="bar"><div class="lbl">Long-thread / context</div><div class="track"><div class="fill" style="background:var(--cont);width:68.5%" data-w="68.5"></div></div><div class="val tnum">24.3k</div></div>
+        <div class="bar"><div class="lbl">Router / model choice</div><div class="track"><div class="fill" style="background:var(--neutral);width:52.1%" data-w="52.1"></div></div><div class="val tnum">18.5k</div></div>
+        <div class="bar"><div class="lbl">Emotional attachment</div><div class="track"><div class="fill" style="background:var(--emo);width:49.3%" data-w="49.3"></div></div><div class="val tnum">17.5k</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LONG-THREAD DECOMPOSITION + QUOTES -->
+  <section id="decomp">
+    <div class="sec-head">
+      <div class="sec-eyebrow"><span class="sq2" style="background:var(--cont)"></span><h2>"Memory / context" is four different complaints</h2></div>
+      <p class="sub">Of 750 posts matching memory/context keywords, hand-reading splits them into four distinct phenomena — the same conflation as the causes above, visible in the data. Only the first is the within-conversation continuity question. <span class="pill pill-analysis">Analysis</span></p>
+    </div>
+    <div class="card">
+      <div class="bars" id="dbars">
+        <div class="bar"><div class="lbl">Within-thread continuity <small>the core signal</small></div><div class="track"><div class="fill" style="background:var(--cont);width:100%" data-w="100"></div></div><div class="val tnum">264<small> posts</small></div></div>
+        <div class="bar"><div class="lbl">Long project / workflow <small>months of work disrupted</small></div><div class="track"><div class="fill" style="background:var(--neutral);width:33.7%" data-w="33.7"></div></div><div class="val tnum">89</div></div>
+        <div class="bar"><div class="lbl">Cross-chat memory feature <small>a different system</small></div><div class="track"><div class="fill" style="background:var(--neutral);width:20.5%" data-w="20.5"></div></div><div class="val tnum">54</div></div>
+        <div class="bar"><div class="lbl">Context-window size <small>the published number</small></div><div class="track"><div class="fill" style="background:var(--neutral);width:20.1%" data-w="20.1"></div></div><div class="val tnum">53</div></div>
+      </div>
+    </div>
+
+    <div class="quotes">
+      <div class="quote"><p>"GPT-5 hallucinates. It forgets context. It feels unstable and inconsistent. GPT-4o was sharp, focused, and reliable."</p><div class="attr"><b>r/ChatGPT</b> · 325 ▲</div></div>
+      <div class="quote"><p>"…it can't follow complex situations as well, doesn't reason as well within the chat."</p><div class="attr"><b>r/ChatGPT</b> · 163 ▲</div></div>
+      <div class="quote"><p>A physics researcher reported GPT-5 "paralyzed my research" across four separate professional uses.</p><div class="attr"><b>r/OpenAI</b> · 139 ▲</div></div>
+    </div>
+    <p class="disc">The 264 come from coders, novelists, and researchers independently — not the companion subreddit. In the comments, corroboration of the continuity complaint clearly outweighed organised "it's placebo" skepticism, though archived comment scores are unreliable so no precise ratio is claimed. The sharpest tell: users who switched back to legacy GPT-4.1 reported continuity returned — same person, same threads, swap the model, symptom changes.</p>
+  </section>
+
+  <!-- CONTEXT WINDOW -->
+  <section id="context">
+    <div class="sec-head">
+      <div class="sec-eyebrow"><span class="sq2" style="background:var(--cA)"></span><h2>How ChatGPT handles a too-long thread: half-answered</h2></div>
+      <p class="sub">The published side and the undocumented side of the same question. The gap is the story — users were left to reverse-engineer. <span class="pill pill-source">Source</span></p>
+    </div>
+    <div class="cwbox">
+      <div class="cwcol">
+        <h4>Published — context-window size</h4>
+        <p class="sub2">OpenAI states these by plan; users documented them and raged at the Plus ceiling.</p>
+        <ul>
+          <li><span>Free</span><b>~8K tokens</b></li>
+          <li><span>Plus / Business</span><b>~32K</b></li>
+          <li><span>Pro / Enterprise</span><b>128K</b></li>
+          <li><span>Thinking (paid)</span><b>up to 256K</b></li>
+        </ul>
+      </div>
+      <div class="cwcol">
+        <h4>Not published — the overflow mechanism</h4>
+        <p class="sub2">What happens when a thread exceeds the window is undocumented.</p>
+        <ul>
+          <li><span>Truncate vs summarise?</span><b>Undocumented</b></li>
+          <li><span>Older turns pushed out</span><b>Observed</b></li>
+          <li><span>Recency prioritised</span><b>Observed</b></li>
+          <li><span>Window resets per chat</span><b>Yes</b></li>
+        </ul>
+      </div>
+    </div>
+    <p class="disc">Every specific "it auto-compresses" claim online is inference from behaviour, not OpenAI documentation. With Plus at ~32K, heavy users' threads were already shedding early turns <em>before</em> GPT-5 arrived — Cause A, restated from the platform side. The "Context Degradation Syndrome" term circulating in blogs has no official standing and is excluded here as a source.</p>
+  </section>
+
+  <!-- AGAINST THE LITERATURE -->
+  <section id="studies">
+    <div class="sec-head">
+      <div class="sec-eyebrow"><span class="sq2" style="background:var(--accent)"></span><h2>Six studies exist — none on the capability axis</h2></div>
+      <p class="sub">Every prior study of this event measured attachment, grief, or governance. The right-hand column is the gap this page fills. Click a header to sort. <span class="pill pill-source">Source</span> <span style="color:var(--faint);font-size:12.5px">· all verified 27 Aug 2026</span></p>
+    </div>
+    <div class="tablewrap">
+      <table id="studytable">
+        <thead>
+          <tr>
+            <th data-k="study" data-t="s">Study <span class="arw">▼</span></th>
+            <th data-k="year" data-t="n">Year <span class="arw">▼</span></th>
+            <th data-k="corpus" data-t="n">Corpus <span class="arw">▼</span></th>
+            <th data-k="platform" data-t="s">Platform <span class="arw">▼</span></th>
+            <th data-k="focus" data-t="s">Focus <span class="arw">▼</span></th>
+            <th data-k="cap" data-t="s">Capability / continuity? <span class="arw">▼</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-study="Keeman & Keeman" data-year="2026" data-corpus="2100" data-platform="Scored responses" data-focus="Empathy / safety" data-cap="0">
+            <td class="study">Keeman &amp; Keeman</td><td class="tnum">2026</td><td class="tnum">2,100</td><td>Scored responses</td><td>Empathy / safety</td>
+            <td class="finding">Empathy indistinguishable across models (p=0.115); safety posture shifted. <span class="hatch">No</span></td>
+          </tr>
+          <tr data-study="Wu" data-year="2026" data-corpus="61846" data-platform="X" data-focus="Themes / governance" data-cap="0">
+            <td class="study">Wu</td><td class="tnum">2026</td><td class="tnum">61,846</td><td>X</td><td>Themes / governance</td>
+            <td class="finding">Widest net; version succession ≠ effective replacement on the user side. <span class="hatch">No</span></td>
+          </tr>
+          <tr data-study="Lai" data-year="2026" data-corpus="1482" data-platform="X" data-focus="Resistance / rights" data-cap="0">
+            <td class="study">Lai</td><td class="tnum">2026</td><td class="tnum">1,482</td><td>X (#keep4o)</td><td>Resistance / rights</td>
+            <td class="finding">Instrumental vs relational attachment; loss of choice drove protest. <span class="hatch">No</span></td>
+          </tr>
+          <tr data-study="Naito" data-year="2025" data-corpus="150" data-platform="Multi" data-focus="Attachment / culture" data-cap="0">
+            <td class="study">Naito</td><td class="tnum">2025</td><td class="tnum">150</td><td>Multi-platform</td><td>Attachment / culture</td>
+            <td class="finding">Attachment framing 78% JP vs 38% EN (χ²=24.9). <span class="hatch">No</span></td>
+          </tr>
+          <tr data-study="Madsen" data-year="2025" data-corpus="0" data-platform="Discourse" data-focus="Parasocial theory" data-cap="0">
+            <td class="study">Madsen</td><td class="tnum">2025</td><td class="tnum" data-sortval="0">conceptual</td><td>Discourse</td><td>Parasocial theory</td>
+            <td class="finding">Frames it as a parasocial breakup / breach of an "affective contract". <span class="hatch">No</span></td>
+          </tr>
+          <tr data-study="Donard & Ribeiro" data-year="2026" data-corpus="3668" data-platform="Reddit + YouTube" data-focus="Mourning / mental health" data-cap="0">
+            <td class="study">Donard &amp; Ribeiro</td><td class="tnum">2026</td><td class="tnum">3,668</td><td>Reddit + YouTube</td><td>Mourning / MH</td>
+            <td class="finding">Nine themes; attachment (425), disappointment (263), grief (110). <span class="hatch">No</span></td>
+          </tr>
+          <tr data-study="This page" data-year="2026" data-corpus="9908" data-platform="Reddit" data-focus="Capability / continuity" data-cap="1" style="background:var(--accent-soft)">
+            <td class="study" style="color:var(--accent)">This page</td><td class="tnum">2026</td><td class="tnum">9,908</td><td>Reddit</td><td style="color:var(--accent);font-weight:600">Capability / continuity</td>
+            <td class="finding" style="color:var(--ink)">The unfilled axis: within-thread continuity, capability-led timeline, four-cause separation. <b style="color:var(--accent)">Yes</b></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="disc">Because Wu already covered X at 61,846 posts, Reddit is the differentiator — it is where workflow and long-thread complaints live rather than hashtag activism.</p>
+  </section>
+
+  <!-- TWO-EVENT TIMELINE -->
+  <section id="twoevents">
+    <div class="sec-head">
+      <div class="sec-eyebrow"><span class="sq2" style="background:var(--ink)"></span><h2>Two events, one hashtag — don't conflate them</h2></div>
+      <p class="sub">#keep4o spans two distinct moments. This page's corpus and most studies cover the first; one study (Keeman) is framed around the second. <span class="pill pill-source">Source</span></p>
+    </div>
+    <div class="tl">
+      <div class="tlnode">
+        <div class="tldot"></div>
+        <div class="tldate">7 Aug 2025</div>
+        <div class="tlwhat">The launch shock. GPT-5 replaces 4o with no warning; 4o is pulled, then restored as a legacy model within days after backlash.</div>
+        <div class="tltag">← this corpus + Wu, Lai, Naito, Madsen, Donard &amp; Ribeiro</div>
+      </div>
+      <div class="tlnode">
+        <div class="tldot"></div>
+        <div class="tldate">13 Feb 2026</div>
+        <div class="tlwhat">The actual retirement. OpenAI removes 4o from ChatGPT for real, ~6 months after reversing the first attempt. #keep4o resurges.</div>
+        <div class="tltag">← Keeman &amp; Keeman is framed around this event</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- METHOD -->
+  <div class="method">
+    <div class="me">Method &amp; limitations</div>
+    <p><b>Corpus.</b> 9,908 unique Reddit posts + 5,270 comments from r/ChatGPT, r/ChatGPTPro, r/MyBoyfriendIsAI and r/OpenAI, 6 Aug–30 Sep 2025, retrieved via the Arctic Shift archive. Post-level upvote scores are intact; archived comment scores are not, so comments are sampled thematically rather than ranked.</p>
+    <p><b>Classification is keyword-based</b>, hand-verified only on the 264-post continuity bucket and every quoted item. The macro split and upvote-weighted figures describe the <b>shape and proportion of the discourse</b> — they are not measurements of the model, and "forgets after two messages" is user perception, likely hyperbole. Complaint-cause theory counts carry more false positives than the topic buckets.</p>
+    <p><b>Two archive traps were handled</b> (and are worth recording): the API caps at 100 results per call, so wide date ranges silently return only the newest slice — every launch-week day exceeded the cap and needed recursive sub-day slicing (r/ChatGPT, Aug 8: 100 → 620 posts). And a <code>422</code> on high-volume windows is a server hiccup, not an empty result — the same window returns 50 rows at a smaller limit, so naive handling under-reports the busiest slices.</p>
+    <p><b>Sourcing.</b> Primary/official only — arXiv, OpenAI documentation, filed forum and issue reports. Forum/issue items are individual reports, not audited by OpenAI, and are treated as credible technical testimony rather than established fact. Corpus is Reddit-only; X is covered by Wu.</p>
+  </div>
+
+  <footer>
+    <div class="src">
+      <b>Sources.</b> OpenAI developer forum (4o memory regression, 8 Jul 2025; data-loss thread, Oct 2025); openai-cookbook issue #2154 (Sep 2025); OpenAI GPT-5 launch notes &amp; System Card (arXiv 2601.03267).
+      Studies: Keeman &amp; Keeman (arXiv <a href="https://arxiv.org/abs/2603.09997" target="_blank" rel="noopener">2603.09997</a>); Wu (arXiv <a href="https://arxiv.org/abs/2608.16574" target="_blank" rel="noopener">2608.16574</a>); Lai (arXiv <a href="https://arxiv.org/abs/2602.00773" target="_blank" rel="noopener">2602.00773</a>, CHI 2026); Naito (arXiv <a href="https://arxiv.org/abs/2508.16624" target="_blank" rel="noopener">2508.16624</a>); Madsen (SSRN 5515078); Donard &amp; Ribeiro (Academia MH&amp;WB, doi 10.20935/MHealthWellB8256). Corpus via Arctic Shift. <br>
+      Figures marked <span class="pill pill-analysis">Analysis</span> are the author's classification of the Reddit corpus. Studies verified against source 27 Aug 2026.
+    </div>
+    <div class="ver tnum">v1.0 · Aug 2026</div>
+  </footer>
+
+</div>
+
+<!-- visit-beacon:start -->
+<script>
+/* Counts a pageview via analytics/ (Cloudflare Worker). No cookies, no storage,
+   no IP retained; geography is resolved at Cloudflare's edge. Fails silently. */
+(function(){try{
+var w=innerWidth,d=w<640?"mobile":w<1024?"tablet":"desktop";
+if(navigator.userAgentData&&navigator.userAgentData.mobile&&d!=="mobile")d="mobile";
+var r="direct";
+if(document.referrer){try{var h=new URL(document.referrer).hostname;if(h&&h!==location.hostname)r=h;}catch(e){}}
+var p=JSON.stringify({s:(location.pathname.split("/").pop()||"").replace(/\.html$/,"")||"gallery",r:r,d:d});
+var u="https://claude-works-analytics.satejp10.workers.dev/hit";
+if(navigator.sendBeacon){navigator.sendBeacon(u,new Blob([p],{type:"text/plain"}));}
+else{fetch(u,{method:"POST",body:p,keepalive:true});}
+}catch(e){}})();
+</script>
+<!-- visit-beacon:end -->
+
+<script>
+(function(){
+  "use strict";
+  // --- line chart: build interactive dots + tooltip ---
+  var days=['Aug 6','Aug 7','Aug 8','Aug 9','Aug 10','Aug 11','Aug 12','Aug 13','Aug 14','Aug 15','Aug 16','Aug 17','Aug 18'];
+  var cap=[12,83,269,187,176,158,104,66,60,55,43,36,37];
+  var emo=[19,47,268,227,195,156,116,89,65,58,64,45,37];
+  var xs=[44,99,154,209,264,319,374,429,484,539,594,649,704];
+  var yCap=[247.3,183.9,18,91.2,101,117,165.2,199.1,204.5,208.9,219.6,225.9,225];
+  var yEmo=[241,216.1,18.9,55.5,84,118.8,154.5,178.6,200,206.3,200.9,217.9,225];
+  var svgNS='http://www.w3.org/2000/svg';
+  var dotsG=document.getElementById('dots');
+  var tip=document.getElementById('tip');
+  var wrap=tip? tip.parentElement:null;
+  function mkDot(cx,cy,cls,i){
+    var c=document.createElementNS(svgNS,'circle');
+    c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',9);
+    c.setAttribute('fill','transparent');c.setAttribute('class','dot');
+    c.dataset.i=i;
+    return c;
+  }
+  function showTip(i,clientPt){
+    if(!tip) return;
+    tip.innerHTML='<b>'+days[i]+'</b><br><span class="tc">cap '+cap[i]+'</span> · <span class="te">emo '+emo[i]+'</span>';
+    // position relative to chart wrap using the point's svg coords mapped to px
+    var svg=dotsG.ownerSVGElement, r=svg.getBoundingClientRect();
+    var sx=xs[i]/720*r.width, sy=Math.min(yCap[i],yEmo[i])/300*r.height;
+    tip.style.left=sx+'px'; tip.style.top=sy+'px'; tip.style.opacity='1';
+  }
+  function hideTip(){ if(tip) tip.style.opacity='0'; }
+  if(dotsG){
+    for(var i=0;i<xs.length;i++){
+      // visible small markers
+      [['var(--cap)',yCap[i]],['var(--emo)',yEmo[i]]].forEach(function(p){
+        var m=document.createElementNS(svgNS,'circle');
+        m.setAttribute('cx',xs[i]);m.setAttribute('cy',p[1]);m.setAttribute('r',2.4);
+        m.setAttribute('fill',p[0]);dotsG.appendChild(m);
+      });
+      var hit=mkDot(xs[i], (yCap[i]+yEmo[i])/2, 'dot', i);
+      (function(idx){
+        hit.addEventListener('mouseenter',function(){showTip(idx);});
+        hit.addEventListener('mousemove',function(){showTip(idx);});
+        hit.addEventListener('mouseleave',hideTip);
+      })(i);
+      dotsG.appendChild(hit);
+    }
+  }
+
+  // --- sortable study table ---
+  var table=document.getElementById('studytable');
+  if(table){
+    var tb=table.tBodies[0];
+    var pinned=tb.querySelector('tr[data-study="This page"]');
+    var ths=table.querySelectorAll('thead th');
+    var state={k:null,dir:1};
+    ths.forEach(function(th){
+      th.addEventListener('click',function(){
+        var k=th.dataset.k, t=th.dataset.t;
+        state.dir = (state.k===k)? -state.dir : 1;
+        state.k=k;
+        ths.forEach(function(h){h.classList.remove('sorted');
+          h.querySelector('.arw').textContent='▼';});
+        th.classList.add('sorted');
+        th.querySelector('.arw').textContent = state.dir>0?'▲':'▼';
+        var rows=Array.prototype.slice.call(tb.querySelectorAll('tr')).filter(function(r){return r!==pinned;});
+        rows.sort(function(a,b){
+          var av=a.dataset[k], bv=b.dataset[k];
+          if(t==='n'){ av=parseFloat(av)||0; bv=parseFloat(bv)||0; return (av-bv)*state.dir; }
+          return av.localeCompare(bv)*state.dir;
+        });
+        rows.forEach(function(r){tb.appendChild(r);});
+        if(pinned) tb.appendChild(pinned); // keep "This page" last
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>

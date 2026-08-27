@@ -7,6 +7,7 @@ See the [main index](../README.md#works) for the full list with live-view links.
 
 ## Contents
 
+- `gpt5-transition-reddit.html` — the GPT-4o→GPT-5 transition on Reddit: a 9,908-post corpus study finding capability complaints led on launch day and the "long threads broke" symptom splitting into four distinct causes, Aug 2026.
 - `koyna-monsoon-dashboard.html` — Koyna Dam monsoon dashboard: Shivsagar Lake filling against gross capacity, and the power it drives within Maharashtra's energy mix, Jul 2026.
 - `how-india-got-online-pixel-quest.html` — interactive, gamified "Pixel Quest" through India's internet-adoption story (completely overhauled rebuild), Jun 2026.
 - `india-online-data-report.html` — standalone data report behind the Pixel Quest: charts on India's path to a billion connected, Jun 2026.
