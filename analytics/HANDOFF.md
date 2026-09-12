@@ -51,7 +51,7 @@ scoped CLOUDFLARE_API_TOKEN in the environment is the alternative route.
 
 Then confirm the deployed hostname. Everything currently points at
 claude-works-analytics.satejp10.workers.dev. If the account subdomain is
-different, that host appears in 10 places (8 works, claude-works/README.md,
+different, that host appears in 13 places (10 works, claude-works/README.md,
 2 badge URLs in the profile README). analytics/README.md has a sed one-liner.
 
 FINALLY — UN-HIDE THE BADGES. This is easy to forget and the whole point of

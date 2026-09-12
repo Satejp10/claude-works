@@ -1,8 +1,9 @@
 # claude-works → satejp10 profile mirror — setup & change log
 
-_Last updated: 2026-08-20 — the sync is **live**; setup in §3 is done, not pending.
+_Last updated: 2026-09-12 — the sync is **live**; setup in §3 is done, not pending.
 Analytics (§10) is committed but **not yet deployed** — it needs one `wrangler` run.
-The profile badges are hidden until it is (§11); `analytics/HANDOFF.md` is the checklist._
+The profile badges are hidden until it is (§11). There are now 10 files in `works/`
+and the hostname lives in 13 places (§12); `analytics/HANDOFF.md` is the checklist._
 
 ---
 
@@ -14,7 +15,7 @@ is always current — you never need to paste more than this one block.
 
 ````text
 CONTEXT: Satej's claude-works repo (github.com/Satejp10/claude-works).
-Current as of 2026-07-30.
+Current as of 2026-09-12.
 
 WHAT IT IS
 A publishing space for visual work made with Claude — infographics, dashboards,
@@ -345,6 +346,9 @@ README are broken links. If the deployed hostname differs from
 
 > Superseded in part by §11: the badges are no longer broken links, they are
 > commented out.
+> Superseded in part by §12 (2026-09-12): there are now **10** works, so the
+> hostname appears in **13** places — the "eight files / 10 places" figures in this
+> section predate the two works added after analytics shipped.
 
 ---
 
@@ -370,3 +374,29 @@ Satej. Everything else a deploy needs *is* reachable from there — Node 22, the
 registry, and `api.cloudflare.com` (verified: a genuine `cf-ray` response) — so a
 scoped `CLOUDFLARE_API_TOKEN` set as an environment secret is a workable alternative
 to running the commands by hand.
+
+---
+
+## 12. Work count + hostname refs; cache-header item already done — 2026-09-12
+
+Housekeeping, no behavioural change — two corrections so the docs match reality.
+
+- **Counts.** Two works — `gpt5-transition-reddit` and `model-switching-drift` — were
+  added after analytics shipped (2026-07-30), via their own PRs. There are now **10**
+  files in `works/`, all carrying the visit beacon, so the Worker hostname appears in
+  **13 places**: the 10 works, the root `README.md`, and the two badge URLs in the
+  profile README. The `sed` one-liner in `analytics/README.md` still covers the 11
+  refs in *this* repo; the two profile-README badges live in `Satejp10/Satejp10` and
+  are updated by hand (they are the wrappers you delete when un-hiding). `CLAUDE.md`,
+  `analytics/README.md`, `analytics/HANDOFF.md`, and `docs/analytics-deploy-log.md`
+  were corrected in place; §10 above is left as written (history is append-only) with
+  a pointer here.
+- **Cache headers.** `docs/analytics-deploy-log.md` carried a to-do to add
+  `Cache-Control` to `badge.svg`/`views.svg` "during the deploy pass". That was
+  already done before merge — `analytics/src/index.js` sets
+  `max-age=300, s-maxage=300, must-revalidate` on `badge.svg` and
+  `no-cache, no-store, must-revalidate` on `views.svg`. The log's item is now marked
+  resolved so a future reader does not re-add it or churn the deliberate TTLs.
+
+Still not deployed — `claude-works-analytics.satejp10.workers.dev` has no DNS record.
+The deploy remains the one open task and needs Satej's Cloudflare account.
