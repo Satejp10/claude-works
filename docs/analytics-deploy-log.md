@@ -25,14 +25,21 @@ openssl rand -hex 32 | npx wrangler secret put VISITOR_SALT
 npx wrangler deploy
 ```
 
-Then **confirm the deployed hostname**. Default `claude-works-analytics.satejp10.workers.dev` appears in 10 places (8 works, `claude-works/README.md`, 2 badge URLs in profile README). `analytics/README.md` has a sed one-liner if the account subdomain differs.
+Then **confirm the deployed hostname**. Default `claude-works-analytics.satejp10.workers.dev` appears in 13 places (10 works, `claude-works/README.md`, 2 badge URLs in profile README). `analytics/README.md` has a sed one-liner if the account subdomain differs.
 
 Then (easy to forget — it's the point): **un-hide the 2 badges** in `Satejp10/Satejp10` README — remove the comment wrappers at the two `analytics-badge:hidden` markers.
 
 Then delete this log + the original handoff — job done.
 
-## NEW this session (2026-08-20) — do during the deploy pass
-**Cache headers:** `badge.svg` and `views.svg` set no `Cache-Control`. GitHub Camo caches the fetched SVG, so the profile badge will show **stale numbers**. Return a short or `no-cache` `Cache-Control` on both endpoints so Camo re-fetches and the count stays fresh. (Same Camo caching already blamed for the `/views.svg` undercount, applied here to display.)
+## Cache headers — already implemented (do NOT re-add)
+This item was resolved before merge — the earlier note below is kept only to explain
+why the headers exist. **The Worker already sets `Cache-Control` on both SVG
+endpoints** (`analytics/src/index.js`): `badge.svg` → `max-age=300, s-maxage=300,
+must-revalidate` (a ~5-min TTL, so the badge lags real traffic by minutes — fine for a
+README) and `views.svg` → `no-cache, no-store, must-revalidate`. Do not add or change
+these; the Camo-staleness concern is handled. (Original reasoning: GitHub Camo caches
+the fetched SVG, so without a short TTL the profile badge would show stale numbers —
+the same Camo caching behind the `/views.svg` undercount, applied here to display.)
 
 ## Verify after deploy
 - `POST /hit` with no Origin header → expect 403

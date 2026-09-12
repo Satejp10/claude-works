@@ -131,7 +131,7 @@ device therefore **cannot** be measured on the profile README, by this Worker or
 by any of the badge services. So the split is:
 
 - **Collected** on the Pages site, where our own JS runs in a real browser: the
-  `<!-- visit-beacon -->` block sits at the bottom of all eight files in `works/`
+  `<!-- visit-beacon -->` block sits at the bottom of all ten files in `works/`
   and at the bottom of the root `README.md`.
 - **Displayed** on the profile README, as SVG the Worker renders (`/badge.svg`
   for demographics, `/views.svg` for an approximate profile hit count).
@@ -142,8 +142,10 @@ Two things to keep in mind when editing:
   page**, which Pages renders from that markdown. GitHub.com strips `<script>`
   when rendering the repo page, so it is invisible there and live on Pages. It
   sits after the gallery block and does not affect `parseWorks`.
-- The Worker hostname appears in **10 places** (8 works, root `README.md`, and
-  two badge URLs in the profile README). `analytics/README.md` has the `sed` one-liner.
+- The Worker hostname appears in **13 places** (the 10 files in `works/`, root
+  `README.md`, and two badge URLs in the profile README). `analytics/README.md` has
+  the `sed` one-liner (which covers the 11 in-repo refs; the 2 profile badges are a
+  separate repo, updated by hand).
 
 `analytics/**` is deliberately outside `thumbnails.yml`'s `paths:` filter, so
 editing the Worker never triggers a thumbnail rebuild.
