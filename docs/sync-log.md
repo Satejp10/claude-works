@@ -1,9 +1,10 @@
 # claude-works → satejp10 profile mirror — setup & change log
 
-_Last updated: 2026-09-12 — the sync is **live**; setup in §3 is done, not pending.
+_Last updated: 2026-09-27 — the sync is **live**; setup in §3 is done, not pending.
 Analytics (§10) is committed but **not yet deployed** — it needs one `wrangler` run.
 The profile badges are hidden until it is (§11). There are now 10 files in `works/`
-and the hostname lives in 13 places (§12); `analytics/HANDOFF.md` is the checklist._
+and the hostname lives in 13 places (§12); `analytics/HANDOFF.md` is the checklist.
+The gallery lists 13 works: those 10 plus 3 hosted in their own repos (§13)._
 
 ---
 
@@ -15,7 +16,7 @@ is always current — you never need to paste more than this one block.
 
 ````text
 CONTEXT: Satej's claude-works repo (github.com/Satejp10/claude-works).
-Current as of 2026-09-12.
+Current as of 2026-09-27.
 
 WHAT IT IS
 A publishing space for visual work made with Claude — infographics, dashboards,
@@ -30,11 +31,15 @@ HOW IT'S WIRED
   README's "Selected work" section. Both are generated — never hand-edit them.
 - analytics/ holds a Cloudflare Worker + D1 that counts visits to the Pages site
   and renders the numbers back onto the profile README as SVG.
+- A Claude Code hook (.claude/hooks/check-works-conventions.mjs) warns, report-
+  only, when an edited works/ page lacks og: preview tags or the visit beacon.
 
-STATUS: the mirror is live and verified (2026-07-29). Analytics is committed but
-NOT DEPLOYED — it needs one wrangler run against Satej's Cloudflare account. The
-two profile badges are commented out until then, so nothing renders as a broken
-image. The checklist for finishing it is analytics/HANDOFF.md.
+STATUS: the mirror is live — last verified 2026-09-12, right after its access
+token (the LANDING_SYNC_TOKEN Actions secret) expired and was renewed. Analytics
+is committed but NOT DEPLOYED — it needs one wrangler run against Satej's
+Cloudflare account. The two profile badges are commented out until then, so
+nothing renders as a broken image. The checklist for finishing it is
+analytics/HANDOFF.md.
 
 HOW SATEJ WORKS
 He builds in Claude Design (claude.ai), then uploads the file straight to GitHub
@@ -56,8 +61,8 @@ THREE GOTCHAS
    and a github-camo user-agent. Demographics are collected on the Pages site,
    where real JS runs, and only displayed on the profile.
 
-CURRENT CONTENTS: 10 works — 8 local, plus 2 hosted in their own repos
-(EDGE, Plot Light Study).
+CURRENT CONTENTS: 13 works — 10 local, plus 3 hosted in their own repos
+(EDGE, Plot Light Study, Clawdvania).
 ````
 
 ---
@@ -400,3 +405,29 @@ Housekeeping, no behavioural change — two corrections so the docs match realit
 
 Still not deployed — `claude-works-analytics.satejp10.workers.dev` has no DNS record.
 The deploy remains the one open task and needs Satej's Cloudflare account.
+
+---
+
+## 13. Clawdvania listed; conventions hook; copy-block recount — 2026-09-27
+
+- **Clawdvania added as an external work**, the third after EDGE and Plot Light Study.
+  It is a five-minute platformer vignette in its own repo, `Satejp10/Clawdvania`, live
+  at `satejp10.github.io/Clawdvania/`. When checked, the deployed page was
+  byte-identical to that repo's `index.html` (75,574 bytes). Its thumbnail is **not a
+  screenshot**: it is the author's poster art (`Resources/Clawdvania_Poster_V3_Wisps_cropped.png`
+  in that repo, 1536×1684) cropped to its bottom 1536×960 band and scaled to 1200×750,
+  so it matches the other tiles' 16:10 frame. The poster's title is cropped out; the
+  gallery caption carries the name. The row is dated Sep 2026, the month it joined the
+  gallery, as with the other external works. Being external, it does not trigger the
+  workflow, so the profile mirror needs a manual run (§4).
+  Clawdvania's own project log had parked this submission on 2026-08-01 "until the
+  project reaches a stable state"; this listing reopens it at the author's request.
+- **Conventions hook — a missed entry from 2026-09-23 (PR #23).** `.claude/settings.json`
+  registers a Claude Code `PostToolUse` hook on `Edit|Write` that runs
+  `.claude/hooks/check-works-conventions.mjs`. For an edited `works/*.html` page it
+  checks `og:title`, `og:description`, `og:image` (must be an absolute `https://` URL)
+  and `og:url`, plus the visit-beacon markers; it prints one line per problem and
+  exits 2 so Claude sees them. It is report-only and never edits files. As of this
+  entry, 8 of the 10 local works lack some or all `og:` tags, so edits to them warn.
+- **Copy-block recount.** The block said "10 works — 8 local", stale since the two
+  local works added on 2026-08-27. It now reads 13 works: 10 local plus 3 external.
