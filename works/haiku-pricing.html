@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Haiku Price and Score</title>
+<meta name="description" content="Claude Haiku 5.5 cut the output price 90%, from $5.00 to $0.50 per million tokens, while its Artificial Analysis score rose from 17 to 43. Prices, caching, real cost, and where the cheap model fits.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Haiku 5.5 costs a tenth of what Haiku 4.5 did">
+<meta property="og:description" content="Output price down 90%, from $5.00 to $0.50 per million tokens, while the Artificial Analysis score rose from 17 to 43. What that means for real cost and for agent workers.">
+<meta property="og:image" content="https://satejp10.github.io/claude-works/assets/thumbnails/haiku-pricing.png">
+<meta property="og:url" content="https://satejp10.github.io/claude-works/works/haiku-pricing.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Plainchart tokens: one light theme, by design */
+  :root{
+    color-scheme: light;
+    --bg:#ffffff; --bg-clear:rgba(255,255,255,0); --ink:#1f1f1f; --lede:#3a3a3a; --muted:#737373; --faint:#a3a3a3;
+    --border:#e8e8e8; --grid:#f1f1f1; --axis:#dcdcdc;
+    --accent:#7F4BF3; --accent-soft:#f2ecff; --c-anthropic:#cc785c;
+    --c-anthropic-text:#a85a3e;   /* darker clay for small text: 5.0:1 on white (clay is 3.3:1) */
+    --display:'Space Grotesk','Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --r:16px; --r-sm:5px; --maxw:980px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:34px 22px 90px;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:38px;}
+  .mark{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px;letter-spacing:-0.01em;}
+  .mark .glyph{width:24px;height:24px;border-radius:6px;background:var(--ink);display:grid;place-items:center;}
+  .mark .glyph::before{content:"";width:11px;height:11px;border-radius:50%;border:2.5px solid #fff;}
+  .stamp{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;}
+
+  /* Hero: the headline states the finding, and the price cut is the biggest thing on the page */
+  .hero{display:grid;grid-template-areas:"h" "fig" "lede";}
+  h1{grid-area:h;font-family:var(--display);font-weight:600;font-size:clamp(2.3rem,6.4vw,3.7rem);
+    line-height:1.03;letter-spacing:-0.015em;margin:0 0 20px;max-width:16ch;text-wrap:balance;}
+  .lede{grid-area:lede;font-size:clamp(1rem,2.4vw,1.16rem);color:var(--lede);max-width:62ch;margin:0;}
+  .drop{grid-area:fig;margin:0 0 20px;border:1px solid var(--border);border-radius:var(--r);padding:20px 22px 22px;}
+  .drop-k{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--muted);}
+  .drop-k .sq{width:11px;height:11px;border-radius:3px;background:var(--c-anthropic);flex:none;}
+  .drop-big{font-family:var(--display);font-weight:600;font-size:clamp(4.4rem,15vw,6.6rem);line-height:.9;
+    letter-spacing:-0.035em;margin:14px 0 10px;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .drop-swap{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;font-family:var(--display);font-weight:600;
+    font-size:clamp(1.6rem,5vw,2.2rem);line-height:1.15;font-variant-numeric:tabular-nums;}
+  .drop-swap .was{color:var(--muted);text-decoration-thickness:2px;}
+  .drop-swap .to{color:var(--faint);font-weight:500;}
+  .drop-swap .now{color:var(--c-anthropic);}
+  .drop-q{font-size:13.5px;color:var(--muted);margin:10px 0 0;line-height:1.5;}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+  @media(min-width:760px){
+    .hero{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:auto 1fr;
+      grid-template-areas:"h fig" "lede fig";column-gap:36px;align-items:start;}
+    .drop{margin:0;align-self:center;}
+  }
+
+  .method{border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+    margin:30px 0 38px;padding:18px 0;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;}
+  .method .ey{font-size:11.5px;font-weight:700;letter-spacing:.13em;color:var(--accent);
+    display:flex;align-items:center;gap:8px;white-space:nowrap;padding-top:2px;}
+  .method .sq{width:13px;height:13px;border-radius:3px;background:var(--accent);}
+  .method p{margin:0;font-size:14px;color:var(--lede);}
+
+  .card{border:1px solid var(--border);border-radius:var(--r);padding:24px 24px 26px;background:var(--bg);}
+  .card + .card{margin-top:18px;}
+  .eyebrow{display:flex;align-items:center;gap:10px;}
+  .eyebrow .sq{width:15px;height:15px;border-radius:4px;background:var(--c-anthropic);flex:none;}
+  .eyebrow h2{font-family:var(--display);font-weight:600;font-size:1.5rem;letter-spacing:-0.01em;margin:0;line-height:1.1;}
+  .sub{font-size:13px;color:var(--muted);margin:10px 0 16px;}
+  .sub b{color:var(--lede);font-weight:600;}
+  .copy{font-size:15px;color:var(--lede);margin:14px 0 0;max-width:68ch;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12px;color:var(--muted);align-items:center;margin-bottom:6px;}
+  .legend .it{display:flex;align-items:center;gap:7px;}
+  .sw{width:10px;height:10px;border-radius:50%;flex:none;}
+  .sw.price{background:var(--c-anthropic);}
+  .sw.score{background:var(--accent);}
+  .sw.est{background:var(--bg);border:2px solid var(--accent);}
+
+  #chart{width:100%;}
+  #chart svg{display:block;}
+  .axis-titles{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-weight:600;margin:12px 0 2px;}
+  .t-price{color:var(--c-anthropic-text);}
+  .t-score{color:var(--accent);text-align:right;}
+
+  /* Phone: the plot scrolls sideways between two pinned axes. The cue sits on the edge where
+     the hidden releases are, and each edge only shows when there is more to see that way. */
+  .scroll-chart{display:flex;align-items:flex-start;}
+  .scroll-chart > svg{flex:none;}
+  .scroll-wrap{position:relative;flex:1;min-width:0;}
+  .scroller{overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;}
+  .edge{position:absolute;top:0;width:40px;display:flex;align-items:flex-start;pointer-events:none;
+    opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;}
+  .edge.on{opacity:1;visibility:visible;}
+  .edge.left{left:0;background:linear-gradient(to right,var(--bg),var(--bg-clear));}
+  .edge.right{right:0;justify-content:flex-end;background:linear-gradient(to left,var(--bg),var(--bg-clear));}
+  .edge-btn{pointer-events:auto;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;min-height:32px;
+    font-family:var(--sans);font-size:13px;font-weight:600;line-height:1;color:var(--accent);
+    background:var(--bg);border:1.5px solid var(--accent);border-radius:999px;padding:6px 12px;cursor:pointer;}
+  .edge-btn .chev{font-size:19px;line-height:14px;}
+  .used .edge-txt{display:none;}
+  .used .edge-btn{padding:6px 11px;}
+
+  .grid{stroke:var(--grid);stroke-width:1;}
+  .base{stroke:var(--axis);stroke-width:1;}
+  .tick{font-family:var(--sans);font-size:11px;font-variant-numeric:tabular-nums;}
+  .tick.p{fill:var(--c-anthropic-text);}
+  .tick.s{fill:var(--accent);}
+  .price-line{fill:none;stroke:var(--c-anthropic);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .price-line.hl{stroke-width:3;}
+  .score-line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .price-dot{fill:var(--c-anthropic);stroke:var(--bg);stroke-width:1.5;}
+  .score-dot{fill:var(--accent);stroke:var(--bg);stroke-width:1.5;}
+  .score-dot.est{fill:var(--bg);stroke:var(--accent);stroke-width:2;}
+  .anno{fill:var(--c-anthropic-text);font-family:var(--sans);font-size:15px;font-weight:700;
+    paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round;}
+  .nm{fill:var(--ink);font-family:var(--sans);font-size:12px;font-weight:600;}
+  .dt{fill:var(--muted);font-family:var(--sans);font-size:11px;}
+  .pv{fill:var(--c-anthropic-text);font-family:var(--sans);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;}
+  .sv{fill:var(--accent);font-family:var(--sans);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;}
+  .rh{fill:var(--muted);font-family:var(--sans);font-size:11px;font-weight:600;}
+
+  .chart-note{font-size:12px;color:var(--muted);margin:10px 0 0;line-height:1.5;}
+
+  /* Price table */
+  .tbl-scroll{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums;}
+  th,td{padding:10px 10px;text-align:right;border-bottom:1px solid var(--grid);}
+  td{white-space:nowrap;}
+  th:first-child,td:first-child{text-align:left;padding-left:0;}
+  td:first-child{color:var(--lede);white-space:normal;}
+  thead th{font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:.02em;line-height:1.3;
+    border-bottom:1px solid var(--axis);vertical-align:bottom;}
+  td.now{font-weight:600;color:var(--ink);}
+
+  /* Horizontal bars: [label | track | value], value always printed */
+  .group + .group{margin-top:20px;}
+  .group-title{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;}
+  .group-title span{font-weight:500;letter-spacing:.02em;text-transform:none;}
+  .bars{display:flex;flex-direction:column;gap:10px;}
+  .row{display:grid;grid-template-columns:minmax(0,210px) minmax(0,1fr) 58px;align-items:center;gap:13px;}
+  .row .lab{display:flex;flex-direction:column;font-size:13.5px;color:var(--lede);line-height:1.3;min-width:0;}
+  .row .lab b{font-weight:600;color:var(--ink);}
+  .row .tag{font-size:11.5px;color:var(--muted);}
+  .track{display:block;height:16px;background:var(--grid);border-radius:var(--r-sm);overflow:hidden;}
+  .fill{display:block;height:100%;min-width:2px;border-radius:var(--r-sm);background:var(--c-anthropic);}
+  .fill.soft{opacity:.5;}
+  .fill.ctx{opacity:.35;}
+  .val{font-size:14px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+  .quote{margin:20px 0 0;}
+  .quote blockquote{margin:0;font-size:15px;color:var(--lede);max-width:66ch;}
+  .quote figcaption{margin-top:6px;font-size:12.5px;color:var(--muted);}
+
+  footer{margin-top:34px;font-size:12px;color:var(--faint);line-height:1.6;border-top:1px solid var(--border);padding-top:18px;}
+  footer a{color:var(--muted);}
+
+  @media(max-width:600px){
+    .wrap{padding:26px 16px 70px;}
+    .card{padding:20px 16px 22px;}
+    .eyebrow h2{font-size:1.3rem;}
+    .method{grid-template-columns:1fr;gap:9px;}
+    th,td{padding:9px 6px;}
+    .row{grid-template-columns:minmax(0,118px) minmax(0,1fr) 50px;gap:9px;}
+    .row .lab{font-size:12.5px;}
+  }
+  @media(prefers-reduced-motion:reduce){.edge{transition:none;}}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="mark"><span class="glyph"></span>Haiku&nbsp;Pricing</div>
+    <div class="stamp">Updated Oct&nbsp;2026</div>
+  </div>
+
+  <section class="hero">
+    <h1>Haiku 5.5 costs a tenth of what Haiku 4.5 did</h1>
+    <figure class="drop">
+      <figcaption class="drop-k"><span class="sq"></span>Output price per million tokens</figcaption>
+      <div class="drop-big">−90%</div>
+      <div class="drop-swap">
+        <s class="was"><span class="sr">Was </span>$5.00</s>
+        <span class="to" aria-hidden="true">→</span>
+        <span class="now"><span class="sr">, now </span>$0.50</span>
+      </div>
+      <p class="drop-q">Haiku 4.5 to Haiku 5.5, for prompts up to 100,000 tokens. Input fell by the same 90%, from $1.00 to $0.10.</p>
+      <p class="drop-q">Above 100,000 tokens the cut is 50%. On average, Anthropic estimates Haiku 5.5 costs around 75% less to run.</p>
+    </figure>
+    <p class="lede">Haiku’s output price had risen twice, from $1.25 to $4.00 to $5.00. Haiku 5.5 cut it to $0.50, while its Artificial Analysis score rose from 17 to 43.</p>
+  </section>
+
+  <div class="method">
+    <div class="ey"><span class="sq"></span>METHOD</div>
+    <p>List prices in USD per million tokens (MTok), from Anthropic’s pricing page and Haiku 5.5 launch post, checked Oct 24, 2026. Dates are first public availability; the 3.5 Haiku date is approximate (late 2024). Scores are the Artificial Analysis Intelligence Index, each model at its highest listed setting. Figures marked “our estimate” adjust for Haiku 5.5’s tokenizer, which counts the same text as about 30% more tokens.</p>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow"><span class="sq"></span><h2>Output price and AA score</h2></div>
+    <p class="sub">Left axis: output price per million tokens. Input is always one fifth of output. Right axis: AA Intelligence Index score, 0 to 50.</p>
+    <div class="legend">
+      <span class="it"><span class="sw price"></span>Output price</span>
+      <span class="it"><span class="sw score"></span>AA score</span>
+      <span class="it"><span class="sw est"></span>Estimated score</span>
+    </div>
+    <div id="chart"></div>
+    <p class="chart-note">Each line has its own scale, so the point where the two lines cross means nothing.</p>
+    <p class="chart-note">Haiku 5.5 prices apply to prompts up to 100,000 tokens. Longer prompts cost $0.50 input and $2.50 output.</p>
+    <p class="chart-note">est. means an Artificial Analysis estimate. Haiku 4.5 is scored with reasoning on. Haiku 5.5 is scored at max effort (38 at high).</p>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow"><span class="sq"></span><h2>What each token costs</h2></div>
+    <p class="sub"><b>Lower is better</b> · USD per million tokens. Haiku 5.5 charges by prompt length, and the prompt counts every input token, cached ones included.</p>
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr><th scope="col">Price</th><th scope="col">Haiku 4.5</th><th scope="col">Haiku 5.5, prompts up to 100k</th><th scope="col">Haiku 5.5, prompts over 100k</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Input</td><td>$1.00</td><td class="now">$0.10</td><td>$0.50</td></tr>
+          <tr><td>Output</td><td>$5.00</td><td class="now">$0.50</td><td>$2.50</td></tr>
+          <tr><td>Cache write, 5 min</td><td>$1.25</td><td class="now">$0.125</td><td>$0.625</td></tr>
+          <tr><td>Cache write, 1 hour</td><td>$2.00</td><td class="now">$0.20</td><td>$1.00</td></tr>
+          <tr><td>Cache read</td><td>$0.10</td><td class="now">$0.01</td><td>$0.05</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="chart-note">Caching follows the same rules on both models: a cache read costs a tenth of normal input, a 5-minute write 1.25 times, and a 1-hour write 2 times. The Batch API takes 50% off input and output on both.</p>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow"><span class="sq"></span><h2>Why the cut is 90% and 75% at once</h2></div>
+    <p class="sub">Size of the cut from Haiku 4.5 to Haiku 5.5 · <b>bigger is better</b></p>
+    <div class="bars">
+      <div class="row"><span class="lab"><b>Price per token, prompts up to 100k</b><span class="tag">List price</span></span><span class="track"><span class="fill" style="width:90%"></span></span><span class="val">−90%</span></div>
+      <div class="row"><span class="lab">Same text, prompts up to 100k<span class="tag">Our estimate</span></span><span class="track"><span class="fill soft" style="width:87%"></span></span><span class="val">−87%</span></div>
+      <div class="row"><span class="lab"><b>Average cost to run</b><span class="tag">Anthropic’s estimate</span></span><span class="track"><span class="fill" style="width:75%"></span></span><span class="val">−75%</span></div>
+      <div class="row"><span class="lab">Price per token, prompts over 100k<span class="tag">List price</span></span><span class="track"><span class="fill" style="width:50%"></span></span><span class="val">−50%</span></div>
+      <div class="row"><span class="lab">Same text, prompts over 100k<span class="tag">Our estimate</span></span><span class="track"><span class="fill soft" style="width:35%"></span></span><span class="val">−35%</span></div>
+    </div>
+    <p class="copy">Haiku 5.5 counts the same text as about 30% more tokens than Haiku 4.5, so a tenth of the price works out to about 87% less spent on the same text. The 100,000-token line is also counted in Haiku 5.5’s tokens, so a prompt of about 77,000 tokens on Haiku 4.5 already reaches the higher tier. Anthropic says prompts up to 100,000 tokens made up around 90% of requests to Haiku 4.5.</p>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow"><span class="sq"></span><h2>A cheap worker for bigger models</h2></div>
+    <p class="sub"><b>Higher is better</b> · Anthropic’s launch benchmarks</p>
+    <p class="copy">Anthropic built Haiku 5.5 for high-volume work such as summaries, classification, database queries and browser use, and pitches it as a subagent under Opus 5.5 or Sonnet 5.5 on coding work. It says Sonnet 5.5 and Opus 5.5 remain the better choice for complex agentic coding.</p>
+    <div class="group" style="margin-top:20px">
+      <p class="group-title">Terminal-Bench 4.0 <span>· agentic coding in a terminal</span></p>
+      <div class="bars">
+        <div class="row"><span class="lab">Haiku 4.5</span><span class="track"><span class="fill ctx" style="width:0%"></span></span><span class="val">0.0%</span></div>
+        <div class="row"><span class="lab"><b>Haiku 5.5</b></span><span class="track"><span class="fill" style="width:39.2%"></span></span><span class="val">39.2%</span></div>
+        <div class="row"><span class="lab">Sonnet 5.5</span><span class="track"><span class="fill ctx" style="width:70.6%"></span></span><span class="val">70.6%</span></div>
+      </div>
+    </div>
+    <div class="group">
+      <p class="group-title">OSWorld 2.1 <span>· computer use, offline subset</span></p>
+      <div class="bars">
+        <div class="row"><span class="lab">Haiku 4.5</span><span class="track"><span class="fill ctx" style="width:15.7%"></span></span><span class="val">15.7%</span></div>
+        <div class="row"><span class="lab"><b>Haiku 5.5</b></span><span class="track"><span class="fill" style="width:72.4%"></span></span><span class="val">72.4%</span></div>
+        <div class="row"><span class="lab">Sonnet 5.5</span><span class="track"><span class="fill ctx" style="width:83.9%"></span></span><span class="val">83.9%</span></div>
+      </div>
+    </div>
+    <p class="copy">That is where the low price matters most. Opus 5.5 output costs $20 per million tokens, 40 times Haiku 5.5’s $0.50, so every task a lead model hands down costs a small fraction as much. How much a whole workflow saves depends on how much of the work moves to Haiku.</p>
+    <figure class="quote">
+      <blockquote>“With Haiku 5.5 as the sidekick, Fusion holds a top-tier FrontierCode score of 66.2 while cutting cost and latency.”</blockquote>
+      <figcaption>Walden Yan, Co-Founder and CPO of Cognition, in Anthropic’s launch post</figcaption>
+    </figure>
+    <p class="chart-note">Benchmarks are Anthropic’s own results from the Haiku 5.5 launch post.</p>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow"><span class="sq"></span><h2>Standard prices, not a launch offer</h2></div>
+    <p class="copy">Anthropic lists these as Haiku 5.5’s regular prices, and neither the launch post nor the model page mentions an introductory rate or an end date. Anthropic says it will keep the model available until at least October 7, 2027.</p>
+  </div>
+
+  <footer>
+    Sources: <a href="https://www.anthropic.com/claude-haiku-5-5">Introducing Claude Haiku 5.5</a> ·
+    <a href="https://platform.claude.com/docs/en/models/haiku-5-5/overview">Haiku 5.5 overview</a> ·
+    <a href="https://platform.claude.com/docs/en/about-claude/pricing">Anthropic pricing</a> ·
+    <a href="https://www.anthropic.com/news/claude-3-family">Claude 3 family</a> ·
+    <a href="https://www.anthropic.com/news/3-5-models-and-computer-use">Claude 3.5 Haiku</a> ·
+    <a href="https://artificialanalysis.ai/articles/claude-haiku-5-5">Artificial Analysis</a>. Prices checked Oct 24, 2026.
+  </footer>
+
+</div>
+
+<script>
+const MODELS = [
+  {name:'Claude 3 Haiku',   mid:'3 Haiku',   date:'Mar 2024',  t:2024.20, outP:1.25, score:6,  est:true},
+  {name:'Claude 3.5 Haiku', mid:'3.5 Haiku', date:'Late 2024', t:2024.84, outP:4.00, score:9,  est:true},
+  {name:'Claude Haiku 4.5', mid:'Haiku 4.5', date:'Oct 2025',  t:2025.79, outP:5.00, score:17, est:false},
+  {name:'Claude Haiku 5.5', mid:'Haiku 5.5', date:'Oct 2026',  t:2026.77, outP:0.50, score:43, est:false},
+];
+const money = v => '$' + v.toFixed(2);
+const host = document.getElementById('chart');
+const ARIA = 'Haiku output price per million tokens (left axis) and AA Intelligence Index score (right axis). ' +
+  'Claude 3 Haiku: $1.25, score 6 (estimate). Claude 3.5 Haiku: $4.00, score 9 (estimate). ' +
+  'Claude Haiku 4.5: $5.00, score 17. Claude Haiku 5.5: $0.50, score 43. Haiku 5.5 cut the price 90%.';
+const T0 = 2023.85, T1 = 2026.92;                     // date range of the x axis
+const xs = (a, b) => MODELS.map(m => a + (m.t - T0) / (T1 - T0) * (b - a));   // true date spacing
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lastW = 0, used = false, peeked = false;          // used: the reader has scrolled the phone chart
+
+// Smooth line through the points, using the monotone rule (as in d3's curveMonotoneX):
+// it never bends above the highest or below the lowest neighbouring point, so it shows no value that didn't exist.
+function monotone(P){
+  const n = P.length, s = [], m = [];
+  for (let i = 0; i < n - 1; i++) s.push((P[i + 1][1] - P[i][1]) / (P[i + 1][0] - P[i][0]));
+  for (let i = 1; i < n - 1; i++){
+    const h0 = P[i][0] - P[i - 1][0], h1 = P[i + 1][0] - P[i][0];
+    const p = (s[i - 1] * h1 + s[i] * h0) / (h0 + h1);
+    m[i] = (Math.sign(s[i - 1]) + Math.sign(s[i])) * Math.min(Math.abs(s[i - 1]), Math.abs(s[i]), 0.5 * Math.abs(p)) || 0;
+  }
+  m[0] = s[0]; m[n - 1] = s[n - 2];                   // the ends follow the first and last step
+  return P.slice(0, -1).map((p, i) => {               // one cubic Bezier per segment
+    const q = P[i + 1], h = (q[0] - p[0]) / 3;
+    return [p, [p[0] + h, p[1] + m[i] * h], [q[0] - h, q[1] - m[i + 1] * h], q];
+  });
+}
+const curvePath = segs => 'M' + segs[0][0].map(v => v.toFixed(1)).join(' ') +
+  segs.map(g => 'C' + g.slice(1).map(pt => pt.map(v => v.toFixed(1)).join(' ')).join(',')).join('');
+const onCurve = (g, t) => [0, 1].map(k => (1 - t) ** 3 * g[0][k] + 3 * (1 - t) ** 2 * t * g[1][k] +
+  3 * (1 - t) * t * t * g[2][k] + t ** 3 * g[3][k]);
+
+function draw(){
+  const W = Math.floor(host.clientWidth);
+  if (!W || W === lastW) return;                      // redraw only when the width changes
+  lastW = W;
+  const narrow = W < 560;
+  const mt = 12, ph = narrow ? 230 : 270;              // plot top and height
+  const pb = mt + ph, H = pb + 104;                   // pb is the y of $0 and of score 0
+  // Left axis: price, $0 to $5. Right axis: score, 0 to 50.
+  // Both use five steps, so one set of gridlines serves both axes.
+  const gy = k => pb - (k / 5) * ph;
+  const py = v => pb - (v / 5) * ph;
+  const sy = v => pb - (v / 50) * ph;
+  const yName = pb + 24, yDate = pb + 42, yP = pb + 68, yS = pb + 88;
+
+  const grid = (S, a, b) => { for (let k = 0; k <= 5; k++)
+    S.push(`<line x1="${a}" x2="${b}" y1="${gy(k)}" y2="${gy(k)}" class="${k ? 'grid' : 'base'}"/>`); };
+  // Each axis's numbers take the color of its line
+  const leftTicks = (S, x) => { for (let k = 0; k <= 5; k++)
+    S.push(`<text x="${x}" y="${gy(k) + 4}" text-anchor="end" class="tick p">$${k}</text>`); };
+  const rightTicks = (S, x) => { for (let k = 0; k <= 5; k++)
+    S.push(`<text x="${x}" y="${gy(k) + 4}" class="tick s">${k * 10}</text>`); };
+  const rowLabels = (S, a, b) => S.push(
+    `<text x="0" y="${yP}" class="rh">${a}</text>`, `<text x="0" y="${yS}" class="rh">${b}</text>`);
+
+  // Lines, markers, the one annotation, and the release strip (name, date, price, score)
+  const series = (S, X, label) => {
+    const priceSegs = monotone(MODELS.map((m, i) => [X[i], py(m.outP)]));
+    const scoreSegs = monotone(MODELS.map((m, i) => [X[i], sy(m.score)]));
+    S.push(`<path d="${curvePath(priceSegs)}" class="price-line"/>`);
+    // The story segment, Haiku 4.5 to 5.5, drawn heavier
+    S.push(`<path d="${curvePath([priceSegs[2]])}" class="price-line hl"/>`);
+    MODELS.forEach((m, i) => S.push(
+      `<circle cx="${X[i].toFixed(1)}" cy="${py(m.outP).toFixed(1)}" r="4.5" class="price-dot">` +
+      `<title>${m.name}: ${money(m.outP)} output per million tokens</title></circle>`));
+    S.push(`<path d="${curvePath(scoreSegs)}" class="score-line"/>`);
+    MODELS.forEach((m, i) => S.push(
+      `<circle cx="${X[i].toFixed(1)}" cy="${sy(m.score).toFixed(1)}" r="4.5" class="${m.est ? 'score-dot est' : 'score-dot'}">` +
+      `<title>${m.name}: AA score ${m.score}${m.est ? ' (estimate)' : ''}</title></circle>`));
+    // Label the drop on its lower part, away from where the lines cross
+    const [ax, ay] = onCurve(priceSegs[2], 0.72);
+    S.push(`<text x="${(ax + 12).toFixed(1)}" y="${(ay + 5).toFixed(1)}" class="anno">−90%</text>`);
+    MODELS.forEach((m, i) => {
+      const x = X[i].toFixed(1);
+      S.push(`<line x1="${x}" x2="${x}" y1="${pb}" y2="${pb + 5}" class="base"/>`,
+        `<text x="${x}" y="${yName}" text-anchor="middle" class="nm">${label(m)}</text>`,
+        `<text x="${x}" y="${yDate}" text-anchor="middle" class="dt">${m.date}</text>`,
+        `<text x="${x}" y="${yP}" text-anchor="middle" class="pv">${money(m.outP)}</text>`,
+        `<text x="${x}" y="${yS}" text-anchor="middle" class="sv">${m.score}${m.est ? ' est.' : ''}</text>`);
+    });
+  };
+  const svg = (w, S, attrs) => `<svg width="${w}" height="${H}" viewBox="0 0 ${w} ${H}" ${attrs}>${S.join('')}</svg>`;
+  const titles = (a, b) => `<div class="axis-titles"><span class="t-price">${a}</span><span class="t-score">${b}</span></div>`;
+
+  if (!narrow){
+    const ml = 56, mr = 56, S = [];
+    grid(S, ml, W - mr);
+    leftTicks(S, ml - 10);
+    rightTicks(S, W - mr + 10);
+    rowLabels(S, 'Price', 'AA score');
+    series(S, xs(ml, W - mr), m => m.name);
+    host.innerHTML = titles('Price, USD per million tokens', 'AA Intelligence Index, 0–50') +
+      svg(W, S, `role="img" aria-label="${ARIA}"`);
+    return;
+  }
+
+  // Phone: the desktop chart at a fixed width, scrolling sideways between the two pinned axes
+  const AL = 44, AR = 34, PW = 516;
+  const L = [], R = [], P = [];
+  leftTicks(L, AL - 8);
+  rowLabels(L, 'Price', 'Score');
+  rightTicks(R, 8);
+  grid(P, 0, PW);
+  series(P, xs(0, PW - 16), m => m.mid);
+  const edge = (side, label, text) =>
+    `<div class="edge ${side}" style="height:${pb}px;padding-top:${Math.round(mt + ph * 0.42 - 16)}px">` +
+    `<button type="button" class="edge-btn" aria-label="${label}">${text}</button></div>`;
+  host.innerHTML = titles('Price, $/MTok', 'AA score, 0–50') +
+    `<div class="scroll-chart">` +
+      svg(AL, L, 'aria-hidden="true"') +
+      `<div class="scroll-wrap${used ? ' used' : ''}">` +
+        `<div class="scroller" tabindex="0" role="region" aria-label="Chart that scrolls sideways to earlier releases">` +
+          svg(PW, P, `role="img" aria-label="${ARIA}"`) + `</div>` +
+        edge('left', 'Show earlier releases', '<span class="chev" aria-hidden="true">‹</span><span class="edge-txt">Earlier</span>') +
+        edge('right', 'Show later releases', '<span class="edge-txt">Later</span><span class="chev" aria-hidden="true">›</span>') +
+      `</div>` +
+      svg(AR, R, 'aria-hidden="true"') +
+    `</div>`;
+  wireScroller(host.querySelector('.scroll-wrap'));
+}
+
+// Opens on the latest releases, shows each edge cue only while there is more that way,
+// nudges once when the chart comes into view, and shrinks the cue after the first scroll.
+function wireScroller(wrap){
+  const sc = wrap.querySelector('.scroller');
+  const [eL, eR] = wrap.querySelectorAll('.edge');
+  const max = () => sc.scrollWidth - sc.clientWidth;
+  let ignoreUntil = 0;                                 // scrolls we started ourselves don't count as use
+  const go = (left, smooth) => {
+    ignoreUntil = performance.now() + (smooth ? 900 : 250);
+    sc.scrollTo({left, behavior: smooth && !reduced ? 'smooth' : 'auto'});
+  };
+  const update = () => {
+    eL.classList.toggle('on', sc.scrollLeft > 4);
+    eR.classList.toggle('on', sc.scrollLeft < max() - 4);
+  };
+  const markUsed = () => { if (!used){ used = true; wrap.classList.add('used'); } };
+  sc.addEventListener('scroll', () => { update(); if (performance.now() > ignoreUntil) markUsed(); }, {passive: true});
+  const step = dir => { markUsed(); sc.scrollBy({left: dir * Math.round(sc.clientWidth * 0.85), behavior: reduced ? 'auto' : 'smooth'}); };
+  eL.querySelector('button').addEventListener('click', () => step(-1));
+  eR.querySelector('button').addEventListener('click', () => step(1));
+  go(max(), false);
+  update();
+  if (reduced || peeked || used || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(entries => {
+    if (!entries[0].isIntersecting || peeked || used) return;
+    io.disconnect();
+    peeked = true;
+    setTimeout(() => { go(max() - 56, true); setTimeout(() => go(max(), true), 520); }, 350);
+  }, {threshold: 0.6});
+  io.observe(sc);
+}
+
+draw();
+new ResizeObserver(draw).observe(host);
+</script>
+<!-- visit-beacon:start -->
+<script>
+/* Counts a pageview via analytics/ (Cloudflare Worker). No cookies, no storage,
+   no IP retained; geography is resolved at Cloudflare's edge. Fails silently. */
+(function(){try{
+var w=innerWidth,d=w<640?"mobile":w<1024?"tablet":"desktop";
+if(navigator.userAgentData&&navigator.userAgentData.mobile&&d!=="mobile")d="mobile";
+var r="direct";
+if(document.referrer){try{var h=new URL(document.referrer).hostname;if(h&&h!==location.hostname)r=h;}catch(e){}}
+var p=JSON.stringify({s:(location.pathname.split("/").pop()||"").replace(/\.html$/,"")||"gallery",r:r,d:d});
+var u="https://claude-works-analytics.satejp10.workers.dev/hit";
+if(navigator.sendBeacon){navigator.sendBeacon(u,new Blob([p],{type:"text/plain"}));}
+else{fetch(u,{method:"POST",body:p,keepalive:true});}
+}catch(e){}})();
+</script>
+<!-- visit-beacon:end -->
+</body>
+</html>
