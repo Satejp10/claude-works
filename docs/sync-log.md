@@ -1,10 +1,10 @@
 # claude-works → satejp10 profile mirror — setup & change log
 
-_Last updated: 2026-09-27 — the sync is **live**; setup in §3 is done, not pending.
+_Last updated: 2026-10-24 — the sync is **live**; setup in §3 is done, not pending.
 Analytics (§10) is committed but **not yet deployed** — it needs one `wrangler` run.
-The profile badges are hidden until it is (§11). There are now 10 files in `works/`
-and the hostname lives in 13 places (§12); `analytics/HANDOFF.md` is the checklist.
-The gallery lists 13 works: those 10 plus 3 hosted in their own repos (§13)._
+The profile badges are hidden until it is (§11). There are now 11 files in `works/`
+and the hostname lives in 14 places (§14); `analytics/HANDOFF.md` is the checklist.
+The gallery lists 14 works: those 11 plus 3 hosted in their own repos (§13, §14)._
 
 ---
 
@@ -16,7 +16,7 @@ is always current — you never need to paste more than this one block.
 
 ````text
 CONTEXT: Satej's claude-works repo (github.com/Satejp10/claude-works).
-Current as of 2026-09-27.
+Current as of 2026-10-24.
 
 WHAT IT IS
 A publishing space for visual work made with Claude — infographics, dashboards,
@@ -61,7 +61,7 @@ THREE GOTCHAS
    and a github-camo user-agent. Demographics are collected on the Pages site,
    where real JS runs, and only displayed on the profile.
 
-CURRENT CONTENTS: 13 works — 10 local, plus 3 hosted in their own repos
+CURRENT CONTENTS: 14 works — 11 local, plus 3 hosted in their own repos
 (EDGE, Plot Light Study, Clawdvania).
 ````
 
@@ -431,3 +431,21 @@ The deploy remains the one open task and needs Satej's Cloudflare account.
   entry, 8 of the 10 local works lack some or all `og:` tags, so edits to them warn.
 - **Copy-block recount.** The block said "10 works — 8 local", stale since the two
   local works added on 2026-08-27. It now reads 13 works: 10 local plus 3 external.
+
+---
+
+## 14. Haiku Price and Score added; counts updated — 2026-10-24
+
+- **New local work:** `works/haiku-pricing.html` ("Haiku Price and Score"), an article
+  on Claude Haiku pricing. It charts output price across four Haiku releases against
+  the Artificial Analysis Intelligence Index, then covers Haiku 5.5 vs 4.5 per-token
+  and caching prices, why the 90% list-price cut and Anthropic's ~75% average are both
+  right, and Haiku 5.5 as a subagent under Opus and Sonnet. It is one self-contained
+  file in the Plainchart style with no libraries. It carries all four `og:` tags (its
+  `og:image` points at the thumbnail CI will render, `assets/thumbnails/haiku-pricing.png`)
+  and the visit beacon, so the conventions hook passes on it.
+- **Counts.** There are now **11** files in `works/`, so the Worker hostname appears in
+  **14 places**: the 11 works, the root `README.md`, and the two profile-README badges.
+  The `sed` one-liner in `analytics/README.md` covers the 12 refs in this repo.
+  `CLAUDE.md` and `analytics/README.md` were corrected in place; §12 is left as written.
+  The copy-block now reads 14 works: 11 local plus 3 external.
