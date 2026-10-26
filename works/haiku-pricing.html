@@ -251,6 +251,18 @@
   </div>
 
   <div class="card">
+    <div class="eyebrow"><span class="sq"></span><h2>What a whole task costs</h2></div>
+    <p class="sub"><b>Lower is better</b> · Measured USD per task on the Artificial Analysis Intelligence Index</p>
+    <div class="bars">
+      <div class="row"><span class="lab">Haiku 4.5<span class="tag">Score 17</span></span><span class="track"><span class="fill ctx" style="width:100%"></span></span><span class="val">$0.28</span></div>
+      <div class="row"><span class="lab"><b>Haiku 5.5, medium effort</b><span class="tag">Score 34</span></span><span class="track"><span class="fill" style="width:17.9%"></span></span><span class="val">$0.05</span></div>
+      <div class="row"><span class="lab"><b>Haiku 5.5, max effort</b><span class="tag">Score 43</span></span><span class="track"><span class="fill" style="width:75%"></span></span><span class="val">$0.21</span></div>
+    </div>
+    <p class="copy">Artificial Analysis measured the full bill for each task, extra tokens included. At medium effort, Haiku 5.5 doubles Haiku 4.5’s score for 82% less per task. At max effort it scores 43, but it thinks for so long, 162,000 output tokens per task against Haiku 4.5’s 18,000, that the saving shrinks to 25%.</p>
+    <p class="chart-note">Artificial Analysis marks the Haiku 5.5 costs as provisional: they don’t yet apply the higher price for prompts over 100,000 tokens. Checked Oct 26, 2026.</p>
+  </div>
+
+  <div class="card">
     <div class="eyebrow"><span class="sq"></span><h2>A cheap worker for bigger models</h2></div>
     <p class="sub"><b>Higher is better</b> · Anthropic’s launch benchmarks</p>
     <p class="copy">Anthropic built Haiku 5.5 for high-volume work such as summaries, classification, database queries and browser use, and pitches it as a subagent under Opus 5.5 or Sonnet 5.5 on coding work. It says Sonnet 5.5 and Opus 5.5 remain the better choice for complex agentic coding.</p>
@@ -270,7 +282,7 @@
         <div class="row"><span class="lab">Sonnet 5.5</span><span class="track"><span class="fill ctx" style="width:83.9%"></span></span><span class="val">83.9%</span></div>
       </div>
     </div>
-    <p class="copy">That is where the low price matters most. Opus 5.5 output costs $20 per million tokens, 40 times Haiku 5.5’s $0.50, so every task a lead model hands down costs a small fraction as much. How much a whole workflow saves depends on how much of the work moves to Haiku.</p>
+    <p class="copy">That is where the low price matters most. Opus 5.5 output costs $20 per million tokens, 40 times Haiku 5.5’s $0.50, so every task a lead model hands down costs a small fraction as much. On the Artificial Analysis index, one task costs $5.98 on Opus 5.5 at max effort (score 58) and $0.05 on Haiku 5.5 at medium effort (score 34), about 120 times less. How much a whole workflow saves depends on how much of the work moves to Haiku.</p>
     <figure class="quote">
       <blockquote>“With Haiku 5.5 as the sidekick, Fusion holds a top-tier FrontierCode score of 66.2 while cutting cost and latency.”</blockquote>
       <figcaption>Walden Yan, Co-Founder and CPO of Cognition, in Anthropic’s launch post</figcaption>
@@ -289,7 +301,8 @@
     <a href="https://platform.claude.com/docs/en/about-claude/pricing">Anthropic pricing</a> ·
     <a href="https://www.anthropic.com/news/claude-3-family">Claude 3 family</a> ·
     <a href="https://www.anthropic.com/news/3-5-models-and-computer-use">Claude 3.5 Haiku</a> ·
-    <a href="https://artificialanalysis.ai/articles/claude-haiku-5-5">Artificial Analysis</a>. Prices checked Oct 24, 2026.
+    <a href="https://artificialanalysis.ai/articles/claude-haiku-5-5">Artificial Analysis</a> ·
+    <a href="https://artificialanalysis.ai/?models=claude-4-5-haiku-reasoning%2Cclaude-haiku-5-5-medium%2Cclaude-opus-4-5-thinking%2Cclaude-opus-5-5%2Cclaude-haiku-5-5#intelligence-efficiency-tabs">Artificial Analysis cost per task</a>. Prices checked Oct 24, 2026; costs per task Oct 26, 2026.
   </footer>
 
 </div>
