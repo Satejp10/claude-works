@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Android vs iOS share</title>
+<meta name="description" content="New phones sold and web page views for Android and iOS, worldwide, in the US and in India. Quarterly and yearly charts with every figure in a sortable table.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Android vs iOS share">
+<meta property="og:description" content="New phones sold and web page views for Android and iOS, worldwide, in the US and in India. Quarterly and yearly charts with every figure in a sortable table.">
+<meta property="og:image" content="https://satejp10.github.io/claude-works/assets/thumbnails/android-vs-ios-share.png">
+<meta property="og:url" content="https://satejp10.github.io/claude-works/works/android-vs-ios-share.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Plainchart tokens (from tokens.css). Series: Android = --c-google, iOS = --c-meta, HarmonyOS = --c-mistral. */
+  :root{
+    --bg:#ffffff; --card:#ffffff; --ink:#1f1f1f; --lede:#3a3a3a;
+    --muted:#737373; --faint:#a3a3a3; --border:#e8e8e8; --grid:#f1f1f1;
+    --axis:#dcdcdc; --hover:#fafafa;
+    --accent:#7F4BF3; --accent-soft:#f2ecff;
+    --display:'Space Grotesk','Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --r:16px; --r-sm:5px; --maxw:980px;
+    --c-google:#34a853; --c-meta:#0089f4; --c-mistral:#ff6900;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  p{margin:0}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:34px 22px 90px}
+
+  /* header */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:38px}
+  .mark{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:-0.01em}
+  .mark .glyph{width:24px;height:24px;border-radius:6px;background:var(--ink);display:grid;place-items:center}
+  .mark .glyph::before{content:"";width:11px;height:11px;border-radius:50%;border:2.5px solid #fff}
+  .stamp{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+  h1{font-family:var(--display);font-weight:600;font-size:clamp(2.3rem,6.4vw,3.7rem);line-height:1.03;letter-spacing:-0.015em;margin:0 0 16px;max-width:16ch}
+  .lede{font-size:clamp(1rem,2.4vw,1.16rem);color:var(--lede);max-width:62ch}
+  .lede b{font-weight:600;color:var(--ink)}
+
+  /* method strip */
+  .method{border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:30px 0 38px;padding:18px 0;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+  .ey{font-size:11.5px;font-weight:700;letter-spacing:.13em;color:var(--accent);display:flex;align-items:center;gap:8px;white-space:nowrap;padding-top:2px}
+  .sq{width:13px;height:13px;border-radius:3px;background:var(--accent);flex:none}
+  .method p{font-size:14px;color:#444}
+
+  /* headline tiles */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 18px}
+  .kpi{border:1px solid var(--border);border-radius:var(--r);padding:18px}
+  .kl{font-size:12.5px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:8px}
+  .kl .sq{width:9px;height:9px;border-radius:2px}
+  .kpi .val{font-family:var(--sans);font-weight:600;font-size:38px;line-height:1.1;letter-spacing:-0.02em;margin:12px 0 8px}
+  .kpi .cap{font-size:12.5px;color:var(--muted);line-height:1.45}
+
+  /* cards and eyebrows */
+  .card{border:1px solid var(--border);border-radius:var(--r);padding:24px 24px 26px;margin-bottom:18px;background:var(--card)}
+  .card-h{margin-bottom:6px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .eyebrow{display:flex;align-items:center;gap:10px}
+  .eyebrow .sq{width:15px;height:15px;border-radius:4px}
+  .eyebrow h2{font-family:var(--display);font-weight:600;font-size:1.5rem;letter-spacing:-0.01em;margin:0;line-height:1.1}
+  .tag{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .sub{font-size:13px;color:var(--muted);margin:9px 0 16px 25px;max-width:72ch}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:12px;color:var(--muted);align-items:center;margin:0 0 6px}
+  .legend .it{display:flex;align-items:center;gap:6px}
+  .legend .d{width:10px;height:10px;border-radius:50%}
+  .chart{position:relative;width:100%}
+  .chart svg{display:block;width:100%;height:auto;overflow:visible}
+  .chart text{font-family:var(--sans)}
+  .ax-line{stroke:var(--grid);stroke-width:1}
+  .ax-base{stroke:var(--axis);stroke-width:1}
+  .ax-tick{font-size:12px;fill:var(--muted)}
+  .ax-x{font-size:12px;fill:var(--muted)}
+  .gap-lbl{font-size:12px;fill:var(--muted)}
+  .lbl{font-size:13px;font-weight:500;fill:var(--ink)}
+  .seg-val{font-size:12px;font-weight:500;fill:var(--ink)}
+  .dv{font-size:12.5px;font-weight:500;fill:var(--ink)}
+  .row-h{font-size:14px;font-weight:600;fill:var(--ink)}
+  .chart-note{font-size:11.5px;color:var(--faint);margin:14px 0 0;line-height:1.45}
+
+  /* tooltip (hover layer) */
+  .tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 11px;font-size:13px;line-height:1.45;min-width:150px;max-width:260px;opacity:0;z-index:2}
+  .tip.on{opacity:1}
+  .tip b{display:block;font-weight:600;margin-bottom:3px}
+  .tip .row{display:flex;align-items:center;justify-content:space-between;gap:14px;font-variant-numeric:tabular-nums}
+  .tip .k{display:inline-flex;align-items:center;gap:7px;color:var(--lede)}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:3px;flex:none}
+  .tip .tnote{font-size:12px;color:var(--faint);margin-top:4px}
+
+  /* pills and table */
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 10px}
+  .pill{font:inherit;font-size:12.5px;font-weight:500;padding:6px 13px;border-radius:999px;border:1px solid var(--border);background:#fff;color:#444;cursor:pointer}
+  .pill:hover{border-color:#c9c9c9}
+  .pill[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tbl-scroll{overflow-x:auto;margin:0 -4px;-webkit-overflow-scrolling:touch}
+  table{border-collapse:collapse;width:100%;min-width:780px;font-size:13px}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--grid);white-space:nowrap}
+  th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{position:sticky;left:0;background:#fff}
+  thead th{font-weight:600;color:var(--muted);font-size:11.5px;letter-spacing:.02em;border-bottom:1px solid var(--axis)}
+  thead th button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;display:inline-flex;align-items:center}
+  thead th button:hover{color:var(--ink)}
+  thead th .arr{color:var(--accent);font-size:10px;margin-left:2px}
+  tbody tr:hover td{background:var(--hover)}
+  .dash{color:var(--faint)}
+  td.src{color:var(--muted);font-size:12px}
+
+  footer{margin-top:34px;font-size:12px;color:var(--faint);line-height:1.6;border-top:1px solid var(--border);padding-top:18px}
+
+  @media (max-width:760px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .kpi .val{font-size:32px}
+  }
+  @media (max-width:600px){
+    .wrap{padding:26px 16px 70px}
+    .eyebrow h2{font-size:1.3rem}
+    .card{padding:20px 16px 22px}
+    .method{grid-template-columns:1fr;gap:9px}
+  }
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="mark"><span class="glyph"></span>Smartphone OS share</div>
+    <div class="stamp">Updated Nov 2026</div>
+  </div>
+
+  <h1>Android vs iOS</h1>
+  <p class="lede"><b>Android leads worldwide and in India. iOS leads in the US.</b> Phone sales and web page views measure different things, so each chart says which one it uses.</p>
+
+  <div class="method">
+    <div class="ey"><span class="sq"></span>METHOD</div>
+    <p>New phones sold come from Counterpoint Research's quarterly tables. Web page views come from StatCounter, which counts visits, so it is only a stand-in for phones in use. Yearly web figures are StatCounter's, as reproduced on Demandsage. 2024 and 2025 are left out because two copies of that data differ by up to about 1.3 points. Figures run through August 2026.</p>
+  </div>
+
+  <section class="kpis" aria-label="Headline numbers">
+    <div class="kpi">
+      <div class="kl"><span class="sq"></span>Android, worldwide</div>
+      <div class="val">67.5%</div>
+      <div class="cap">Web page views, Aug 2026</div>
+    </div>
+    <div class="kpi">
+      <div class="kl"><span class="sq"></span>Android, worldwide</div>
+      <div class="val">75%</div>
+      <div class="cap">New phones sold, Q2 2026. iOS 20%, HarmonyOS 5%.</div>
+    </div>
+    <div class="kpi">
+      <div class="kl"><span class="sq"></span>iOS, US</div>
+      <div class="val">58%</div>
+      <div class="cap">Web page views, June 2026</div>
+    </div>
+    <div class="kpi">
+      <div class="kl"><span class="sq"></span>Android, India</div>
+      <div class="val">93%</div>
+      <div class="cap">Web page views, June 2026</div>
+    </div>
+  </section>
+
+  <!-- CARD 1: worldwide new phones, by quarter -->
+  <div class="card">
+    <div class="card-h">
+      <div class="eyebrow"><span class="sq"></span><h2>New phones sold, worldwide</h2></div>
+      <span class="tag">Counterpoint</span>
+    </div>
+    <p class="sub">Share of new phones sold each quarter. Each column adds to 100%.</p>
+    <div class="legend" id="lg-ww-new"></div>
+    <div class="chart" id="ch-ww-new"></div>
+    <p class="chart-note">The source's Q4 2025 figures add to 99% because of rounding.</p>
+  </div>
+
+  <!-- CARD 2: worldwide web page views, by year -->
+  <div class="card">
+    <div class="card-h">
+      <div class="eyebrow"><span class="sq"></span><h2>Web page views, worldwide</h2></div>
+      <span class="tag">StatCounter</span>
+    </div>
+    <p class="sub">Share of web page views by phone system: yearly points, then three 2026 months. 2024 and 2025 are not shown.</p>
+    <div class="legend" id="lg-ww-web"></div>
+    <div class="chart" id="ch-ww-web"></div>
+    <p class="chart-note">2016 comes from a single table. August 2026 averages two StatCounter readings.</p>
+  </div>
+
+  <!-- CARD 3: US web page views, by year -->
+  <div class="card">
+    <div class="card-h">
+      <div class="eyebrow"><span class="sq"></span><h2>Web page views, US</h2></div>
+      <span class="tag">StatCounter</span>
+    </div>
+    <p class="sub">iOS has the larger share in every year shown. 2024 and 2025 are not shown.</p>
+    <div class="legend" id="lg-us-web"></div>
+    <div class="chart" id="ch-us-web"></div>
+    <p class="chart-note">2015, 2016 and 2017 each come from a single table.</p>
+  </div>
+
+  <!-- CARD 4: US new phones, by quarter -->
+  <div class="card">
+    <div class="card-h">
+      <div class="eyebrow"><span class="sq"></span><h2>New phones sold, US</h2></div>
+      <span class="tag">Counterpoint</span>
+    </div>
+    <p class="sub">The two lines mirror each other, because each quarter's two shares add to 100%.</p>
+    <div class="legend" id="lg-us-new"></div>
+    <div class="chart" id="ch-us-new"></div>
+    <p class="chart-note">iOS led in every quarter shown except Q2 2025, which was a tie.</p>
+  </div>
+
+  <!-- CARD 5: India readings -->
+  <div class="card">
+    <div class="card-h">
+      <div class="eyebrow"><span class="sq"></span><h2>India</h2></div>
+      <span class="tag">Mixed sources</span>
+    </div>
+    <p class="sub">I found no yearly series for India. Each row is one reading from one source, so rows are not evenly spaced in time.</p>
+    <div class="legend" id="lg-in"></div>
+    <div class="chart" id="ch-in"></div>
+    <p class="chart-note">Android was at 90% or more in every reading shown.</p>
+  </div>
+
+  <!-- CARD 6: every number -->
+  <div class="card">
+    <div class="card-h">
+      <div class="eyebrow"><span class="sq"></span><h2>Every number</h2></div>
+      <span class="tag" id="count"></span>
+    </div>
+    <p class="sub">Filter by region or measure. Click a column heading to sort.</p>
+    <div class="pills" id="f-region" role="group" aria-label="Filter by region"></div>
+    <div class="pills" id="f-meas" role="group" aria-label="Filter by measure"></div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr id="thead"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="chart-note">Every chart above is drawn from these rows.</p>
+  </div>
+
+  <footer>
+    Sources: Counterpoint Research (new phones sold, quarterly); StatCounter (web page views, 2026 readings); StatCounter tables as reproduced on Demandsage (yearly web figures); Appingine citing Statista (US 2015); Strategy Analytics via Digit and Android Authority (India 2015 and 2016); Khaleej Times citing StatCounter (India 2019). Note on 2015: IDC put Android at about 81% and iOS at about 16% of new phones sold worldwide, which is 231.5 million iPhones out of 1.44 billion phones. Data through August 2026.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+var COLORS = {a:'#34a853', i:'#0089f4', h:'#ff6900'};   /* Android, iOS, HarmonyOS */
+var NAMES  = {a:'Android', i:'iOS', h:'HarmonyOS'};
+var MON = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+
+/* ---------- data (figures as published; see the method note) ---------- */
+var NEW_WW = [
+  {q:'Q3 2024', a:80, i:16, h:4}, {q:'Q4 2024', a:74, i:22, h:4},
+  {q:'Q1 2025', a:76, i:19, h:5}, {q:'Q2 2025', a:79, i:17, h:4},
+  {q:'Q3 2025', a:79, i:17, h:4}, {q:'Q4 2025', a:72, i:24, h:3},
+  {q:'Q1 2026', a:73, i:22, h:5}, {q:'Q2 2026', a:75, i:20, h:5}
+];
+var NEW_US = [
+  {q:'Q3 2024', a:48, i:52}, {q:'Q4 2024', a:35, i:65},
+  {q:'Q1 2025', a:45, i:55}, {q:'Q2 2025', a:50, i:50},
+  {q:'Q3 2025', a:45, i:55}, {q:'Q4 2025', a:31, i:69},
+  {q:'Q1 2026', a:42, i:58}, {q:'Q2 2026', a:49, i:51}
+];
+var WEB_WW = [
+  {y:'2016', a:69.11, i:19.29}, {y:'2017', a:72.63, i:19.65},
+  {y:'2018', a:75.45, i:20.47}, {y:'2019', a:75.47, i:22.71},
+  {y:'2020', a:73.06, i:26.28}, {y:'2021', a:71.89, i:27.34},
+  {y:'2022', a:71.47, i:27.85}, {y:'2023', a:70.26, i:29.02}
+];
+var WEB_WW_2026 = [
+  {m:'Jun 2026', a:69.14, i:30.79},
+  {m:'Jul 2026', a:68.36, i:31.60},
+  {m:'Aug 2026', a:67.53, i:32.44, avg:true}
+];
+var WEB_US = [
+  {y:'2015', a:46.42, i:50.85, src:'Appingine table citing Statista'},
+  {y:'2016', a:45.20, i:53.19},
+  {y:'2017', a:45.23, i:53.89},
+  {y:'2018', a:44.73, i:54.82},
+  {y:'2019', a:44.51, i:55.23},
+  {y:'2020', a:40.20, i:59.54},
+  {y:'2021', a:41.11, i:58.58},
+  {y:'2022', a:42.94, i:56.74},
+  {y:'2023', a:41.46, i:58.10}
+];
+var WEB_US_2026 = {m:'Jun 2026', a:41.62, i:58.35};
+var INDIA = [
+  {p:'Q2 2015',  meas:'New phones sold', a:90,    i:4.5,  src:'Strategy Analytics, via Digit'},
+  {p:'Q2 2016',  meas:'New phones sold', a:97,    i:2.4,  src:'Strategy Analytics, via Android Authority'},
+  {p:'Jul 2019', meas:'Web page views',  a:91.5,  i:2.6,  src:'StatCounter, via Khaleej Times'},
+  {p:'Q1 2026',  meas:'New phones sold', a:90,    i:10,   src:'Counterpoint Research'},
+  {p:'Q2 2026',  meas:'New phones sold', a:91,    i:9,    src:'Counterpoint Research'},
+  {p:'Jun 2026', meas:'Web page views',  a:93.05, i:6.89, src:'StatCounter'}
+];
+
+/* ---------- helpers ---------- */
+function tKey(p){
+  var m = /^Q(\d) (\d{4})$/.exec(p);
+  if (m) return +m[2] + (+m[1] - 1) / 4;
+  m = /^([A-Za-z]{3}) (\d{4})$/.exec(p);
+  if (m) return +m[2] + MON[m[1]] / 12;
+  return +p;
+}
+function fmt(v){
+  if (v == null || Number.isNaN(v)) return '—';
+  if (Number.isInteger(v)) return String(v);
+  return (Math.round((v + Number.EPSILON) * 10) / 10).toFixed(1);
+}
+function node(tag, attrs, parent){
+  var el = document.createElementNS(NS, tag);
+  for (var k in attrs) el.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(el);
+  return el;
+}
+function T(parent, x, y, s, cls, anchor){
+  var el = node('text', {x:x, y:y, 'class':cls || '', 'text-anchor':anchor || 'start'}, parent);
+  el.textContent = s;
+  return el;
+}
+function xLabel(parent, x, y, s, compact){
+  if (Array.isArray(s.label)){
+    var t = node('text', {x:x, y:y, 'class':'ax-x', 'text-anchor':'middle'}, parent);
+    var a = node('tspan', {x:x, dy:0}, t);  a.textContent = s.label[0];
+    var b = node('tspan', {x:x, dy:15}, t); b.textContent = compact ? "'" + s.label[1].slice(2) : s.label[1];
+  } else {
+    T(parent, x, y, compact && s.short ? s.short : s.label, 'ax-x', 'middle');
+  }
+}
+function yAxis(svg, m, W, ticks, Y){
+  ticks.forEach(function(t){
+    node('line', {x1:m.l, x2:W - m.r, y1:Y(t), y2:Y(t), 'class': t === 0 ? 'ax-base' : 'ax-line'}, svg);
+    T(svg, m.l - 8, Y(t) + 4, t + '%', 'ax-tick', 'end');
+  });
+}
+function legend(id, keys){
+  document.getElementById(id).innerHTML = keys.map(function(k){
+    return '<span class="it"><span class="d" style="background:' + COLORS[k] + '"></span>' + NAMES[k] + '</span>';
+  }).join('');
+}
+function makeTip(host){
+  var t = document.createElement('div');
+  t.className = 'tip';
+  host.appendChild(t);
+  return t;
+}
+function placeTip(host, tip, html, px, py){
+  tip.innerHTML = html;
+  tip.classList.add('on');
+  var tw = tip.offsetWidth, th = tip.offsetHeight, hw = host.clientWidth, hh = host.clientHeight;
+  var left = px + 16;
+  if (left + tw > hw) left = px - tw - 16;
+  if (left < 0) left = 0;
+  var top = py - th / 2;
+  if (top < 0) top = 0;
+  if (top + th > hh) top = Math.max(0, hh - th);
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+}
+function tipRow(key, value){
+  return '<div class="row"><span class="k"><i class="swatch" style="background:' + COLORS[key] + '"></i>' + NAMES[key] + '</span><span>' + value + '</span></div>';
+}
+function roundTop(x, y, w, h, r){
+  var rr = Math.min(r, w / 2, h);
+  return 'M' + x + ' ' + (y + h) + 'V' + (y + rr) + 'Q' + x + ' ' + y + ' ' + (x + rr) + ' ' + y +
+         'H' + (x + w - rr) + 'Q' + (x + w) + ' ' + y + ' ' + (x + w) + ' ' + (y + rr) + 'V' + (y + h) + 'Z';
+}
+
+/* ---------- line chart (share over time, one 0-100 axis) ---------- */
+function lineChart(id, o){
+  var host = document.getElementById(id);
+  host.innerHTML = '';
+  var W = host.clientWidth || 640, compact = W < 560, H = o.height;
+  var m = {t:26, r: compact ? 60 : 130, b:58, l:42};
+  var pw = W - m.l - m.r, ph = H - m.t - m.b, n = o.slots.length;
+  var X = function(k){ return m.l + k * pw / (n - 1); };
+  var Y = function(v){ return m.t + ph - v / 100 * ph; };
+  var svg = node('svg', {width:W, height:H, viewBox:'0 0 ' + W + ' ' + H, role:'img', 'aria-label':o.aria}, host);
+  yAxis(svg, m, W, o.ticks, Y);
+  o.slots.forEach(function(s, k){
+    if (s.gap) T(svg, X(k), m.t + 12, '2024–25 not shown', 'gap-lbl', 'middle');
+    else xLabel(svg, X(k), H - m.b + 20, s, compact);
+  });
+  o.keys.forEach(function(key){
+    var col = COLORS[key], seg = [];
+    var flush = function(){
+      if (seg.length > 1) node('path', {d:'M' + seg.map(function(p){ return p[0] + ' ' + p[1]; }).join(' L'),
+        fill:'none', stroke:col, 'stroke-width':2, 'stroke-linejoin':'round', 'stroke-linecap':'round'}, svg);
+      seg = [];
+    };
+    o.slots.forEach(function(s, k){
+      if (typeof s[key] === 'number') seg.push([X(k), Y(s[key])]); else flush();
+    });
+    flush();
+    o.slots.forEach(function(s, k){
+      if (typeof s[key] === 'number') node('circle', {cx:X(k), cy:Y(s[key]), r:4, fill:col, stroke:'#fff', 'stroke-width':1.5}, svg);
+    });
+  });
+  /* endpoint labels; nudged apart when two sit on top of each other */
+  var ends = o.keys.map(function(key){
+    var last = -1;
+    o.slots.forEach(function(s, k){ if (typeof s[key] === 'number') last = k; });
+    if (last < 0) return null;
+    return {key:key, x:X(last), y:Y(o.slots[last][key]), v:o.slots[last][key]};
+  }).filter(Boolean).sort(function(p, q){ return p.y - q.y; });
+  for (var j = 1; j < ends.length; j++) if (ends[j].y - ends[j - 1].y < 16) ends[j].y = ends[j - 1].y + 16;
+  ends.forEach(function(e){
+    T(svg, e.x + 10, e.y + 4, compact ? fmt(e.v) + '%' : NAMES[e.key] + ' ' + fmt(e.v) + '%', 'lbl');
+  });
+  /* hover layer: crosshair, marker and tooltip at the nearest point */
+  var cross = node('line', {x1:0, x2:0, y1:m.t, y2:m.t + ph, stroke:'#a3a3a3', 'stroke-width':1, opacity:0}, svg);
+  var hot = o.keys.map(function(key){ return node('circle', {r:6, fill:COLORS[key], stroke:'#fff', 'stroke-width':2, opacity:0}, svg); });
+  var tip = makeTip(host);
+  var over = node('rect', {x:m.l, y:m.t, width:pw, height:ph, fill:'transparent'}, svg);
+  var hide = function(){
+    cross.setAttribute('opacity', 0);
+    hot.forEach(function(c){ c.setAttribute('opacity', 0); });
+    tip.classList.remove('on');
+  };
+  var show = function(ev){
+    var r = svg.getBoundingClientRect();
+    var px = (ev.clientX - r.left) * W / r.width;
+    var best = -1, bd = Infinity;
+    o.slots.forEach(function(s, k){
+      if (s.gap) return;
+      var d = Math.abs(X(k) - px);
+      if (d < bd) { bd = d; best = k; }
+    });
+    if (best < 0) return;
+    var s = o.slots[best];
+    cross.setAttribute('x1', X(best)); cross.setAttribute('x2', X(best)); cross.setAttribute('opacity', 1);
+    o.keys.forEach(function(key, j){
+      if (typeof s[key] === 'number'){
+        hot[j].setAttribute('cx', X(best)); hot[j].setAttribute('cy', Y(s[key])); hot[j].setAttribute('opacity', 1);
+      } else hot[j].setAttribute('opacity', 0);
+    });
+    var rows = o.keys.filter(function(key){ return typeof s[key] === 'number'; })
+      .map(function(key){ return tipRow(key, fmt(s[key]) + '%'); }).join('');
+    var hr = host.getBoundingClientRect();
+    placeTip(host, tip, '<b>' + s.long + '</b>' + rows + (s.note ? '<div class="tnote">' + s.note + '</div>' : ''),
+      ev.clientX - hr.left, ev.clientY - hr.top);
+  };
+  over.addEventListener('pointermove', show);
+  over.addEventListener('pointerdown', show);
+  over.addEventListener('pointerleave', hide);
+}
+
+/* ---------- stacked columns (100% of new phones, one column per quarter) ---------- */
+function columnChart(id, o){
+  var host = document.getElementById(id);
+  host.innerHTML = '';
+  var W = host.clientWidth || 640, compact = W < 560, H = o.height;
+  var m = {t:16, r: compact ? 60 : 150, b:58, l:42};
+  var pw = W - m.l - m.r, ph = H - m.t - m.b, n = o.slots.length;
+  var step = pw / n, bw = Math.min(52, step * 0.56);
+  var Y = function(v){ return m.t + ph - v / 100 * ph; };
+  var svg = node('svg', {width:W, height:H, viewBox:'0 0 ' + W + ' ' + H, role:'img', 'aria-label':o.aria}, host);
+  yAxis(svg, m, W, [0, 25, 50, 75, 100], Y);
+  var band = node('rect', {x:m.l, y:m.t, width:step, height:ph, fill:'#fafafa', opacity:0}, svg);
+  var keys = ['a', 'i', 'h'];
+  var centers = [], mids = [];
+  o.slots.forEach(function(s, k){
+    var cx = m.l + step * (k + 0.5), x0 = cx - bw / 2;
+    centers.push(cx);
+    mids.push({});
+    var base = m.t + ph;
+    keys.forEach(function(key){
+      var v = s[key];
+      if (typeof v !== 'number') return;
+      var h = v / 100 * ph, y0 = base - h;
+      var d = key === 'h' ? roundTop(x0, y0, bw, h, 5) : 'M' + x0 + ' ' + y0 + 'h' + bw + 'v' + h + 'h' + (-bw) + 'z';
+      node('path', {d:d, fill:COLORS[key], stroke:'#fff', 'stroke-width':2, 'stroke-linejoin':'round'}, svg);
+      mids[k][key] = y0 + h / 2;
+      if (key !== 'h' && h >= 18 && bw >= 30) T(svg, cx, y0 + h / 2 + 4, fmt(v) + '%', 'seg-val', 'middle');
+      base = y0;
+    });
+    xLabel(svg, cx, H - m.b + 20, s, compact);
+  });
+  /* direct labels on the latest column, where the small HarmonyOS band cannot carry a value inside */
+  var last = n - 1, lx = centers[last] + bw / 2 + 12;
+  keys.forEach(function(key){
+    if (mids[last][key] == null) return;
+    var v = o.slots[last][key];
+    T(svg, lx, mids[last][key] + 4, compact ? fmt(v) + '%' : NAMES[key] + ' ' + fmt(v) + '%', 'lbl');
+  });
+  /* hover layer: column band and tooltip with all three shares */
+  var tip = makeTip(host);
+  var over = node('rect', {x:m.l, y:m.t, width:pw, height:ph, fill:'transparent'}, svg);
+  var hide = function(){ band.setAttribute('opacity', 0); tip.classList.remove('on'); };
+  var show = function(ev){
+    var r = svg.getBoundingClientRect();
+    var px = (ev.clientX - r.left) * W / r.width;
+    var k = Math.min(n - 1, Math.max(0, Math.floor((px - m.l) / step)));
+    var s = o.slots[k];
+    band.setAttribute('x', m.l + step * k);
+    band.setAttribute('opacity', 1);
+    var rows = keys.filter(function(key){ return typeof s[key] === 'number'; })
+      .map(function(key){ return tipRow(key, fmt(s[key]) + '%'); }).join('');
+    var hr = host.getBoundingClientRect();
+    placeTip(host, tip, '<b>' + s.long + '</b>' + rows, ev.clientX - hr.left, ev.clientY - hr.top);
+  };
+  over.addEventListener('pointermove', show);
+  over.addEventListener('pointerdown', show);
+  over.addEventListener('pointerleave', hide);
+}
+
+/* ---------- India: one row per reading, both shares on one 0-100 axis ---------- */
+function dotStrip(id, rows){
+  var host = document.getElementById(id);
+  host.innerHTML = '';
+  var W = host.clientWidth || 640, compact = W < 560;
+  var rowH = compact ? 60 : 56;
+  var m = {t:8, r:34, b:34, l: compact ? 100 : 176};
+  var pw = W - m.l - m.r, H = m.t + rows.length * rowH + m.b;
+  var X = function(v){ return m.l + v / 100 * pw; };
+  var svg = node('svg', {width:W, height:H, viewBox:'0 0 ' + W + ' ' + H, role:'img',
+    'aria-label':'India: Android and iOS share in each reading'}, host);
+  [0, 25, 50, 75, 100].forEach(function(t){
+    node('line', {x1:X(t), x2:X(t), y1:m.t, y2:H - m.b, 'class': t === 0 ? 'ax-base' : 'ax-line'}, svg);
+    T(svg, X(t), H - m.b + 20, t + '%', 'ax-tick', t === 0 ? 'start' : (t === 100 ? 'end' : 'middle'));
+  });
+  var tip = makeTip(host);
+  var hide = function(){ tip.classList.remove('on'); };
+  rows.forEach(function(r, idx){
+    var cy = m.t + idx * rowH + rowH / 2, ix = X(r.i), ax = X(r.a);
+    node('line', {x1:m.l, x2:W - m.r, y1:cy, y2:cy, stroke:'#f1f1f1', 'stroke-width':1}, svg);
+    node('line', {x1:ix, x2:ax, y1:cy, y2:cy, stroke:'#e8e8e8', 'stroke-width':2}, svg);
+    T(svg, 0, cy - 2, r.p, 'row-h');
+    T(svg, 0, cy + 14, r.meas, 'ax-x');
+    node('circle', {cx:ix, cy:cy, r:6, fill:COLORS.i, stroke:'#fff', 'stroke-width':2}, svg);
+    node('circle', {cx:ax, cy:cy, r:6, fill:COLORS.a, stroke:'#fff', 'stroke-width':2}, svg);
+    T(svg, ix, cy - 12, fmt(r.i) + '%', 'dv', 'middle');
+    T(svg, ax, cy - 12, fmt(r.a) + '%', 'dv', 'middle');
+    var html = '<b>' + r.p + ' · ' + r.meas + '</b>' + tipRow('a', fmt(r.a) + '%') + tipRow('i', fmt(r.i) + '%') +
+               '<div class="tnote">' + r.src + '</div>';
+    [ix, ax].forEach(function(x){
+      var hit = node('circle', {cx:x, cy:cy, r:16, fill:'transparent'}, svg);
+      var show = function(ev){
+        var hr = host.getBoundingClientRect();
+        placeTip(host, tip, html, ev.clientX - hr.left, ev.clientY - hr.top);
+      };
+      hit.addEventListener('pointermove', show);
+      hit.addEventListener('pointerdown', show);
+      hit.addEventListener('pointerleave', hide);
+    });
+  });
+}
+
+/* ---------- chart slots ---------- */
+var slotsWWNew = NEW_WW.map(function(d){
+  return {label:d.q.split(' '), long:d.q, a:d.a, i:d.i, h:d.h};
+});
+var slotsWW = WEB_WW.map(function(d){
+  return {label:d.y, short:"'" + d.y.slice(2), long:d.y, a:d.a, i:d.i};
+}).concat([{gap:true}]).concat(WEB_WW_2026.map(function(d){
+  return {label:d.m.replace(' 2026', " '26"), short:d.m.slice(0, 3), long:d.m, a:d.a, i:d.i,
+          note: d.avg ? 'Average of two StatCounter readings: 67.45% and 67.61% Android' : null};
+}));
+var slotsUS = WEB_US.map(function(d){
+  return {label:d.y, short:"'" + d.y.slice(2), long:d.y, a:d.a, i:d.i};
+}).concat([{gap:true}, {label:"Jun '26", short:'Jun', long:'Jun 2026', a:WEB_US_2026.a, i:WEB_US_2026.i}]);
+var slotsUSNew = NEW_US.map(function(d){
+  return {label:d.q.split(' '), long:d.q, a:d.a, i:d.i};
+});
+
+/* ---------- drawing ---------- */
+function drawAll(){
+  columnChart('ch-ww-new', {slots:slotsWWNew, height:316,
+    aria:'Stacked columns: share of new phones sold by quarter, worldwide. Android, iOS and HarmonyOS.'});
+  lineChart('ch-ww-web', {slots:slotsWW, keys:['a','i'], ticks:[0,25,50,75,100], height:300,
+    aria:'Lines: worldwide share of web page views by year, Android and iOS.'});
+  lineChart('ch-us-web', {slots:slotsUS, keys:['a','i'], ticks:[0,25,50,75,100], height:300,
+    aria:'Lines: US share of web page views by year, iOS and Android.'});
+  lineChart('ch-us-new', {slots:slotsUSNew, keys:['a','i'], ticks:[0,25,50,75,100], height:300,
+    aria:'Lines: US share of new phones sold by quarter, Android and iOS.'});
+  dotStrip('ch-in', INDIA);
+}
+var timer = null;
+window.addEventListener('resize', function(){ clearTimeout(timer); timer = setTimeout(drawAll, 150); });
+
+/* ---------- table data and controls ---------- */
+var ROWS = [];
+NEW_WW.forEach(function(d){ ROWS.push({region:'Worldwide', meas:'New phones sold', p:d.q, a:d.a, i:d.i, h:d.h, src:'Counterpoint Research'}); });
+NEW_US.forEach(function(d){ ROWS.push({region:'US', meas:'New phones sold', p:d.q, a:d.a, i:d.i, h:null, src:'Counterpoint Research'}); });
+WEB_WW.forEach(function(d){ ROWS.push({region:'Worldwide', meas:'Web page views', p:d.y, a:d.a, i:d.i, h:null, src:'StatCounter, via Demandsage'}); });
+WEB_WW_2026.forEach(function(d){ ROWS.push({region:'Worldwide', meas:'Web page views', p:d.m, a:d.a, i:d.i, h:null, src: d.avg ? 'StatCounter, average of two readings' : 'StatCounter'}); });
+WEB_US.forEach(function(d){ ROWS.push({region:'US', meas:'Web page views', p:d.y, a:d.a, i:d.i, h:null, src: d.src || 'StatCounter, via Demandsage'}); });
+ROWS.push({region:'US', meas:'Web page views', p:WEB_US_2026.m, a:WEB_US_2026.a, i:WEB_US_2026.i, h:null, src:'StatCounter'});
+INDIA.forEach(function(d){ ROWS.push({region:'India', meas:d.meas, p:d.p, a:d.a, i:d.i, h:null, src:d.src}); });
+ROWS.forEach(function(r){ r.t = tKey(r.p); });
+
+var COLS = [
+  {k:'region', l:'Region',     t:'s'},
+  {k:'meas',   l:'Measure',    t:'s'},
+  {k:'t',      l:'Period',     t:'n'},
+  {k:'a',      l:'Android',    t:'n'},
+  {k:'i',      l:'iOS',        t:'n'},
+  {k:'h',      l:'HarmonyOS',  t:'n'},
+  {k:'src',    l:'Source',     t:'s'}
+];
+var state = {region:'All', meas:'All', key:null, dir:1};
+
+function buildFilters(){
+  function pill(group, val, label){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pill';
+    b.textContent = label;
+    b.setAttribute('aria-pressed', String(state[group] === val));
+    b.addEventListener('click', function(){ state[group] = val; buildFilters(); renderTable(); });
+    return b;
+  }
+  var rg = document.getElementById('f-region'), ms = document.getElementById('f-meas');
+  rg.innerHTML = ''; ms.innerHTML = '';
+  [['All','All regions'], ['Worldwide','Worldwide'], ['US','US'], ['India','India']]
+    .forEach(function(p){ rg.appendChild(pill('region', p[0], p[1])); });
+  [['All','All measures'], ['New phones sold','New phones sold'], ['Web page views','Web page views']]
+    .forEach(function(p){ ms.appendChild(pill('meas', p[0], p[1])); });
+}
+function buildHead(){
+  var tr = document.getElementById('thead');
+  tr.innerHTML = '';
+  COLS.forEach(function(c){
+    var th = document.createElement('th');
+    var on = state.key === c.k;
+    if (c.t === 'n') th.className = 'num';
+    th.setAttribute('aria-sort', on ? (state.dir === 1 ? 'ascending' : 'descending') : 'none');
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = c.l;
+    if (on){
+      var ar = document.createElement('span');
+      ar.className = 'arr';
+      ar.textContent = state.dir === 1 ? ' ↑' : ' ↓';
+      b.appendChild(ar);
+    }
+    b.addEventListener('click', function(){
+      if (state.key === c.k) state.dir = -state.dir;
+      else { state.key = c.k; state.dir = c.t === 's' ? 1 : -1; }
+      buildHead();
+      renderTable();
+    });
+    th.appendChild(b);
+    tr.appendChild(th);
+  });
+}
+function renderTable(){
+  var body = document.getElementById('tbody');
+  var rows = ROWS.filter(function(r){
+    return (state.region === 'All' || r.region === state.region) && (state.meas === 'All' || r.meas === state.meas);
+  });
+  if (state.key){
+    var k = state.key, d = state.dir;
+    rows = rows.slice().sort(function(x, y){
+      var a = x[k], b = y[k];
+      if (a == null && b == null) return 0;
+      if (a == null) return 1;
+      if (b == null) return -1;
+      return a > b ? d : (a < b ? -d : 0);
+    });
+  }
+  body.innerHTML = rows.map(function(r){
+    var nums = [r.a, r.i, r.h].map(function(v){
+      return '<td class="num">' + (v == null ? '<span class="dash">—</span>' : v) + '</td>';
+    }).join('');
+    return '<tr><td>' + r.region + '</td><td>' + r.meas + '</td><td>' + r.p + '</td>' + nums +
+           '<td class="src">' + r.src + '</td></tr>';
+  }).join('');
+  document.getElementById('count').textContent = rows.length + (rows.length === 1 ? ' row' : ' rows');
+}
+
+/* ---------- start ---------- */
+legend('lg-ww-new', ['a','i','h']);
+legend('lg-ww-web', ['a','i']);
+legend('lg-us-web', ['a','i']);
+legend('lg-us-new', ['a','i']);
+legend('lg-in', ['a','i']);
+buildFilters();
+buildHead();
+renderTable();
+drawAll();
+})();
+</script>
+<!-- visit-beacon:start -->
+<script>
+/* Counts a pageview via analytics/ (Cloudflare Worker). No cookies, no storage,
+   no IP retained; geography is resolved at Cloudflare's edge. Fails silently. */
+(function(){try{
+var w=innerWidth,d=w<640?"mobile":w<1024?"tablet":"desktop";
+if(navigator.userAgentData&&navigator.userAgentData.mobile&&d!=="mobile")d="mobile";
+var r="direct";
+if(document.referrer){try{var h=new URL(document.referrer).hostname;if(h&&h!==location.hostname)r=h;}catch(e){}}
+var p=JSON.stringify({s:(location.pathname.split("/").pop()||"").replace(/\.html$/,"")||"gallery",r:r,d:d});
+var u="https://claude-works-analytics.satejp10.workers.dev/hit";
+if(navigator.sendBeacon){navigator.sendBeacon(u,new Blob([p],{type:"text/plain"}));}
+else{fetch(u,{method:"POST",body:p,keepalive:true});}
+}catch(e){}})();
+</script>
+<!-- visit-beacon:end -->
+</body>
+</html>
