@@ -79,10 +79,10 @@ the profile README badges currently point at:
 https://claude-works-analytics.satejp10.workers.dev
 ```
 
-If your account subdomain differs, update that host in **14 places**: the eleven
+If your account subdomain differs, update that host in **15 places**: the twelve
 files in `works/`, the beacon at the bottom of the root `README.md`, and the two
 badge URLs in the `Satejp10/Satejp10` profile README. The `sed` one-liner below
-covers the 12 refs in this repo; the two profile badges live in the other repo, so
+covers the 13 refs in this repo; the two profile badges live in the other repo, so
 update those by hand (they're the same wrappers you un-hide in step 7). From the
 repo root:
 

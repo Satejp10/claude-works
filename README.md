@@ -13,31 +13,34 @@ served live via **GitHub Pages** so you can view them rendered, not just as sour
 <!-- GALLERY:START -->
 <table>
   <tr>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/android-vs-ios-share.html"><img src="assets/thumbnails/android-vs-ios-share.png" alt="Android vs iOS share" width="420"></a><br><sub><b>Android vs iOS share</b></sub></td>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/haiku-pricing.html"><img src="assets/thumbnails/haiku-pricing.png" alt="Haiku Price and Score" width="420"></a><br><sub><b>Haiku Price and Score</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/Clawdvania/"><img src="assets/thumbnails/clawdvania.png" alt="Clawdvania — A Walk Home at Dusk" width="420"></a><br><sub><b>Clawdvania — A Walk Home at Dusk</b></sub></td>
-  </tr>
-  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/model-switching-drift.html"><img src="assets/thumbnails/model-switching-drift.png" alt="The Switch Matrix" width="420"></a><br><sub><b>The Switch Matrix</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/gpt5-transition-reddit.html"><img src="assets/thumbnails/gpt5-transition-reddit.png" alt="The GPT-5 Backlash Wasn't Mostly About Grief" width="420"></a><br><sub><b>The GPT-5 Backlash Wasn't Mostly About Grief</b></sub></td>
-  </tr>
-  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/Sun-light-shadow-plot/Solar%20light%20study.html"><img src="assets/thumbnails/sun-light-shadow-plot.png" alt="Plot Light Study" width="420"></a><br><sub><b>Plot Light Study</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/koyna-monsoon-dashboard.html"><img src="assets/thumbnails/koyna-monsoon-dashboard.png" alt="Koyna Dam — Monsoon Water & Power" width="420"></a><br><sub><b>Koyna Dam — Monsoon Water & Power</b></sub></td>
-  </tr>
-  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/how-india-got-online-pixel-quest.html"><img src="assets/thumbnails/how-india-got-online-pixel-quest.gif" alt="How India Got Online — Pixel Quest" width="420"></a><br><sub><b>How India Got Online — Pixel Quest</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/india-online-data-report.html"><img src="assets/thumbnails/india-online-data-report.png" alt="India Online — How a Billion Got Connected" width="420"></a><br><sub><b>India Online — How a Billion Got Connected</b></sub></td>
-  </tr>
-  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/ai-accelerators-2026.html"><img src="assets/thumbnails/ai-accelerators-2026.png" alt="AI Engines, What Runs Your AI?" width="420"></a><br><sub><b>AI Engines, What Runs Your AI?</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/EDGE/"><img src="assets/thumbnails/edge.gif" alt="EDGE — Browser Recreation" width="420"></a><br><sub><b>EDGE — Browser Recreation</b></sub></td>
-  </tr>
-  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/agentic-capabilities-june-2026.html"><img src="assets/thumbnails/agentic-capabilities-june-2026.png" alt="Agentic Capabilities" width="420"></a><br><sub><b>Agentic Capabilities</b></sub></td>
-    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/ai-lab-headcount.html"><img src="assets/thumbnails/ai-lab-headcount.png" alt="AI Labs, by Headcount" width="420"></a><br><sub><b>AI Labs, by Headcount</b></sub></td>
   </tr>
   <tr>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/ai-lab-headcount.html"><img src="assets/thumbnails/ai-lab-headcount.png" alt="AI Labs, by Headcount" width="420"></a><br><sub><b>AI Labs, by Headcount</b></sub></td>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/terminal-portfolio.html"><img src="assets/thumbnails/terminal-portfolio.png" alt="Terminal Portfolio" width="420"></a><br><sub><b>Terminal Portfolio</b></sub></td>
+  </tr>
+  <tr>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/glass-morphism-design-trials.html"><img src="assets/thumbnails/glass-morphism-design-trials.png" alt="Liquid Glass — Design Trials" width="420"></a><br><sub><b>Liquid Glass — Design Trials</b></sub></td>
   </tr>
 </table>
@@ -66,6 +69,7 @@ _Thumbnails above are generated automatically from the works below — see [Addi
 
 | Work | Type | Date | Links |
 |------|------|------|-------|
+| **Android vs iOS share** — New phones sold and web page views for Android and iOS, worldwide, in the US and in India: quarterly and yearly charts, plus a sortable table of every figure with its source. | Dashboard (HTML) | Nov 2026 | [View](https://satejp10.github.io/claude-works/works/android-vs-ios-share.html) · [Source](works/android-vs-ios-share.html) |
 | **Haiku Price and Score** — Claude Haiku 5.5 costs a tenth of what Haiku 4.5 did: output price across four Haiku releases against the Artificial Analysis Intelligence Index, then per-token and caching prices, why Anthropic's 75% average and the 90% list-price cut are both right, and why a cheap worker model matters under Opus and Sonnet. | Article (HTML) | Oct 2026 | [View](https://satejp10.github.io/claude-works/works/haiku-pricing.html) · [Source](works/haiku-pricing.html) |
 | **Clawdvania — A Walk Home at Dusk** — a five-minute walk home starring Clawd, the orange pixel-crab: cross the autumn hills as the light fades, gather the 12 wisps that drift along the way to light your path, and reach the cottage before dark. Double jump and a Hollow Knight-style wall cling, fully synthesized audio, zero asset files — one self-contained HTML file in vanilla JS + Canvas 2D (desktop keyboard + mobile touch). Lives in its [own repo](https://github.com/Satejp10/Clawdvania). | Game (JS/Canvas) | Sep 2026 | [View](https://satejp10.github.io/Clawdvania/) · [Source](https://github.com/Satejp10/Clawdvania) · [Thumb](assets/thumbnails/clawdvania.png) |
 | **The Switch Matrix** — a visual reading of arXiv 2603.03111 (NatWest AI Research + UCL): measuring performance drift when a deployed LLM system swaps models mid-conversation. Interactive 9×9 handoff matrices show even a single mid-conversation model switch can move outcomes by up to 13 points. | Infographic (HTML) | Aug 2026 | [View](https://satejp10.github.io/claude-works/works/model-switching-drift.html) · [Source](works/model-switching-drift.html) |

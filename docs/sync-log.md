@@ -1,10 +1,10 @@
 # claude-works → satejp10 profile mirror — setup & change log
 
-_Last updated: 2026-10-24 — the sync is **live**; setup in §3 is done, not pending.
+_Last updated: 2026-11-01 — the sync is **live**; setup in §3 is done, not pending.
 Analytics (§10) is committed but **not yet deployed** — it needs one `wrangler` run.
-The profile badges are hidden until it is (§11). There are now 11 files in `works/`
-and the hostname lives in 14 places (§14); `analytics/HANDOFF.md` is the checklist.
-The gallery lists 14 works: those 11 plus 3 hosted in their own repos (§13, §14)._
+The profile badges are hidden until it is (§11). There are now 12 files in `works/`
+and the hostname lives in 15 places (§15); `analytics/HANDOFF.md` is the checklist.
+The gallery lists 15 works: those 12 plus 3 hosted in their own repos (§13, §14, §15)._
 
 ---
 
@@ -16,7 +16,7 @@ is always current — you never need to paste more than this one block.
 
 ````text
 CONTEXT: Satej's claude-works repo (github.com/Satejp10/claude-works).
-Current as of 2026-10-24.
+Current as of 2026-11-01.
 
 WHAT IT IS
 A publishing space for visual work made with Claude — infographics, dashboards,
@@ -61,7 +61,7 @@ THREE GOTCHAS
    and a github-camo user-agent. Demographics are collected on the Pages site,
    where real JS runs, and only displayed on the profile.
 
-CURRENT CONTENTS: 14 works — 11 local, plus 3 hosted in their own repos
+CURRENT CONTENTS: 15 works — 12 local, plus 3 hosted in their own repos
 (EDGE, Plot Light Study, Clawdvania).
 ````
 
@@ -449,3 +449,25 @@ The deploy remains the one open task and needs Satej's Cloudflare account.
   The `sed` one-liner in `analytics/README.md` covers the 12 refs in this repo.
   `CLAUDE.md` and `analytics/README.md` were corrected in place; §12 is left as written.
   The copy-block now reads 14 works: 11 local plus 3 external.
+
+---
+
+## 15. Android vs iOS share added; counts updated — 2026-11-01
+
+- **New local work:** `works/android-vs-ios-share.html` ("Android vs iOS share"), a
+  dashboard of new phones sold (Counterpoint, quarterly) and web page views (StatCounter,
+  yearly plus three 2026 months) for Android and iOS, worldwide, in the US and in India.
+  It is one self-contained file in the Plainchart style with no libraries. It carries the
+  four `og:` tags, with `og:image` pointing at `assets/thumbnails/android-vs-ios-share.png`,
+  which CI renders after merge, and the visit beacon.
+- **Counts.** There are now **12** files in `works/`, so the Worker hostname appears in
+  **15 places**: the 12 works, the root `README.md`, and the two profile-README badges.
+  The `sed` one-liner in `analytics/README.md` covers the 13 refs in this repo.
+  `CLAUDE.md` and `analytics/README.md` were updated to match. The copy-block now reads
+  15 works: 12 local plus 3 external.
+- **Delivered by pull request.** The change sits on branch `claude/android-vs-ios-share`
+  as a draft PR, following this repo's session-branch rule. It goes live when merged to
+  `main`, which runs the thumbnail workflow.
+- **Data caveats recorded on the page.** 2024 and 2025 web-page-view figures are left
+  out because two copies of the source data differ by up to about 1.3 points. India has
+  no yearly series, so its readings appear as individual rows.
