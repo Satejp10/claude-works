@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
-<title>Android vs iOS share</title>
+<title>Android vs iOS market share</title>
 <meta name="description" content="New phones sold and web page views for Android and iOS, worldwide, in the US and in India. Quarterly and yearly charts with every figure in a sortable table.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Android vs iOS share">
+<meta property="og:title" content="Android vs iOS market share">
 <meta property="og:description" content="New phones sold and web page views for Android and iOS, worldwide, in the US and in India. Quarterly and yearly charts with every figure in a sortable table.">
 <meta property="og:image" content="https://satejp10.github.io/claude-works/assets/thumbnails/android-vs-ios-share.png">
 <meta property="og:url" content="https://satejp10.github.io/claude-works/works/android-vs-ios-share.html">
@@ -107,6 +107,29 @@
   .dash{color:var(--faint)}
   td.src{color:var(--muted);font-size:12px}
 
+  /* iOS share over time: one 100% bar per period, animated */
+  .share-geo{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+  .share-top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin:0 0 18px}
+  .share-label{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .share-num{font-family:var(--sans);font-weight:600;font-size:56px;line-height:1;letter-spacing:-0.02em;margin-top:8px;font-variant-numeric:tabular-nums}
+  .share-controls{display:flex;align-items:center;gap:12px;flex:0 1 340px;min-width:220px}
+  .share-controls input[type=range]{flex:1;min-width:0;margin:0;accent-color:var(--ink)}
+  #share-play{min-width:80px;text-align:center}
+  .srow{display:grid;grid-template-columns:86px 1fr;align-items:center;gap:12px;margin:0 0 7px;opacity:.18;transition:opacity .4s ease}
+  .srow.on{opacity:1}
+  .syr{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .strack{display:flex;height:22px;border-radius:var(--r-sm);overflow:hidden}
+  .strack span{flex:none;height:100%}
+  .sa{background:var(--c-google)}
+  .so{background:var(--axis);border-left:2px solid #fff}
+  .sio{background:var(--c-meta);border-left:2px solid #fff;line-height:22px;padding-right:8px;text-align:right;font-size:12.5px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
+  .sgap{font-size:11.5px;color:var(--faint);border-top:1px solid var(--axis);margin:12px 0 11px;padding-top:9px}
+  @media (prefers-reduced-motion: reduce){ .srow{transition:none} }
+  @media (max-width:600px){
+    .share-num{font-size:44px}
+    .srow{grid-template-columns:74px 1fr;gap:10px}
+  }
+
   footer{margin-top:34px;font-size:12px;color:var(--faint);line-height:1.6;border-top:1px solid var(--border);padding-top:18px}
 
   @media (max-width:760px){
@@ -130,7 +153,7 @@
     <div class="stamp">Updated Nov 2026</div>
   </div>
 
-  <h1>Android vs iOS</h1>
+  <h1>Android vs iOS <br>market share</h1>
   <p class="lede"><b>Android leads worldwide and in India. iOS leads in the US.</b> Phone sales and web page views measure different things, so each chart says which one it uses.</p>
 
   <div class="method">
@@ -160,6 +183,32 @@
       <div class="cap">Web page views, June 2026</div>
     </div>
   </section>
+
+  <!-- CARD 0: iOS share over time, one 100% bar per period, animated -->
+  <div class="card" id="share-card">
+    <div class="card-h">
+      <div class="eyebrow"><span class="sq"></span><h2>iOS share over time</h2></div>
+      <span class="tag">StatCounter</span>
+    </div>
+    <p class="sub">One bar per year, then three 2026 months. Press play, or drag the slider.</p>
+    <div class="share-geo" role="group" aria-label="Choose region">
+      <button type="button" class="pill" data-geo="ww" aria-pressed="true">Worldwide</button>
+      <button type="button" class="pill" data-geo="us" aria-pressed="false">US</button>
+    </div>
+    <div class="share-top">
+      <div>
+        <div class="share-label" id="share-cap">iOS share, worldwide web page views · Aug 2026</div>
+        <div class="share-num" id="share-num">32%</div>
+      </div>
+      <div class="share-controls">
+        <button type="button" class="pill" id="share-play">Play</button>
+        <input type="range" id="share-slider" min="0" max="10" value="10" aria-label="Choose a period">
+      </div>
+    </div>
+    <div class="legend" id="lg-share"></div>
+    <div class="share-rows" id="share-chart"></div>
+    <p class="chart-note">Grey is every other system. Worldwide, Aug 2026 averages two StatCounter readings.</p>
+  </div>
 
   <!-- CARD 1: worldwide new phones, by quarter -->
   <div class="card">
@@ -673,7 +722,128 @@ function renderTable(){
   document.getElementById('count').textContent = rows.length + (rows.length === 1 ? ' row' : ' rows');
 }
 
+/* ---------- iOS share over time: one 100% bar per period, animated ---------- */
+function initShare(){
+  var SHARE = {
+    ww: {label:'iOS share, worldwide web page views',
+         steps: WEB_WW.map(function(d){ return {p:d.y, a:d.a, i:d.i}; })
+                  .concat([{gap:true}], WEB_WW_2026.map(function(d){ return {p:d.m, a:d.a, i:d.i}; }))},
+    us: {label:'iOS share, US web page views',
+         steps: WEB_US.map(function(d){ return {p:d.y, a:d.a, i:d.i}; })
+                  .concat([{gap:true}, {p:WEB_US_2026.m, a:WEB_US_2026.a, i:WEB_US_2026.i}])}
+  };
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var host = document.getElementById('share-chart');
+  var cap = document.getElementById('share-cap');
+  var num = document.getElementById('share-num');
+  var btn = document.getElementById('share-play');
+  var slider = document.getElementById('share-slider');
+  var geo = 'ww', order = [], rows = [], pos = 0, timer = null, cur = null, token = 0;
+
+  document.getElementById('lg-share').innerHTML =
+    '<span class="it"><span class="d" style="background:' + COLORS.a + '"></span>Android</span>' +
+    '<span class="it"><span class="d" style="background:' + COLORS.i + '"></span>iOS</span>' +
+    '<span class="it"><span class="d" style="background:var(--axis)"></span>Other</span>';
+
+  /* count the big number to its new value; instant on first draw, under reduced motion, or when unchanged */
+  function setNumber(target){
+    var from = cur, t0 = null, id = ++token;
+    if (from === null || reduce || from === target){
+      cur = target;
+      num.textContent = target + '%';
+      return;
+    }
+    requestAnimationFrame(function step(ts){
+      if (id !== token) return;
+      if (t0 === null) t0 = ts;
+      var t = Math.min(1, (ts - t0) / 450);
+      cur = Math.round(from + (target - from) * t);
+      num.textContent = cur + '%';
+      if (t < 1) requestAnimationFrame(step);
+    });
+  }
+
+  function build(){
+    var steps = SHARE[geo].steps;
+    host.innerHTML = '';
+    order = [];
+    rows = [];
+    steps.forEach(function(st){
+      if (st.gap){
+        var g = document.createElement('div');
+        g.className = 'sgap';
+        g.textContent = '2024–25 not shown';
+        host.appendChild(g);
+        return;
+      }
+      var ow = Math.max(0, 100 - st.a - st.i);
+      var txt = st.p + ': iOS ' + st.i.toFixed(1) + '%, Android ' + st.a.toFixed(1) + '%, other ' + ow.toFixed(1) + '%';
+      var row = document.createElement('div');
+      row.className = 'srow';
+      row.innerHTML = '<span class="syr">' + st.p + '</span>' +
+        '<div class="strack" role="img" title="' + txt + '" aria-label="' + txt + '">' +
+        '<span class="sa" style="width:' + st.a + '%"></span>' +
+        '<span class="so" style="width:' + ow + '%"></span>' +
+        '<span class="sio" style="width:' + st.i + '%">' + Math.round(st.i) + '%</span></div>';
+      host.appendChild(row);
+      rows.push(row);
+      order.push(st);
+    });
+    pos = order.length - 1;
+    slider.max = pos;
+    slider.value = pos;
+  }
+
+  function show(p){
+    pos = p;
+    rows.forEach(function(r, k){ r.classList.toggle('on', k <= p); });
+    slider.value = p;
+    cap.textContent = SHARE[geo].label + ' · ' + order[p].p;
+    setNumber(Math.round(order[p].i));
+  }
+
+  function pause(){
+    clearInterval(timer);
+    timer = null;
+    btn.textContent = 'Play';
+  }
+
+  function play(){
+    if (pos >= order.length - 1){
+      cur = Math.round(order[0].i);          /* restart at the first bar without counting down */
+      num.textContent = cur + '%';
+      show(0);
+    }
+    btn.textContent = 'Pause';
+    timer = setInterval(function(){
+      show(pos + 1);
+      if (pos >= order.length - 1) pause();
+    }, 900);
+  }
+
+  btn.addEventListener('click', function(){ if (timer) pause(); else play(); });
+  slider.addEventListener('input', function(){ pause(); show(+slider.value); });
+
+  function setGeo(g){
+    geo = g;
+    pause();
+    document.querySelectorAll('[data-geo]').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-geo') === g));
+    });
+    build();
+    show(pos);
+  }
+  document.querySelectorAll('[data-geo]').forEach(function(b){
+    b.addEventListener('click', function(){ setGeo(b.getAttribute('data-geo')); });
+  });
+
+  if (reduce) btn.hidden = true;
+  build();
+  show(pos);
+}
+
 /* ---------- start ---------- */
+initShare();
 legend('lg-ww-new', ['a','i','h']);
 legend('lg-ww-web', ['a','i']);
 legend('lg-us-web', ['a','i']);

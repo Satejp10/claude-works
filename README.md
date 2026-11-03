@@ -13,7 +13,7 @@ served live via **GitHub Pages** so you can view them rendered, not just as sour
 <!-- GALLERY:START -->
 <table>
   <tr>
-    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/android-vs-ios-share.html"><img src="assets/thumbnails/android-vs-ios-share.png" alt="Android vs iOS share" width="420"></a><br><sub><b>Android vs iOS share</b></sub></td>
+    <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/android-vs-ios-share.html"><img src="assets/thumbnails/android-vs-ios-share.png" alt="Android vs iOS market share" width="420"></a><br><sub><b>Android vs iOS market share</b></sub></td>
     <td width="50%" align="center" valign="top"><a href="https://satejp10.github.io/claude-works/works/haiku-pricing.html"><img src="assets/thumbnails/haiku-pricing.png" alt="Haiku Price and Score" width="420"></a><br><sub><b>Haiku Price and Score</b></sub></td>
   </tr>
   <tr>
@@ -69,7 +69,7 @@ _Thumbnails above are generated automatically from the works below — see [Addi
 
 | Work | Type | Date | Links |
 |------|------|------|-------|
-| **Android vs iOS share** — New phones sold and web page views for Android and iOS, worldwide, in the US and in India: quarterly and yearly charts, plus a sortable table of every figure with its source. | Dashboard (HTML) | Nov 2026 | [View](https://satejp10.github.io/claude-works/works/android-vs-ios-share.html) · [Source](works/android-vs-ios-share.html) |
+| **Android vs iOS market share** — New phones sold and web page views for Android and iOS, worldwide, in the US and in India: an animated view of iOS's rising share, quarterly and yearly charts, and a sortable table of every figure with its source. | Dashboard (HTML) | Nov 2026 | [View](https://satejp10.github.io/claude-works/works/android-vs-ios-share.html) · [Source](works/android-vs-ios-share.html) |
 | **Haiku Price and Score** — Claude Haiku 5.5 costs a tenth of what Haiku 4.5 did: output price across four Haiku releases against the Artificial Analysis Intelligence Index, then per-token and caching prices, why Anthropic's 75% average and the 90% list-price cut are both right, and why a cheap worker model matters under Opus and Sonnet. | Article (HTML) | Oct 2026 | [View](https://satejp10.github.io/claude-works/works/haiku-pricing.html) · [Source](works/haiku-pricing.html) |
 | **Clawdvania — A Walk Home at Dusk** — a five-minute walk home starring Clawd, the orange pixel-crab: cross the autumn hills as the light fades, gather the 12 wisps that drift along the way to light your path, and reach the cottage before dark. Double jump and a Hollow Knight-style wall cling, fully synthesized audio, zero asset files — one self-contained HTML file in vanilla JS + Canvas 2D (desktop keyboard + mobile touch). Lives in its [own repo](https://github.com/Satejp10/Clawdvania). | Game (JS/Canvas) | Sep 2026 | [View](https://satejp10.github.io/Clawdvania/) · [Source](https://github.com/Satejp10/Clawdvania) · [Thumb](assets/thumbnails/clawdvania.png) |
 | **The Switch Matrix** — a visual reading of arXiv 2603.03111 (NatWest AI Research + UCL): measuring performance drift when a deployed LLM system swaps models mid-conversation. Interactive 9×9 handoff matrices show even a single mid-conversation model switch can move outcomes by up to 13 points. | Infographic (HTML) | Aug 2026 | [View](https://satejp10.github.io/claude-works/works/model-switching-drift.html) · [Source](works/model-switching-drift.html) |
