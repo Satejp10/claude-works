@@ -107,27 +107,26 @@
   .dash{color:var(--faint)}
   td.src{color:var(--muted);font-size:12px}
 
-  /* iOS share over time: one 100% bar per period, animated */
+  /* iOS share over time: one animated pie per period */
   .share-geo{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
   .share-top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin:0 0 18px}
   .share-label{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .share-num{font-family:var(--sans);font-weight:600;font-size:56px;line-height:1;letter-spacing:-0.02em;margin-top:8px;font-variant-numeric:tabular-nums}
+  .share-num{font-family:var(--sans);font-weight:600;font-size:56px;line-height:1;letter-spacing:-0.02em;margin-top:8px}
   .share-controls{display:flex;align-items:center;gap:12px;flex:0 1 340px;min-width:220px}
   .share-controls input[type=range]{flex:1;min-width:0;margin:0;accent-color:var(--ink)}
   #share-play{min-width:80px;text-align:center}
-  .srow{display:grid;grid-template-columns:86px 1fr;align-items:center;gap:12px;margin:0 0 7px;opacity:.18;transition:opacity .4s ease}
-  .srow.on{opacity:1}
-  .syr{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
-  .strack{display:flex;height:22px;border-radius:var(--r-sm);overflow:hidden}
-  .strack span{flex:none;height:100%}
-  .sa{background:var(--c-google)}
-  .so{background:var(--axis);border-left:2px solid #fff}
-  .sio{background:var(--c-meta);border-left:2px solid #fff;line-height:22px;padding-right:8px;text-align:right;font-size:12.5px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
-  .sgap{font-size:11.5px;color:var(--faint);border-top:1px solid var(--axis);margin:12px 0 11px;padding-top:9px}
-  @media (prefers-reduced-motion: reduce){ .srow{transition:none} }
+  .pie-wrap{position:relative;display:flex;justify-content:center;margin:6px 0 0}
+  .pie{display:block;width:min(100%,300px);height:auto;overflow:visible}
+  .pie path{stroke:#fff;stroke-width:2;stroke-linejoin:round}
+  .pie .sl-o{fill:var(--axis)}
+  .pie text{font-family:var(--sans);fill:var(--ink);text-anchor:middle;pointer-events:none}
+  .pie .pn{font-size:12.5px;font-weight:500}
+  .pie .pv{font-size:14px;font-weight:600}
+  .pie-legend{justify-content:center;margin:14px 0 0;font-size:13px}
+  .pie-legend b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+  .tip .row.hl{font-weight:600}
   @media (max-width:600px){
     .share-num{font-size:44px}
-    .srow{grid-template-columns:74px 1fr;gap:10px}
   }
 
   footer{margin-top:34px;font-size:12px;color:var(--faint);line-height:1.6;border-top:1px solid var(--border);padding-top:18px}
@@ -184,13 +183,13 @@
     </div>
   </section>
 
-  <!-- CARD 0: iOS share over time, one 100% bar per period, animated -->
+  <!-- CARD 0: iOS share over time, one animated pie per period -->
   <div class="card" id="share-card">
     <div class="card-h">
       <div class="eyebrow"><span class="sq"></span><h2>iOS share over time</h2></div>
       <span class="tag">StatCounter</span>
     </div>
-    <p class="sub">One bar per year, then three 2026 months. Press play, or drag the slider.</p>
+    <p class="sub" id="share-sub">One pie per year, then June to August 2026. Press play, or drag the slider.</p>
     <div class="share-geo" role="group" aria-label="Choose region">
       <button type="button" class="pill" data-geo="ww" aria-pressed="true">Worldwide</button>
       <button type="button" class="pill" data-geo="us" aria-pressed="false">US</button>
@@ -205,9 +204,11 @@
         <input type="range" id="share-slider" min="0" max="10" value="10" aria-label="Choose a period">
       </div>
     </div>
-    <div class="legend" id="lg-share"></div>
-    <div class="share-rows" id="share-chart"></div>
-    <p class="chart-note">Grey is every other system. Worldwide, Aug 2026 averages two StatCounter readings.</p>
+    <div class="pie-wrap">
+      <svg class="pie" id="share-pie" viewBox="0 0 280 280" role="img" aria-label="iOS share pie chart"></svg>
+    </div>
+    <div class="legend pie-legend" id="lg-share"></div>
+    <p class="chart-note" id="share-note">Grey is every other system. Aug 2026 averages two StatCounter readings. 2024 and 2025 are not shown.</p>
   </div>
 
   <!-- CARD 1: worldwide new phones, by quarter -->
@@ -722,39 +723,109 @@ function renderTable(){
   document.getElementById('count').textContent = rows.length + (rows.length === 1 ? ' row' : ' rows');
 }
 
-/* ---------- iOS share over time: one 100% bar per period, animated ---------- */
+/* ---------- iOS share over time: one animated pie per period ---------- */
 function initShare(){
   var SHARE = {
-    ww: {label:'iOS share, worldwide web page views',
-         steps: WEB_WW.map(function(d){ return {p:d.y, a:d.a, i:d.i}; })
-                  .concat([{gap:true}], WEB_WW_2026.map(function(d){ return {p:d.m, a:d.a, i:d.i}; }))},
-    us: {label:'iOS share, US web page views',
-         steps: WEB_US.map(function(d){ return {p:d.y, a:d.a, i:d.i}; })
-                  .concat([{gap:true}, {p:WEB_US_2026.m, a:WEB_US_2026.a, i:WEB_US_2026.i}])}
+    ww: {
+      label: 'iOS share, worldwide web page views',
+      sub: 'One pie per year, then June to August 2026. Press play, or drag the slider.',
+      note: 'Grey is every other system. Aug 2026 averages two StatCounter readings. 2024 and 2025 are not shown.',
+      frames: WEB_WW.map(function(d){ return {p:d.y, a:d.a, i:d.i}; })
+                .concat(WEB_WW_2026.map(function(d){ return {p:d.m, a:d.a, i:d.i}; }))
+    },
+    us: {
+      label: 'iOS share, US web page views',
+      sub: 'One pie per year, then June 2026. Press play, or drag the slider.',
+      note: 'Grey is every other system. 2024 and 2025 are not shown.',
+      frames: WEB_US.map(function(d){ return {p:d.y, a:d.a, i:d.i}; })
+                .concat([{p:WEB_US_2026.m, a:WEB_US_2026.a, i:WEB_US_2026.i}])
+    }
   };
   var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  var host = document.getElementById('share-chart');
+  var CX = 140, CY = 140, R = 132;          /* the SVG viewBox is 280 x 280 */
+  var MIN_LABEL = 40;                       /* slices under 40 degrees get no label on the pie */
+  var svg = document.getElementById('share-pie');
+  var wrap = svg.parentNode;
+  var sub = document.getElementById('share-sub');
   var cap = document.getElementById('share-cap');
   var num = document.getElementById('share-num');
+  var note = document.getElementById('share-note');
   var btn = document.getElementById('share-play');
   var slider = document.getElementById('share-slider');
-  var geo = 'ww', order = [], rows = [], pos = 0, timer = null, cur = null, token = 0;
+  var lg = document.getElementById('lg-share');
+  var geo = 'ww', frames = SHARE.ww.frames, pos = 0, timer = null;
+  var anim = 0, numTok = 0, cur = null, shownA = 0, shownI = 0;
 
-  document.getElementById('lg-share').innerHTML =
-    '<span class="it"><span class="d" style="background:' + COLORS.a + '"></span>Android</span>' +
-    '<span class="it"><span class="d" style="background:' + COLORS.i + '"></span>iOS</span>' +
-    '<span class="it"><span class="d" style="background:var(--axis)"></span>Other</span>';
+  /* slices run clockwise from 12 o'clock: Android, then iOS, then Other */
+  var pa = node('path', {'class':'sl-a', fill:COLORS.a}, svg);
+  var pi = node('path', {'class':'sl-i', fill:COLORS.i}, svg);
+  var po = node('path', {'class':'sl-o'}, svg);
+  var LA = {n:node('text', {'class':'pn'}, svg), v:node('text', {'class':'pv'}, svg)};
+  var LI = {n:node('text', {'class':'pn'}, svg), v:node('text', {'class':'pv'}, svg)};
 
-  /* count the big number to its new value; instant on first draw, under reduced motion, or when unchanged */
-  function setNumber(target){
-    var from = cur, t0 = null, id = ++token;
-    if (from === null || reduce || from === target){
-      cur = target;
-      num.textContent = target + '%';
+  lg.innerHTML =
+    '<span class="it"><span class="d" style="background:' + COLORS.a + '"></span>Android <b id="lv-a"></b></span>' +
+    '<span class="it"><span class="d" style="background:' + COLORS.i + '"></span>iOS <b id="lv-i"></b></span>' +
+    '<span class="it"><span class="d" style="background:var(--axis)"></span>Other <b id="lv-o"></b></span>';
+  var lvA = document.getElementById('lv-a'), lvI = document.getElementById('lv-i'), lvO = document.getElementById('lv-o');
+  var tip = makeTip(wrap);
+
+  function pct(v){ return v.toFixed(1) + '%'; }
+  function other(f){ return Math.max(0, 100 - f.a - f.i); }
+  function pt(deg, r){
+    var t = deg * Math.PI / 180;
+    return [CX + r * Math.sin(t), CY - r * Math.cos(t)];
+  }
+  function wedge(d0, d1){
+    if (d1 - d0 < 0.05) return '';
+    var p0 = pt(d0, R), p1 = pt(d1, R);
+    return 'M' + CX + ' ' + CY + ' L' + p0[0].toFixed(2) + ' ' + p0[1].toFixed(2) +
+      ' A' + R + ' ' + R + ' 0 ' + (d1 - d0 > 180 ? 1 : 0) + ' 1 ' + p1[0].toFixed(2) + ' ' + p1[1].toFixed(2) + ' Z';
+  }
+  function place(L, mid, span, name, value){
+    var p = pt(mid, R * 0.6), on = span >= MIN_LABEL ? '1' : '0';
+    L.n.setAttribute('x', p[0].toFixed(2));
+    L.n.setAttribute('y', (p[1] - 7).toFixed(2));
+    L.v.setAttribute('x', p[0].toFixed(2));
+    L.v.setAttribute('y', (p[1] + 10).toFixed(2));
+    L.n.textContent = name;
+    L.v.textContent = value;
+    L.n.setAttribute('opacity', on);
+    L.v.setAttribute('opacity', on);
+  }
+  function draw(A, I){
+    var f = frames[pos];
+    pa.setAttribute('d', wedge(0, A));
+    pi.setAttribute('d', wedge(A, I));
+    po.setAttribute('d', wedge(I, 360));
+    place(LA, A / 2, A, 'Android', Math.round(f.a) + '%');
+    place(LI, (A + I) / 2, I - A, 'iOS', Math.round(f.i) + '%');
+  }
+  function ease(t){ return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function moveTo(A1, I1, instant){
+    var id = ++anim, A0 = shownA, I0 = shownI, t0 = null;
+    if (reduce || instant){
+      shownA = A1; shownI = I1; draw(A1, I1);
       return;
     }
     requestAnimationFrame(function step(ts){
-      if (id !== token) return;
+      if (id !== anim) return;
+      if (t0 === null) t0 = ts;
+      var t = Math.min(1, (ts - t0) / 600), e = ease(t);
+      shownA = A0 + (A1 - A0) * e;
+      shownI = I0 + (I1 - I0) * e;
+      draw(shownA, shownI);
+      if (t < 1) requestAnimationFrame(step);
+    });
+  }
+  function setNumber(target){
+    var from = cur, t0 = null, id = ++numTok;
+    if (from === null || reduce || from === target){
+      cur = target; num.textContent = target + '%';
+      return;
+    }
+    requestAnimationFrame(function step(ts){
+      if (id !== numTok) return;
       if (t0 === null) t0 = ts;
       var t = Math.min(1, (ts - t0) / 450);
       cur = Math.round(from + (target - from) * t);
@@ -762,67 +833,56 @@ function initShare(){
       if (t < 1) requestAnimationFrame(step);
     });
   }
-
-  function build(){
-    var steps = SHARE[geo].steps;
-    host.innerHTML = '';
-    order = [];
-    rows = [];
-    steps.forEach(function(st){
-      if (st.gap){
-        var g = document.createElement('div');
-        g.className = 'sgap';
-        g.textContent = '2024–25 not shown';
-        host.appendChild(g);
-        return;
-      }
-      var ow = Math.max(0, 100 - st.a - st.i);
-      var txt = st.p + ': iOS ' + st.i.toFixed(1) + '%, Android ' + st.a.toFixed(1) + '%, other ' + ow.toFixed(1) + '%';
-      var row = document.createElement('div');
-      row.className = 'srow';
-      row.innerHTML = '<span class="syr">' + st.p + '</span>' +
-        '<div class="strack" role="img" title="' + txt + '" aria-label="' + txt + '">' +
-        '<span class="sa" style="width:' + st.a + '%"></span>' +
-        '<span class="so" style="width:' + ow + '%"></span>' +
-        '<span class="sio" style="width:' + st.i + '%">' + Math.round(st.i) + '%</span></div>';
-      host.appendChild(row);
-      rows.push(row);
-      order.push(st);
-    });
-    pos = order.length - 1;
-    slider.max = pos;
-    slider.value = pos;
-  }
-
-  function show(p){
+  function goTo(p, instant){
     pos = p;
-    rows.forEach(function(r, k){ r.classList.toggle('on', k <= p); });
+    var f = frames[p], o = other(f);
     slider.value = p;
-    cap.textContent = SHARE[geo].label + ' · ' + order[p].p;
-    setNumber(Math.round(order[p].i));
+    slider.setAttribute('aria-valuetext', f.p);
+    cap.textContent = SHARE[geo].label + ' · ' + f.p;
+    svg.setAttribute('aria-label', SHARE[geo].label + ', ' + f.p + ': iOS ' + pct(f.i) +
+      ', Android ' + pct(f.a) + ', other ' + pct(o));
+    lvA.textContent = pct(f.a);
+    lvI.textContent = pct(f.i);
+    lvO.textContent = pct(o);
+    setNumber(Math.round(f.i));
+    moveTo(f.a * 3.6, Math.min(360, (f.a + f.i) * 3.6), instant);
   }
+
+  function trow(name, color, value, hl){
+    return '<div class="row' + (hl ? ' hl' : '') + '"><span class="k"><i class="swatch" style="background:' +
+      color + '"></i>' + name + '</span><span>' + value + '</span></div>';
+  }
+  function showTip(ev, key){
+    var f = frames[pos], hr = wrap.getBoundingClientRect();
+    var html = '<b>' + f.p + ' · ' + (geo === 'ww' ? 'worldwide' : 'US') + '</b>' +
+      trow('Android', COLORS.a, pct(f.a), key === 'a') +
+      trow('iOS', COLORS.i, pct(f.i), key === 'i') +
+      trow('Other', 'var(--axis)', pct(other(f)), key === 'o');
+    placeTip(wrap, tip, html, ev.clientX - hr.left, ev.clientY - hr.top);
+  }
+  function hideTip(){ tip.classList.remove('on'); }
+  [[pa, 'a'], [pi, 'i'], [po, 'o']].forEach(function(s){
+    s[0].addEventListener('pointermove', function(ev){ showTip(ev, s[1]); });
+    s[0].addEventListener('pointerdown', function(ev){ showTip(ev, s[1]); });
+    s[0].addEventListener('pointerleave', hideTip);
+  });
 
   function pause(){
     clearInterval(timer);
     timer = null;
     btn.textContent = 'Play';
   }
-
   function play(){
-    if (pos >= order.length - 1){
-      cur = Math.round(order[0].i);          /* restart at the first bar without counting down */
-      num.textContent = cur + '%';
-      show(0);
-    }
+    if (timer) return;
+    if (pos >= frames.length - 1) goTo(0, true);
     btn.textContent = 'Pause';
     timer = setInterval(function(){
-      show(pos + 1);
-      if (pos >= order.length - 1) pause();
-    }, 900);
+      goTo(pos + 1);
+      if (pos >= frames.length - 1) pause();
+    }, 1500);
   }
-
   btn.addEventListener('click', function(){ if (timer) pause(); else play(); });
-  slider.addEventListener('input', function(){ pause(); show(+slider.value); });
+  slider.addEventListener('input', function(){ pause(); goTo(+slider.value); });
 
   function setGeo(g){
     geo = g;
@@ -830,16 +890,18 @@ function initShare(){
     document.querySelectorAll('[data-geo]').forEach(function(b){
       b.setAttribute('aria-pressed', String(b.getAttribute('data-geo') === g));
     });
-    build();
-    show(pos);
+    frames = SHARE[g].frames;
+    slider.max = frames.length - 1;
+    sub.textContent = SHARE[g].sub;
+    note.textContent = SHARE[g].note;
+    goTo(frames.length - 1);
   }
   document.querySelectorAll('[data-geo]').forEach(function(b){
     b.addEventListener('click', function(){ setGeo(b.getAttribute('data-geo')); });
   });
 
-  if (reduce) btn.hidden = true;
-  build();
-  show(pos);
+  slider.max = frames.length - 1;
+  goTo(frames.length - 1, true);            /* first draw: latest period, no animation */
 }
 
 /* ---------- start ---------- */
