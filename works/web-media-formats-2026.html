@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web Media Formats 2026</title>
+<meta name="description" content="Which image and video formats the web uses in 2026, counted three ways: by image requests, by each page's main image, and by websites. Data from HTTP Archive, W3Techs and Ericsson.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="What the web is made of: images &amp; video">
+<meta property="og:description" content="SVG just passed JPEG, WebP keeps climbing, AVIF is under 2%, and video is about 75% of mobile data. Charts from HTTP Archive, W3Techs and Ericsson.">
+<meta property="og:image" content="https://satejp10.github.io/claude-works/assets/thumbnails/web-media-formats-2026.png">
+<meta property="og:url" content="https://satejp10.github.io/claude-works/works/web-media-formats-2026.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE    quiet, report-grade data page (Plainchart): the numbers carry it.
+   IDEA     a census of the web's media, counted three ways: requests, main images, websites.
+   PICTURE  two format donuts up top, then an eleven-year trend line.
+   COLOUR and TYPE  Plainchart tokens, one fixed colour per format; Space Grotesk + Inter.
+   LAYOUT   one 980px column; under 600px cards become flat full-width sections. */
+:root{
+  color-scheme:light;
+  --bg:#ffffff; --card:#ffffff; --ink:#1f1f1f; --lede:#3a3a3a;
+  --muted:#737373; --faint:#a3a3a3; --border:#e8e8e8; --grid:#f1f1f1;
+  --axis:#dcdcdc; --hover:#fafafa;
+  --accent:#7F4BF3; --accent-soft:#f2ecff;
+  --display:'Space Grotesk','Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --r:16px; --r-sm:5px; --maxw:980px;
+  --c-openai:#1f1f1f; --c-anthropic:#cc785c; --c-google:#34a853; --c-mistral:#ff6900;
+  --c-deepseek:#2243e6; --c-minimax:#eb3568; --c-cohere:#39c5bb; --c-neutral:#9aa0a6;
+  /* one colour per format, reused in every chart */
+  --f-jpeg:var(--c-deepseek); --f-png:var(--c-anthropic); --f-svg:var(--c-google);
+  --f-gif:var(--c-minimax); --f-webp:var(--c-mistral); --f-avif:var(--c-cohere); --f-other:var(--c-neutral);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:clip}
+a{color:inherit;text-decoration-color:var(--axis);text-underline-offset:2px}
+a:hover{text-decoration-color:var(--ink)}
+.wrap{display:block;max-width:var(--maxw);margin:0 auto;padding:34px 22px 90px}
+
+/* header */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:38px}
+.mark{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px;letter-spacing:-0.01em}
+.mark .glyph{width:24px;height:24px;border-radius:6px;background:var(--ink);display:grid;place-items:center;flex:none}
+.mark .glyph::before{content:"";width:11px;height:11px;border-radius:50%;border:2.5px solid #fff}
+.stamp{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(2rem,1rem + 4.4vw,3.7rem);line-height:1.03;
+  letter-spacing:-0.015em;margin:0 0 16px;max-width:16ch;text-wrap:balance}
+.lede{font-size:clamp(1rem,.95rem + .3vw,1.16rem);color:var(--lede);max-width:64ch;margin:0}
+.lede b{font-weight:600;color:var(--ink)}
+
+/* headline tiles */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:30px 0 18px}
+.tile{border:1px solid var(--border);border-radius:var(--r);padding:16px 16px 15px;min-width:0}
+.tile .k{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:600;
+  font-size:clamp(1.5rem,1.1rem + 1.2vw,2.05rem);letter-spacing:-0.01em;line-height:1.05;font-variant-numeric:tabular-nums}
+.tile .k .sq{width:11px;height:11px;border-radius:3px;flex:none}
+.tile .l{font-size:13.5px;color:var(--lede);margin-top:8px;line-height:1.4}
+.tile .s{font-size:12px;color:var(--muted);margin-top:8px}
+
+/* cards */
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:18px}
+.duo>.card{margin-bottom:0}
+.card{border:1px solid var(--border);border-radius:var(--r);padding:24px 24px 26px;margin-bottom:18px;background:var(--card);min-width:0}
+.card-h{margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.eyebrow{display:flex;align-items:center;gap:10px;min-width:0}
+.eyebrow .sq{width:15px;height:15px;border-radius:4px;flex:none}
+.eyebrow h2{font-family:var(--display);font-weight:600;font-size:1.5rem;letter-spacing:-0.01em;margin:0;line-height:1.15}
+.sub{font-size:13px;color:var(--muted);margin:0 0 18px}
+.sub b{color:var(--lede);font-weight:500}
+.pill-tag{font-size:11.5px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:999px;white-space:nowrap}
+h3{font-size:13.5px;font-weight:600;margin:0 0 12px;color:var(--lede)}
+.chart-note{font-size:12px;color:var(--muted);margin:16px 0 0;line-height:1.5}
+
+/* donuts */
+.donut{position:relative;width:190px;height:190px;margin:4px auto 22px}
+.donut svg{display:block;width:100%;height:100%}
+.donut path{stroke:#fff;stroke-width:1.5;transition:opacity .2s;cursor:pointer}
+.dc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center}
+.dc b{font-family:var(--display);font-weight:600;font-size:1.65rem;letter-spacing:-0.01em;line-height:1;font-variant-numeric:tabular-nums}
+.dc span{font-size:12.5px;color:var(--muted);margin-top:6px;max-width:104px;line-height:1.25}
+.lrows{display:flex;flex-direction:column;gap:2px}
+.lr{all:unset;box-sizing:border-box;display:grid;grid-template-columns:104px minmax(0,1fr) 50px 56px;align-items:center;gap:10px;
+  padding:5px 6px;margin:0 -6px;border-radius:8px;cursor:pointer;font-size:13px;transition:opacity .2s,background .15s}
+.lr:hover,.lr[aria-pressed="true"]{background:var(--hover)}
+.lr:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.lr.dim{opacity:.38}
+.chg{text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chg.up{color:#2e7d44}
+
+/* bars (Plainchart rows) */
+.bars{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.row{display:grid;grid-template-columns:120px minmax(0,1fr) 92px;align-items:center;gap:13px}
+.nm{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;min-width:0}
+.nm .dot{width:9px;height:9px;border-radius:2px;flex:none}
+.nm .t{min-width:0;overflow-wrap:anywhere}
+.track{display:block;background:var(--grid);border-radius:var(--r-sm);height:16px;position:relative;overflow:hidden}
+.fill{display:block;height:100%;border-radius:var(--r-sm);min-width:2px;width:0;transition:width .9s cubic-bezier(.2,.7,.2,1)}
+.val{text-align:right;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.val .tag{font-size:11.5px;color:var(--muted);font-weight:500;margin-left:5px}
+.row.wide{grid-template-columns:minmax(0,1fr) auto;row-gap:6px}
+.row.wide .track{grid-column:1 / -1;grid-row:2;height:18px}
+
+/* pills */
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.pill{font:inherit;font-size:12.5px;font-weight:500;padding:6px 13px;border-radius:999px;border:1px solid var(--border);
+  background:#fff;color:#444;cursor:pointer;transition:.15s}
+.pill:hover{border-color:#c9c9c9}
+.pill[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* trend line */
+.fig{position:relative;min-width:0}
+.fig svg{display:block;touch-action:pan-y}
+.ax-line{stroke:var(--grid);stroke-width:1;stroke-dasharray:2 4}
+.ax-base{stroke:var(--axis);stroke-width:1}
+.ax-tick{fill:var(--muted);font-size:11px;font-family:var(--sans);font-variant-numeric:tabular-nums}
+.ln{fill:none;stroke-width:2.25;stroke-linejoin:round;stroke-linecap:round}
+.end-lbl{font-size:12px;font-family:var(--sans);font-weight:600;fill:var(--ink)}
+.end-lbl tspan{font-weight:500;fill:var(--muted)}
+.hx{stroke:#c9c9c9;stroke-width:1}
+.hit{fill:transparent;cursor:crosshair}
+.series-key{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;margin:0 0 8px}
+.series-key[hidden]{display:none}
+.series-key .dot{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px}
+.series-key b{font-weight:600;font-variant-numeric:tabular-nums}
+.readout{font-size:12.5px;color:var(--muted);margin:10px 0 0;min-height:1.5em;font-variant-numeric:tabular-nums}
+.readout b{color:var(--ink);font-weight:600}
+.callouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 22px;margin-top:18px}
+.co{margin:0;font-size:13px;color:var(--lede);line-height:1.45;border-top:1px solid var(--border);padding-top:12px}
+.co b{display:block;font-family:var(--display);font-size:1.05rem;font-weight:600;color:var(--ink);margin-bottom:3px}
+.co .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:8px;vertical-align:1px}
+details{margin-top:16px;border-top:1px solid var(--grid)}
+summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--lede);padding:9px 0}
+summary::marker{color:var(--accent)}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:4px 0 2px}
+th,td{text-align:right;padding:8px 10px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+thead th{font-weight:600;color:var(--muted);font-size:12px;border-bottom:1px solid var(--axis)}
+tbody tr:hover{background:var(--hover)}
+th .dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:1px}
+
+/* video */
+.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px;margin-top:26px}
+.stack{display:flex;gap:2px;height:28px;border-radius:var(--r-sm);overflow:hidden}
+.stack span{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;min-width:0}
+.skey{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:12.5px;color:var(--lede)}
+.skey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}
+.skey b{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* facts */
+.facts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px 18px}
+.fact b{display:block;font-family:var(--display);font-weight:600;font-size:1.55rem;letter-spacing:-0.01em;line-height:1.1;font-variant-numeric:tabular-nums}
+.fact span{display:block;font-size:13px;color:var(--lede);margin-top:6px;line-height:1.4}
+
+/* method + footer */
+.method{border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:30px 0 38px;padding:18px 0;
+  display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
+.method .ey{font-size:11.5px;font-weight:700;letter-spacing:.13em;color:var(--accent);display:flex;align-items:center;gap:8px;white-space:nowrap;padding-top:2px}
+.method .sq{width:13px;height:13px;border-radius:3px;background:var(--accent)}
+.method p{margin:0;font-size:14px;color:#444}
+footer{margin-top:34px;font-size:12.5px;color:var(--muted);line-height:1.65;border-top:1px solid var(--border);padding-top:18px}
+footer b{color:var(--lede)}
+footer ul{margin:6px 0 12px;padding-left:18px}
+footer li{margin:3px 0}
+footer li::marker{color:var(--accent)}
+footer a{overflow-wrap:anywhere}
+
+@media(min-width:861px){#duo-top .sub{min-height:4.5em}}
+@media(max-width:860px){
+  .duo{grid-template-columns:minmax(0,1fr)}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .callouts{grid-template-columns:minmax(0,1fr)}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+  .wrap{display:flex;flex-direction:column;padding:20px 16px 64px}
+  .wrap>*{order:5}
+  .wrap>.topbar,.wrap>h1,.wrap>.lede{order:0}
+  #duo-top{order:1}
+  .tiles{order:2}
+  .method{order:3}
+  .topbar{margin-bottom:26px}
+  .tiles{gap:10px;margin:22px 0 26px}
+  .tile{padding:13px 12px 12px}
+  .duo{gap:0;margin-bottom:0}
+  .card,.duo>.card{border-width:1px 0 0;border-radius:0;margin:0 -16px;padding:22px 16px 26px}
+  .eyebrow h2{font-size:1.25rem}
+  .card-h{flex-wrap:wrap}
+  .row{grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:6px}
+  .row .track{grid-column:1 / -1;grid-row:2;height:14px}
+  .lr{grid-template-columns:minmax(0,1fr) auto 62px;row-gap:6px;column-gap:10px;padding:6px 6px 8px}
+  .lr .track{grid-column:1 / -1;grid-row:2}
+  .chart-note{font-size:12.5px}
+  .method{grid-template-columns:minmax(0,1fr);gap:9px;margin:26px 0 26px}
+  .pill{min-height:36px}
+  .split{grid-template-columns:minmax(0,1fr);gap:24px}
+  table{font-size:12.5px}
+  th,td{padding:7px 4px}
+  th .dot{display:none}
+  footer{margin-top:26px}
+}
+@media(prefers-reduced-motion:reduce){.fill,.lr,.donut path{transition:none}}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <div class="topbar">
+    <div class="mark"><span class="glyph"></span>Web Media Census</div>
+    <div class="stamp">Updated 16&nbsp;Nov&nbsp;2026</div>
+  </div>
+
+  <h1>What the web is made of: images &amp; video</h1>
+  <p class="lede"><b>Images are the heaviest thing a web page downloads</b>, and most are still JPEG and PNG. On W3Techs' count of websites, SVG just passed JPEG, WebP keeps climbing and AVIF is still under 2%. Video appears on about 7% of pages, yet it makes up about three-quarters of all mobile data.</p>
+
+  <div class="tiles">
+    <div class="tile"><div class="k"><span class="sq" style="background:var(--f-svg)"></span>69.2%</div><div class="l">of websites use SVG, now ahead of JPEG at 68.0%</div><div class="s">W3Techs · 16 Nov 2026</div></div>
+    <div class="tile"><div class="k"><span class="sq" style="background:var(--ink)"></span>911 KB</div><div class="l">of images on the median mobile home page, more than its 632 KB of JavaScript</div><div class="s">HTTP Archive · July 2025</div></div>
+    <div class="tile"><div class="k"><span class="sq" style="background:var(--ink)"></span>≈75%</div><div class="l">of all mobile network traffic is video</div><div class="s">Ericsson · end of 2025</div></div>
+    <div class="tile"><div class="k"><span class="sq" style="background:var(--f-avif)"></span>1.8%</div><div class="l">of websites use AVIF; it was 1.0% of image requests in 2024</div><div class="s">W3Techs · HTTP Archive</div></div>
+  </div>
+
+  <div class="duo" id="duo-top">
+    <section class="card" id="d-req">
+      <div class="card-h"><div class="eyebrow"><span class="sq" style="background:var(--f-jpeg)"></span><h2>Every image the web loads</h2></div></div>
+      <p class="sub"><b>Share of all image requests</b> by format · mobile · June 2024 · right column: change in share since 2022</p>
+      <div class="donut"><svg viewBox="0 0 200 200" role="img" aria-label="Donut chart of image requests by format, mobile, June 2024: JPEG 32.4%, PNG 28.4%, GIF 16.8%, WebP 12.0%, SVG 6.4%, AVIF 1.0%, ICO and other 3.0%."></svg><div class="dc"></div></div>
+      <div class="lrows"></div>
+      <p class="chart-note">JPEG fell from 40% of image requests in 2022 to 32%. AVIF's +386% starts from a very small base. HTTP Archive's 2025 report has no media chapter, so this June 2024 split is its newest.</p>
+    </section>
+    <section class="card" id="d-lcp">
+      <div class="card-h"><div class="eyebrow"><span class="sq" style="background:var(--f-png)"></span><h2>The main image on each page</h2></div></div>
+      <p class="sub"><b>Share of pages</b> by the format of their LCP image, the biggest thing visible as the page loads · July 2025 · right column: change since 2024</p>
+      <div class="donut"><svg viewBox="0 0 200 200" role="img" aria-label="Donut chart of the format of each page's main (LCP) image, July 2025: JPEG 57%, PNG 26%, WebP 11%, AVIF 0.7%, GIF, SVG and other about 5%."></svg><div class="dc"></div></div>
+      <div class="lrows"></div>
+      <p class="chart-note">An image is the main element on 85% of desktop and 76% of mobile pages. JPEG's 57% is the desktop figure; the report says mobile is similar. GIF, SVG and other formats are each under 2%.</p>
+    </section>
+  </div>
+
+  <div class="method">
+    <div class="ey"><span class="sq"></span>METHOD</div>
+    <p>Three ways of counting. <b>HTTP Archive</b> crawls about 17 million websites listed in the Chrome UX Report and counts image requests (June 2024) or each page's main image (July 2025). <b>W3Techs</b> counts the share of websites that use a format at all and updates daily; a site can use several formats, so its figures add up to more than 100%. <b>Ericsson</b> measures traffic on mobile networks.</p>
+  </div>
+
+  <section class="card" id="c-trend">
+    <div class="card-h"><div class="eyebrow"><span class="sq" style="background:var(--f-svg)"></span><h2>Which formats websites use, 2015 to now</h2></div><span class="pill-tag">Updated 16 Nov</span></div>
+    <p class="sub"><b>% of websites using each format</b> · W3Techs, 1 January each year plus today · sites use several formats, so the lines don't add up to 100%</p>
+    <div class="series-key" id="trend-key" hidden></div>
+    <div class="fig" id="trend"></div>
+    <p class="readout" id="trend-read"></p>
+    <div class="callouts">
+      <p class="co"><b><span class="dot" style="background:var(--f-svg)"></span>SVG passes JPEG</b>69.2% of sites against 68.0% today. On 3 Nov JPEG still led, 68.7% to 68.5%. In 2015 SVG was under 1%.</p>
+      <p class="co"><b><span class="dot" style="background:var(--f-webp)"></span>WebP climbs</b>From 0.2% of sites in 2020 to 24.0% today.</p>
+      <p class="co"><b><span class="dot" style="background:var(--f-gif)"></span>GIF fades</b>From 44.1% of sites in 2015 to 12.8% today. AVIF is at 1.8%, up from 0.4% at the start of 2025.</p>
+    </div>
+    <details><summary>All values (% of websites)</summary><table id="trend-tbl"></table></details>
+  </section>
+
+  <div class="duo">
+    <section class="card" id="c-bpp">
+      <div class="card-h"><div class="eyebrow"><span class="sq" style="background:var(--f-webp)"></span><h2>How tightly images are packed</h2></div></div>
+      <p class="sub"><b>Lower is better</b> · median bits per pixel on real sites · mobile · June 2024</p>
+      <div class="bars" id="bpp"></div>
+      <p class="chart-note">Each format holds different kinds of images on real sites, so this compares formats as they are used, not codecs head to head. AVIF's median rose from about 1.0 to 1.4 since 2022.</p>
+    </section>
+    <section class="card" id="c-pw">
+      <div class="card-h"><div class="eyebrow"><span class="sq" style="background:var(--ink)"></span><h2>What a page weighs</h2></div></div>
+      <p class="sub"><b>Median KB per home page</b>, by content type · July 2025</p>
+      <div class="pills" id="pw-pills"><button class="pill" type="button" data-d="m" aria-pressed="true">Mobile</button><button class="pill" type="button" data-d="d" aria-pressed="false">Desktop</button></div>
+      <div class="bars" id="pw"></div>
+      <p class="chart-note">The median home page weighs <b id="pw-total">2,559 KB</b> in total. Each type's median is taken on its own, so the rows don't add up to the total. Video is left out because most pages have none.</p>
+    </section>
+  </div>
+
+  <section class="card" id="c-video">
+    <div class="card-h"><div class="eyebrow"><span class="sq" style="background:var(--ink)"></span><h2>Video: rare on pages, huge on networks</h2></div></div>
+    <p class="sub"><b>Few web pages carry video</b>, but video fills mobile networks</p>
+    <div class="bars" id="v-share"></div>
+    <div class="split">
+      <div><h3>Video files on web pages, by format</h3><div class="bars" id="v-fmt"></div></div>
+      <div><h3>How long page videos run</h3><div class="stack" id="v-dur"></div><div class="skey" id="v-dur-key"></div></div>
+    </div>
+    <p class="chart-note">Page figures: HTTP Archive, mobile, June 2024, counting files served with a video type. The report counts all but about 4% of them as either MP4 or adaptive streaming, such as the TS and M4S pieces of HLS and DASH streams. "Other" is the remainder. Traffic figure: Ericsson, all mobile network traffic at the end of 2025.</p>
+  </section>
+
+  <section class="card" id="c-facts">
+    <div class="card-h"><div class="eyebrow"><span class="sq" style="background:var(--f-gif)"></span><h2>Odd facts from the crawl</h2></div></div>
+    <p class="sub">HTTP Archive · June 2024 · mobile unless noted</p>
+    <div class="facts">
+      <div class="fact"><b>6.4%</b><span>of images are a single pixel, most likely tracking beacons and spacer GIFs</span></div>
+      <div class="fact"><b>54,028</b><span>frames in the longest animated GIF the crawl found</span></div>
+      <div class="fact"><b>32%</b><span>of GIFs are animated</span></div>
+      <div class="fact"><b>12 KB</b><span>median image file, about 240&nbsp;×&nbsp;240 pixels</span></div>
+      <div class="fact"><b>135 KB</b><span>median size of the largest image on each page</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <b>Sources</b>
+    <ul>
+      <li>HTTP Archive, <a href="https://almanac.httparchive.org/en/2024/media">Web Almanac 2024, Media</a>: June 2024 crawl of about 17 million websites. Image request shares (Fig. 5.11–5.12), bits per pixel (5.17), video, odd facts.</li>
+      <li>HTTP Archive, <a href="https://almanac.httparchive.org/en/2025/performance">Web Almanac 2025, Performance</a>: July 2025 crawl. LCP image formats (Fig. 7.9) and LCP element types.</li>
+      <li>HTTP Archive, <a href="https://almanac.httparchive.org/en/2025/page-weight">Web Almanac 2025, Page Weight</a>: July 2025 crawl. Median bytes by content type on home pages.</li>
+      <li>W3Techs, <a href="https://w3techs.com/technologies/overview/image_format">image file formats</a> (16 Nov 2026) and its <a href="https://w3techs.com/technologies/history_overview/image_format/all/y">yearly history</a>.</li>
+      <li>Ericsson Mobility Report, <a href="https://www.ericsson.com/en/reports-and-papers/mobility-report/dataforecasts/mobile-traffic-update">mobile traffic update</a> (June 2026 edition): video was about 75% of mobile data traffic at the end of 2025.</li>
+    </ul>
+    The 2025 Web Almanac has no Media chapter, so June 2024 is HTTP Archive's newest format split. "&lt;0.1" marks values W3Techs reports as under 0.1%. Built with Plainchart.
+  </footer>
+</main>
+
+<script>
+{
+const FMT={jpeg:'JPEG',png:'PNG',svg:'SVG',gif:'GIF',webp:'WebP',avif:'AVIF',other:'Other'};
+const col=k=>`var(--f-${k})`;
+const $=s=>document.querySelector(s);
+const nm=d=>d.n||FMT[d.k];
+const LT=0.05; // stands for W3Techs' "<0.1%"
+const fmtP=v=>v==null?'—':v===LT?'<0.1':v.toFixed(1);
+
+/* ---------------- data ---------------- */
+// HTTP Archive Web Almanac 2024, Media, Fig 5.11/5.12 — share of image requests, mobile, June 2024
+const REQ=[
+  {k:'jpeg',v:32.4,t:'32.4%',c:'−20%'},
+  {k:'png',v:28.4,t:'28.4%',c:'+1%',up:1},
+  {k:'gif',v:16.8,t:'16.8%',c:'+6%',up:1},
+  {k:'webp',v:12.0,t:'12.0%',c:'+34%',up:1},
+  {k:'svg',v:6.4,t:'6.4%',c:'+36%',up:1},
+  {k:'avif',v:1.0,t:'1.0%',c:'+386%',up:1},
+  {k:'other',v:3.0,t:'3.0%',c:'',n:'ICO & other'}
+];
+// Web Almanac 2025, Performance, Fig 7.9 — format of each page's LCP image, July 2025
+const LCP=[
+  {k:'jpeg',v:57,t:'57%',c:'−4 pts'},
+  {k:'png',v:26,t:'26%',c:'±0'},
+  {k:'webp',v:11,t:'11%',c:'+4 pts',up:1},
+  {k:'avif',v:0.7,t:'0.7%',c:'up',up:1},
+  {k:'other',v:5.3,t:'≈5%',c:'±0',n:'GIF, SVG & other'}
+];
+// W3Techs — % of websites using each format, 1 Jan each year + 16 Nov 2026
+const YRS=[2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2026.874];
+const YL=['Jan 2015','Jan 2016','Jan 2017','Jan 2018','Jan 2019','Jan 2020','Jan 2021','Jan 2022','Jan 2023','Jan 2024','Jan 2025','Jan 2026','16 Nov 2026'];
+const W3={
+  png:[63.3,69.8,73.4,74.9,74.7,75.0,77.9,80.4,81.8,82.1,80.4,78.1,74.3],
+  svg:[0.5,1.4,3.0,5.5,15.1,21.2,29.4,41.6,54.1,54.5,59.1,64.8,69.2],
+  jpeg:[68.8,72.6,74.1,73.7,72.7,71.1,72.3,74.5,77.6,77.8,75.6,73.0,68.0],
+  webp:[null,null,LT,LT,LT,0.2,0.5,3.0,6.5,10.8,14.9,18.7,24.0],
+  gif:[44.1,41.5,38.3,33.9,27.9,23.9,21.6,20.9,22.4,21.5,18.4,15.9,12.8],
+  avif:[null,null,null,null,null,null,null,LT,LT,0.1,0.4,1.1,1.8]
+};
+const ORD=['png','svg','jpeg','webp','gif','avif'];
+// Web Almanac 2024, Media, Fig 5.17 — median bits per pixel, mobile
+const BPP=[{k:'webp',v:1.3},{k:'avif',v:1.4},{k:'jpeg',v:2.0},{k:'png',v:3.8},{k:'gif',v:6.7}];
+// Web Almanac 2025, Page Weight — median KB per home page by type, July 2025
+const PW={m:[['Images',911],['JavaScript',632],['Fonts',122],['CSS',77],['HTML',22]],
+          d:[['Images',1058],['JavaScript',697],['Fonts',139],['CSS',82],['HTML',22]]};
+const PWT={m:'2,559 KB',d:'2,862 KB'};
+// Video — Web Almanac 2024 Media (Fig 5.37, 5.38, 5.39) and Ericsson Mobility Report
+const VSH=[{n:'Mobile pages with a &lt;video&gt; element',v:6.7,t:'6.7%',s:'desktop 7.7%'},
+           {n:'Mobile network traffic that is video',v:75,t:'≈75%',s:'Ericsson'}];
+const VF=[['MP4',68],['No file extension',14],['TS',9],['M4S',4],['MOV',1],['WebM',1],['Other',3]];
+const VD=[['0–10 s',21],['10–30 s',37],['30–60 s',21],['1–2 min',12],['Over 2 min',9]];
+const VDC=['#1f1f1f','#474747','#737373','#a3a3a3','#cfcfcf'];
+
+/* ---------------- helpers ---------------- */
+const grow=root=>requestAnimationFrame(()=>requestAnimationFrame(()=>
+  root.querySelectorAll('.fill').forEach(f=>{f.style.width=f.dataset.w+'%';})));
+const barRow=(label,dot,v,max,val,fill)=>`<div class="row">
+  <div class="nm">${dot?`<span class="dot" style="background:${dot}"></span>`:''}<span class="t">${label}</span></div>
+  <div class="track"><div class="fill" data-w="${Math.max(1,v/max*100).toFixed(1)}" style="background:${fill}"></div></div>
+  <div class="val">${val}</div></div>`;
+
+/* ---------------- donuts ---------------- */
+const donut=(host,data)=>{
+  const svg=host.querySelector('svg'), dc=host.querySelector('.dc'), rows=host.querySelector('.lrows');
+  const tot=data.reduce((s,d)=>s+d.v,0), R=98, r=60;
+  const pt=(rad,ang)=>(100+rad*Math.cos(ang)).toFixed(2)+' '+(100+rad*Math.sin(ang)).toFixed(2);
+  let a=-Math.PI/2;
+  svg.innerHTML=data.map(d=>{
+    const a0=a, a1=a+d.v/tot*Math.PI*2; a=a1;
+    const lg=a1-a0>Math.PI?1:0;
+    return `<path data-k="${d.k}" style="fill:${col(d.k)}" d="M${pt(R,a0)} A${R} ${R} 0 ${lg} 1 ${pt(R,a1)} L${pt(r,a1)} A${r} ${r} 0 ${lg} 0 ${pt(r,a0)}Z"><title>${nm(d)}: ${d.t}</title></path>`;
+  }).join('');
+  const max=Math.max(...data.map(d=>d.v));
+  rows.innerHTML=data.map(d=>`<button class="lr" type="button" data-k="${d.k}" aria-pressed="false">
+    <span class="nm"><span class="dot" style="background:${col(d.k)}"></span><span class="t">${nm(d)}</span></span>
+    <span class="track"><span class="fill" data-w="${Math.max(1,d.v/max*100).toFixed(1)}" style="background:${col(d.k)}"></span></span>
+    <span class="val">${d.t}</span><span class="chg${d.up?' up':''}">${d.c||'—'}</span></button>`).join('');
+  const top=data[0]; let pin=null;
+  const show=k=>{
+    const d=data.find(x=>x.k===k);
+    dc.innerHTML=d?`<b>${d.t}</b><span>${nm(d)}</span>`:`<b>${top.t}</b><span>${nm(top)}, the largest</span>`;
+    svg.querySelectorAll('path').forEach(p=>{p.style.opacity=(!k||p.dataset.k===k)?1:.2;});
+    rows.querySelectorAll('.lr').forEach(b=>{
+      b.classList.toggle('dim',!!k&&b.dataset.k!==k);
+      b.setAttribute('aria-pressed',String(pin===b.dataset.k));
+    });
+  };
+  host.querySelectorAll('[data-k]').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{if(!pin)show(el.dataset.k);});
+    el.addEventListener('mouseleave',()=>{if(!pin)show(null);});
+    el.addEventListener('click',()=>{pin=pin===el.dataset.k?null:el.dataset.k;show(pin);});
+  });
+  show(null); grow(rows);
+};
+donut($('#d-req'),REQ);
+donut($('#d-lcp'),LCP);
+
+/* ---------------- trend line ---------------- */
+const fitChart=(host,draw)=>{
+  let lastW=0;
+  const run=()=>{const w=Math.round(host.clientWidth); if(!w||w===lastW)return; lastW=w; host.innerHTML=draw(w);};
+  run(); new ResizeObserver(run).observe(host);
+};
+const tHost=$('#trend'), tKey=$('#trend-key'), tRead=$('#trend-read'), T={};
+const READ0='Hover or tap the chart to read any year.';
+tKey.innerHTML=ORD.map(k=>`<span><span class="dot" style="background:${col(k)}"></span>${FMT[k]} <b>${fmtP(W3[k][W3[k].length-1])}%</b></span>`).join('');
+tRead.textContent=READ0;
+const drawTrend=w=>{
+  const ph=w<560;
+  const h=ph?Math.round(Math.min(440,Math.max(300,w*0.9))):Math.round(Math.max(320,Math.min(440,w*0.45)));
+  const m=ph?{t:12,r:10,b:26,l:34}:{t:14,r:118,b:34,l:42};
+  const x0=YRS[0], x1=YRS[YRS.length-1], yMax=90;
+  const X=v=>m.l+(v-x0)/(x1-x0)*(w-m.l-m.r), Y=v=>h-m.b-v/yMax*(h-m.t-m.b);
+  Object.assign(T,{X});
+  tKey.hidden=!ph;
+  let g='';
+  (ph?[0,40,80]:[0,20,40,60,80]).forEach(t=>{
+    g+=`<line class="${t?'ax-line':'ax-base'}" x1="${m.l}" x2="${w-m.r}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/>`;
+    g+=`<text class="ax-tick" x="${m.l-7}" y="${(Y(t)+4).toFixed(1)}" text-anchor="end">${t}%</text>`;
+  });
+  (ph?[2015,2020]:[2015,2017,2019,2021,2023,2025]).forEach(t=>{
+    g+=`<text class="ax-tick" x="${X(t).toFixed(1)}" y="${h-m.b+18}" text-anchor="${t===2015?'start':'middle'}">${t}</text>`;
+  });
+  g+=`<text class="ax-tick" x="${X(x1).toFixed(1)}" y="${h-m.b+18}" text-anchor="end">Nov '26</text>`;
+  ORD.forEach(k=>{
+    const pts=W3[k].map((v,i)=>v==null?null:X(YRS[i]).toFixed(1)+','+Y(v).toFixed(1)).filter(Boolean);
+    const lv=W3[k][W3[k].length-1];
+    g+=`<polyline class="ln" style="stroke:${col(k)}" points="${pts.join(' ')}"/>`;
+    g+=`<circle cx="${X(x1).toFixed(1)}" cy="${Y(lv).toFixed(1)}" r="3.5" style="fill:${col(k)}"/>`;
+  });
+  if(!ph){
+    const e=ORD.map(k=>{const v=W3[k][W3[k].length-1];return {k,v,y:Y(v)};}).sort((a,b)=>a.y-b.y);
+    for(let i=1;i<e.length;i++){if(e[i].y-e[i-1].y<16)e[i].y=e[i-1].y+16;}
+    e.forEach(o=>{
+      g+=`<circle cx="${w-m.r+14}" cy="${o.y.toFixed(1)}" r="4" style="fill:${col(o.k)}"/>`;
+      g+=`<text class="end-lbl" x="${w-m.r+23}" y="${(o.y+4).toFixed(1)}">${FMT[o.k]} <tspan>${fmtP(o.v)}%</tspan></text>`;
+    });
+  }
+  g+=`<line class="hx" id="hx" x1="0" x2="0" y1="${m.t}" y2="${h-m.b}" visibility="hidden"/>`;
+  g+=`<rect class="hit" x="${m.l}" y="${m.t}" width="${w-m.l-m.r}" height="${h-m.t-m.b}"/>`;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Line chart: share of websites using PNG, SVG, JPEG, WebP, GIF and AVIF from January 2015 to 16 November 2026. Latest: PNG 74.3%, SVG 69.2%, JPEG 68.0%, WebP 24.0%, GIF 12.8%, AVIF 1.8%.">${g}</svg>`;
+};
+fitChart(tHost,drawTrend);
+const pick=e=>{
+  const svg=tHost.querySelector('svg'); if(!svg||!T.X)return;
+  const x=e.clientX-svg.getBoundingClientRect().left;
+  let best=0, bd=1e9;
+  YRS.forEach((yr,i)=>{const d=Math.abs(T.X(yr)-x); if(d<bd){bd=d;best=i;}});
+  const hx=svg.querySelector('#hx'), hxX=T.X(YRS[best]).toFixed(1);
+  hx.setAttribute('x1',hxX); hx.setAttribute('x2',hxX); hx.setAttribute('visibility','visible');
+  tRead.innerHTML=`<b>${YL[best]}</b> · `+ORD.map(k=>{const v=W3[k][best];return `${FMT[k]} ${fmtP(v)}${v==null?'':'%'}`;}).join(' · ');
+};
+tHost.addEventListener('pointermove',pick);
+tHost.addEventListener('pointerdown',pick);
+tHost.addEventListener('pointerleave',e=>{
+  if(e.pointerType!=='mouse')return;
+  const hx=tHost.querySelector('#hx'); if(hx)hx.setAttribute('visibility','hidden');
+  tRead.textContent=READ0;
+});
+const tDet=$('#c-trend details'), tTbl=$('#trend-tbl');
+tDet.addEventListener('toggle',()=>{
+  if(!tDet.open||tTbl.dataset.done)return;
+  tTbl.dataset.done='1';
+  tTbl.innerHTML=`<thead><tr><th>Date</th>${ORD.map(k=>`<th><span class="dot" style="background:${col(k)}"></span>${FMT[k]}</th>`).join('')}</tr></thead><tbody>${
+    YL.map((y,i)=>`<tr><td>${y.replace('Jan ','')}</td>${ORD.map(k=>`<td>${fmtP(W3[k][i])}</td>`).join('')}</tr>`).join('')}</tbody>`;
+});
+
+/* ---------------- bits per pixel ---------------- */
+const bpp=$('#bpp');
+bpp.innerHTML=BPP.map(d=>barRow(FMT[d.k],col(d.k),d.v,7,`${d.v.toFixed(1)}<span class="tag">bpp</span>`,col(d.k))).join('');
+grow(bpp);
+
+/* ---------------- page weight ---------------- */
+const pw=$('#pw'), pwMax=Math.max(...PW.d.map(r=>r[1]));
+const drawPW=dev=>{
+  pw.innerHTML=PW[dev].map(([n,v])=>barRow(n,'',v,pwMax,`${v.toLocaleString('en-US')}<span class="tag">KB</span>`,n==='Images'?'var(--ink)':'var(--c-neutral)')).join('');
+  $('#pw-total').textContent=PWT[dev];
+  grow(pw);
+};
+document.querySelectorAll('#pw-pills .pill').forEach(p=>p.addEventListener('click',()=>{
+  document.querySelectorAll('#pw-pills .pill').forEach(x=>x.setAttribute('aria-pressed',String(x===p)));
+  drawPW(p.dataset.d);
+}));
+drawPW('m');
+
+/* ---------------- video ---------------- */
+const vs=$('#v-share');
+vs.innerHTML=VSH.map(d=>`<div class="row wide"><div class="nm"><span class="t">${d.n}</span></div>
+  <div class="val">${d.t}<span class="tag">${d.s}</span></div>
+  <div class="track"><div class="fill" data-w="${d.v}" style="background:var(--ink)"></div></div></div>`).join('');
+grow(vs);
+const vf=$('#v-fmt');
+vf.innerHTML=VF.map(([n,v])=>barRow(n,'',v,70,`${v}%`,n==='Other'?'var(--c-neutral)':'var(--ink)')).join('');
+grow(vf);
+$('#v-dur').innerHTML=VD.map(([n,v],i)=>`<span style="flex:${v} 1 0;background:${VDC[i]};color:${i<3?'#fff':'var(--ink)'}" title="${n}: ${v}%">${v>=12?v+'%':''}</span>`).join('');
+$('#v-dur-key').innerHTML=VD.map(([n,v],i)=>`<span><i style="background:${VDC[i]}"></i>${n} <b>${v}%</b></span>`).join('');
+}
+</script>
+<!-- visit-beacon:start -->
+<script>
+/* Counts a pageview via analytics/ (Cloudflare Worker). No cookies, no storage,
+   no IP retained; geography is resolved at Cloudflare's edge. Fails silently. */
+(function(){try{
+var w=innerWidth,d=w<640?"mobile":w<1024?"tablet":"desktop";
+if(navigator.userAgentData&&navigator.userAgentData.mobile&&d!=="mobile")d="mobile";
+var r="direct";
+if(document.referrer){try{var h=new URL(document.referrer).hostname;if(h&&h!==location.hostname)r=h;}catch(e){}}
+var p=JSON.stringify({s:(location.pathname.split("/").pop()||"").replace(/\.html$/,"")||"gallery",r:r,d:d});
+var u="https://claude-works-analytics.satejp10.workers.dev/hit";
+if(navigator.sendBeacon){navigator.sendBeacon(u,new Blob([p],{type:"text/plain"}));}
+else{fetch(u,{method:"POST",body:p,keepalive:true});}
+}catch(e){}})();
+</script>
+<!-- visit-beacon:end -->
+</body>
+</html>

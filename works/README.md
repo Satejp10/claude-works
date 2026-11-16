@@ -7,6 +7,7 @@ See the [main index](../README.md#works) for the full list with live-view links.
 
 ## Contents
 
+- `web-media-formats-2026.html` — "What the web is made of: images & video": the web's image and video formats counted three ways (every image request, each page's main image, share of websites using each format), SVG passing JPEG on W3Techs, bits per pixel by format, page weight by content type, and video's small share of pages against its ~75% of mobile traffic, Nov 2026.
 - `android-vs-ios-share.html` — "Android vs iOS market share": new phones sold and web page views for Android and iOS, worldwide, in the US and in India, with an animated iOS share view, quarterly and yearly charts, and a sortable table of every figure, Nov 2026.
 - `haiku-pricing.html` — "Haiku Price and Score": Claude Haiku's output price across four releases against its Artificial Analysis score, plus the Haiku 5.5 vs 4.5 comparison (per-token and caching prices, why the 90% list-price cut and Anthropic's ~75% average are both right, Haiku as a cheap subagent), Oct 2026.
 - `model-switching-drift.html` — "The Switch Matrix": a visual reading of arXiv 2603.03111 (NatWest AI Research + UCL) on performance drift when one model finishes another's conversation — interactive 9×9 switch matrices showing a single mid-conversation handoff can move outcomes by up to 13 points, Aug 2026.
