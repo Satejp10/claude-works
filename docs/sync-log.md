@@ -1,10 +1,10 @@
 # claude-works → satejp10 profile mirror — setup & change log
 
-_Last updated: 2026-11-01 — the sync is **live**; setup in §3 is done, not pending.
+_Last updated: 2026-11-16 — the sync is **live**; setup in §3 is done, not pending.
 Analytics (§10) is committed but **not yet deployed** — it needs one `wrangler` run.
-The profile badges are hidden until it is (§11). There are now 12 files in `works/`
-and the hostname lives in 15 places (§15); `analytics/HANDOFF.md` is the checklist.
-The gallery lists 15 works: those 12 plus 3 hosted in their own repos (§13, §14, §15)._
+The profile badges are hidden until it is (§11). There are now 13 files in `works/`
+and the hostname lives in 16 places (§16); `analytics/HANDOFF.md` is the checklist.
+The gallery lists 16 works: those 13 plus 3 hosted in their own repos (§13–§16)._
 
 ---
 
@@ -16,7 +16,7 @@ is always current — you never need to paste more than this one block.
 
 ````text
 CONTEXT: Satej's claude-works repo (github.com/Satejp10/claude-works).
-Current as of 2026-11-01.
+Current as of 2026-11-16.
 
 WHAT IT IS
 A publishing space for visual work made with Claude — infographics, dashboards,
@@ -61,7 +61,7 @@ THREE GOTCHAS
    and a github-camo user-agent. Demographics are collected on the Pages site,
    where real JS runs, and only displayed on the profile.
 
-CURRENT CONTENTS: 15 works — 12 local, plus 3 hosted in their own repos
+CURRENT CONTENTS: 16 works — 13 local, plus 3 hosted in their own repos
 (EDGE, Plot Light Study, Clawdvania).
 ````
 
@@ -471,3 +471,29 @@ The deploy remains the one open task and needs Satej's Cloudflare account.
 - **Data caveats recorded on the page.** 2024 and 2025 web-page-view figures are left
   out because two copies of the source data differ by up to about 1.3 points. India has
   no yearly series, so its readings appear as individual rows.
+
+---
+
+## 16. What the web is made of (web media formats) added; counts updated — 2026-11-16
+
+- **New local work:** `works/web-media-formats-2026.html` ("What the web is made of:
+  images & video"), an infographic on the web's image and video formats, counted three
+  ways: the share of image requests (HTTP Archive Web Almanac 2024), the format of each
+  page's main LCP image (Web Almanac 2025), and the share of websites using each format
+  (W3Techs, 2015 to 16 Nov 2026, the month SVG passed JPEG). It also covers bits per
+  pixel by format, page weight by content type, and video (pages with a `<video>`
+  element against Ericsson's ~75% video share of mobile traffic). It is one
+  self-contained file in the Plainchart style with no libraries, laid out for phones
+  (checked at 360, 390 and 412px). It carries the four `og:` tags, with `og:image`
+  pointing at `assets/thumbnails/web-media-formats-2026.png`, which CI renders after
+  merge, and the visit beacon.
+- **Counts.** There are now **13** files in `works/`, so the Worker hostname appears in
+  **16 places**: the 13 works, the root `README.md`, and the two profile-README badges.
+  The `sed` one-liner in `analytics/README.md` covers the 14 refs in this repo.
+  `CLAUDE.md` and `analytics/README.md` were updated to match. The copy-block now reads
+  16 works: 13 local plus 3 external.
+- **Delivered by pull request** on branch `claude/web-media-formats-2026`. It goes live
+  when merged to `main`, which runs the thumbnail workflow.
+- **Data notes.** HTTP Archive's 2025 Almanac has no Media chapter, so the request split
+  is from the June 2024 crawl; the page says so. The W3Techs figures add up to more than
+  100% because a site can use several formats, so they are drawn as lines, not a pie.
